@@ -1,0 +1,4 @@
+.DS_Store
+.eval-runs/
+__pycache__/
+*.pyc

@@ -1,0 +1,14 @@
+interface:
+  display_name: Evals Coach
+  short_description: Help PMs write reliable AI evals
+  default_prompt: Use $evals-coach to turn this AI product idea or PRD into a focused
+    minimum viable eval with test cases, a grader and clear next actions.
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true
