@@ -14,6 +14,7 @@ Score each criterion 0, 1, or 2. Use **not applicable** only where stated; do no
 | Agent trajectory | Ignores tools/state when relevant | Mentions tools | Required/prohibited/conditional calls, ordering, budgets, arguments, final state, and reset are specified |
 | Handoff and loop | Advice ends at a document | Some next steps | Engineering handoff plus path from manual review to CI and production failures |
 | Uncertainty discipline | Fabricates facts or overclaims | Some assumptions visible | Asks only material questions, labels assumptions, and distinguishes observed from hypothetical data |
+| PM usability | Disproportionate wall of text or implementation detail obscures the decision | Understandable but longer, repetitive, or more technical than needed | Decision-first, scannable, proportionate, and immediately usable by a PM; detail is separated or omitted |
 
 ## Hard failures
 
@@ -24,6 +25,7 @@ Flag separately even if the numeric score is high:
 - An uncalibrated LLM judge presented as trustworthy ground truth
 - A severe safety or trust failure allowed to disappear inside an average
 - Missing tool/state constraints for an agent task where the final answer could look correct after an unsafe trajectory
+- A sparse first request expanded into a comprehensive-looking strategy that a PM cannot reasonably run or review
 
 ## Reporting
 
@@ -33,6 +35,7 @@ Report:
 - Hard-failure count and description
 - Baseline-to-skill delta by task
 - Regressions introduced by the skill
+- Output word count and PM-usability score
 - At least three qualitative examples supporting the scores
 
 The suite is a product-quality check, not proof of universal model improvement.

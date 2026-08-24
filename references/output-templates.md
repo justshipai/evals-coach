@@ -1,6 +1,6 @@
 # Output templates
 
-Use these templates for complete eval-design deliverables. Remove irrelevant sections rather than filling them with boilerplate.
+Use these templates for eval-design deliverables. Remove irrelevant sections rather than filling them with boilerplate. Default to the minimum viable template and aim for roughly 800–1,200 words including its case table. Do not repeat the same requirement across sections. Put unusually detailed instrumentation or state controls in an engineering appendix only when the risk requires them.
 
 ## Contents
 
@@ -40,30 +40,26 @@ Use this by default for a PM's first eval or a sparse pre-launch PRD:
 ## First release gate
 [The provisional rule and why it is appropriate.]
 
-## Operating path
-- Now: [How this eval can run immediately, plus trigger, cadence, and owner.]
-- Next: [How it becomes a release or CI gate, plus trigger and owner.]
-- Later: [How production failures become candidate cases, plus review cadence and owner.]
-
-## What this does not cover
-- ...
-
 ## Engineering handoff
 - Cases to implement or source:
 - Graders or checks to build:
-- Evidence and instrumentation required:
+- Evidence required:
 - Release gate to encode:
-- Open product decisions:
+- Product decisions engineering must not guess:
 - Owners:
 - Ready when:
 
-## Next actions
+## Operating path and next actions
+- Now: [Immediate run, owner and trigger.]
+- Next: [Release/CI gate and owner.]
+- Later: [How observed failures become cases.]
+- Material gap: [...]
+
 1. ...
 2. ...
-3. ...
 ```
 
-Do not add multiple criteria, extensive slices, or several judges unless the product risk makes them necessary. Mark a release gate provisional when it is based only on curated or synthetic cases.
+Do not add multiple criteria, extensive slices or several judges unless the product risk makes them necessary. Mark a release gate provisional when it is based only on curated or synthetic cases. Five to eight cases are usually enough for the first decision.
 
 ## 2. Complete eval plan
 
@@ -245,12 +241,15 @@ Before delivery, confirm:
 - Release thresholds distinguish critical gates from aggregate scores
 - Assumptions and uncovered areas are explicit
 - A first eval remains small enough for the PM to run and learn from immediately
+- The PM-facing plan is decision-first, scannable and proportionate; a normal first eval is roughly 800–1,200 words
+- Detailed instrumentation appears only when it changes implementation or protects against a material failure
+- Requirements are not repeated across several sections
 - Every Create output contains structured, copyable test cases rather than prose descriptions alone
 - Relevant agent cases state required, prohibited, conditional, or budgeted tool behaviour without prescribing an unnecessary trajectory
 - Stateful cases define a reproducible starting state and reset requirements
 - The operating path explains how the eval runs now, gates releases next, and learns from production later
 - The PM owns failure review and suite curation; engineering owns harness execution and instrumentation
-- The output ends with three concrete next actions
+- The output ends with no more than three concrete next actions
 - The engineering handoff identifies cases, graders, evidence, release gates, owners, and blockers
 - Product decisions that engineering must not infer are explicit
 - The test-case validator passes when a CSV is created

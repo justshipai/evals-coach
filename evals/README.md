@@ -14,15 +14,24 @@ Alternate condition order and blind the scorer to reduce ordering and confirmati
 Requirements: Node.js 20+ and an authenticated `codex` CLI.
 
 ```bash
-node evals/run-codex.mjs --dry-run
-node evals/run-codex.mjs --condition both
+node evals/run-codex.mjs --dry-run --model gpt-5.6-sol --effort medium --repetitions 2
+node evals/run-codex.mjs --condition both --model gpt-5.6-sol --effort medium --repetitions 2
 ```
 
-Outputs are written to `.eval-runs/`, which is ignored by git. The runner checks for baseline contamination, uses fresh workspaces, alternates run order, and records final answers and traces.
+Outputs are written to `.eval-runs/`, which is ignored by git. The runner checks for baseline contamination, uses fresh workspaces, alternates run order, records the model, reasoning effort, CLI version and source commit, and prints progress for every run.
+
+For a blind review, zip only the generated `blind-review` directory:
+
+```bash
+RUN_DIR=$(ls -td .eval-runs/* | head -1)
+zip -r evals-coach-blind-review.zip "$RUN_DIR/blind-review"
+```
+
+Keep `condition-map.json` private until the scorer has fixed all scores and hard-failure judgements. Then reveal the map and calculate the baseline-to-skill delta.
 
 ## Current status
 
-The cases and rubric have been reviewed for coverage, but no cross-model scores are published yet. Do not cite a performance improvement until blinded runs have been completed and inspected. Publishing a weak or null result is preferable to turning an eval into marketing theatre.
+An initial blinded GPT-5.6 Sol run is published under [`results/`](results/). It found a strong quality improvement and also exposed excessive output length. The current skill and rubric include a concision fix that has not yet been independently replicated. Treat the published run as exploratory evidence, not a universal performance claim.
 
 Suggested first matrix:
 

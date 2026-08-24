@@ -29,11 +29,24 @@ Default to a **minimum viable eval** unless the user requests a complete suite o
 
 - One product decision
 - One critical behaviour or failure mode
-- Five to ten deliberately varied cases
+- Five to eight deliberately varied cases
 - One reliable grader, with human review until calibrated
 - One explicit release gate
 
 Make the first eval runnable and learnable. Do not turn a sparse PRD into a large speculative test suite.
+
+## Keep the PM output usable
+
+Default to a decision brief, not an exhaustive test strategy. For a normal first eval, aim for roughly 800–1,200 words including the case table. Allow a longer answer only when high-risk tool or state detail prevents unsafe implementation, or when the user requests a complete design.
+
+- Lead with the decision, critical behaviour and cases. A PM should understand the proposed eval before reaching implementation detail.
+- Use five to eight cases by default. Do not inflate a small eval to look comprehensive.
+- Keep the engineering handoff to the minimum needed to make the eval runnable. Refer to categories of trace evidence instead of listing every possible field.
+- Do not repeat the same requirement in the definition of good, case table, grader, gate and handoff.
+- Put genuinely necessary low-level detail in a clearly labelled engineering appendix.
+- For Critique and Calibrate requests, answer the decision directly and add only the changes or next steps needed.
+
+If completeness and usability conflict, preserve critical safety detail and cut explanatory prose first.
 
 ## Preserve product judgement
 
@@ -220,4 +233,4 @@ Adapt the output to the request:
 - When creating `test-cases.csv`, run `scripts/validate_test_cases.py` and fix errors before delivery.
 - Generate executable framework code only when explicitly requested. Keep the product plan portable across eval frameworks by default.
 
-Finish with an engineering handoff, assumptions, uncovered gaps, and three concrete next actions in execution order. Name the next evidence that would most improve confidence.
+Finish with a compact engineering handoff, material assumptions or gaps, and no more than three concrete next actions in execution order. Name the next evidence that would most improve confidence. Before delivery, remove duplicated requirements and detail that does not change the product decision or implementation.
