@@ -60,7 +60,7 @@ Many tools generate datasets, scorers or experiment runs inside a particular pla
 
 ### Does it work with Codex, Claude Code, Cursor, Lovable or Bolt?
 
-Yes, although installation differs. Codex, [Claude Code](https://docs.anthropic.com/en/docs/claude-code/skills) and [Cursor](https://cursor.com/docs/skills) can load `SKILL.md` as an agent skill. [Lovable supports reusable skills](https://docs.lovable.dev/features/skills). Bolt does not currently use the same skill-install format, but you can add the instructions to [Project Knowledge](https://support.bolt.new/settings/project-settings) or ask Bolt to read the files from your project.
+Yes, although installation differs. Codex, [Claude Code](https://docs.anthropic.com/en/docs/claude-code/skills) and [Cursor](https://cursor.com/docs/skills) can load `SKILL.md` as an agent skill. [Lovable supports reusable skills](https://docs.lovable.dev/features/skills). Bolt can upload skills directly from files or GitHub.
 
 On any other AI tool, attach or copy `SKILL.md` and its referenced files into the conversation or project context, then ask the agent to follow Evals Coach.
 
