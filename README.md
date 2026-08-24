@@ -18,7 +18,10 @@ It does **not** run your evals or replace an eval platform. It helps you decide 
 - Agent tool-call, ordering, budget, and state-reset expectations when relevant
 - An engineering-ready handoff plus a path from manual review to CI and production feedback
 
-See the complete [AI Meeting Catch-up example](examples/ai-meeting-catch-up/eval-plan.md).
+## Examples
+
+- [AI Meeting Catch-up](examples/ai-meeting-catch-up/eval-plan.md) — a complete in-repo eval plan and test set
+- [SmartDesk AI Triage & Auto-Resolve](examples/smartdesk-ai-triage/README.md) — a public Claude example showing Evals Coach applied to a higher-risk support agent
 
 ## Install
 
