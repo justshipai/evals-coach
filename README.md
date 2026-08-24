@@ -52,15 +52,39 @@ $evals-coach Turn these production failures into regression cases. Do not invent
 $evals-coach Help me calibrate this LLM judge against human labels.
 ```
 
-## Why this is different
+## Common questions
 
-Many tools generate datasets, scorers, or experiment runs inside a particular platform. Evals Coach works one step upstream: it helps PMs choose the behaviours, cases, evidence, graders, and thresholds that make those components meaningful. The output is deliberately vendor-neutral and importable into the harness your team already uses.
+### How is this different from eval platforms or other eval skills?
+
+Many tools generate datasets, scorers or experiment runs inside a particular platform. Evals Coach works one step upstream: it helps PMs decide what good looks like, which failures matter and what evidence should determine whether a feature ships. The output is vendor-neutral and can be implemented in the eval harness your team already uses.
+
+### Does it work with Codex, Claude Code, Cursor, Lovable or Bolt?
+
+Yes, although installation differs. Codex, [Claude Code](https://docs.anthropic.com/en/docs/claude-code/skills) and [Cursor](https://cursor.com/docs/skills) can load `SKILL.md` as an agent skill. [Lovable supports reusable skills](https://docs.lovable.dev/features/skills). Bolt does not currently use the same skill-install format, but you can add the instructions to [Project Knowledge](https://support.bolt.new/settings/project-settings) or ask Bolt to read the files from your project.
+
+On any other AI tool, attach or copy `SKILL.md` and its referenced files into the conversation or project context, then ask the agent to follow Evals Coach.
+
+### What is `SKILL.md`?
+
+A portable instruction file that teaches an AI agent a repeatable workflow. It contains the core Evals Coach method and points the agent to supporting guidance, templates and validation scripts only when needed.
+
+### Do I need a code repository or technical eval experience?
+
+No. Start with whatever you have: a PRD, feature idea, workflow, sample outputs, production failures, user feedback or an existing eval. Repository access is optional evidence, not a requirement.
+
+### Does Evals Coach run the evals?
+
+No. It helps you design a trustworthy, runnable eval and prepare the engineering handoff. Your team can then implement it in Braintrust, LangSmith, Promptfoo, an internal harness or another eval platform.
+
+### Should every agent eval prescribe tool calls?
+
+No. Specify required, prohibited or conditional tool behaviour only when it affects correctness, safety, permissions, recovery, user experience, cost or latency. If several routes can produce the right outcome safely, do not force one ideal trajectory.
 
 ## Early evaluation result
 
 In a six-task blinded comparison using GPT-5.6 Sol at medium reasoning, the tested Evals Coach version beat the no-skill baseline on all six tasks: **100% versus 65%** on the original rubric, with zero critical failures versus two.
 
-The same run exposed a weakness: skill outputs averaged 1,867 words versus 862 for baseline. We have since tightened the default output and added PM usability to the rubric. Because the rubric was developed alongside the skill, there was one run per task and the revised version has not yet been independently replicated, treat this as promising early evidence rather than a universal claim.
+The same run exposed a weakness: skill outputs averaged 1,867 words versus 862 for baseline. We have since tightened the default output and added PM usability to the rubric. The rubric was developed alongside the skill, there was one run per task and the revised version has not yet been independently replicated. Treat this as promising early evidence rather than a universal claim.
 
 Read the [full method, task scores and limitations](evals/results/2026-08-24-gpt-5.6-sol-medium/report.md).
 
