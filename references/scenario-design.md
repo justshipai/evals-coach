@@ -68,7 +68,7 @@ Label each case by source:
 
 Never allow synthetic volume to create the illusion of representative coverage.
 
-For a minimum viable pre-launch eval, create five to ten varied cases around one critical behaviour. Replace curated and synthetic cases with production evidence as soon as it becomes available.
+For a minimum viable pre-launch eval, create five to eight varied cases around one critical behaviour. Replace curated and synthetic cases with production evidence as soon as it becomes available.
 
 ## Define slices
 
