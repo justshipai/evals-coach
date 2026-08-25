@@ -19,6 +19,20 @@ It does **not** replace an eval platform or execute your product suite. It helps
 - Agent tool-call, ordering, budget, and state-reset expectations when relevant
 - An engineering-ready handoff plus a path from manual review to CI and production feedback
 
+## How the modes work
+
+Evals Coach is one skill with five modes. You can name a mode explicitly, or simply describe what you need and it will choose the appropriate workflow.
+
+| Mode | Use it when | What it produces |
+| --- | --- | --- |
+| **Create** | You have a PRD, feature idea or user workflow | A focused eval, test cases, graders, release gate and engineering handoff |
+| **Run** | You have a draft eval and real system outputs | A guided first scoring cycle, rubric improvements, baseline result and repeatable handoff |
+| **Critique** | You already have an eval but are unsure whether it is trustworthy | The gaps, misleading signals and specific changes needed |
+| **Expand** | You have production failures, traces or user feedback | New regression cases grounded in observed problems |
+| **Calibrate** | You have human labels and want to automate grading | A comparison of human and judge decisions, including false passes and false failures |
+
+A typical team starts with **Create**, moves to **Run**, then uses **Expand** and **Calibrate** as real evidence accumulates. **Critique** can be used at any stage.
+
 ## Examples
 
 - [AI Meeting Catch-up](examples/ai-meeting-catch-up/eval-plan.md) — a complete in-repo eval plan and test set
