@@ -1,8 +1,8 @@
 interface:
   display_name: Evals Coach
-  short_description: Help PMs write reliable AI evals
-  default_prompt: Use $evals-coach to turn this AI product idea or PRD into a focused
-    minimum viable eval with test cases, a grader and clear next actions.
+  short_description: Help PMs write and run reliable AI evals
+  default_prompt: Use $evals-coach to turn this AI product idea, PRD or set of outputs
+    into a focused eval, a guided first run and a clear engineering handoff.
   icon_small: assets/icon.svg
   icon_large: assets/icon.svg
 policy:

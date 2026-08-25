@@ -2,9 +2,9 @@
 
 **The vendor-neutral eval coach for AI PMs.** Turn product intent into evals your team can implement, run, and improve.
 
-Evals Coach helps product managers move from “the AI should be helpful and accurate” to a small, testable definition of good. It can create an eval plan from a PRD or feature idea, critique an existing eval, expand production failures into regression cases, and help calibrate graders.
+Evals Coach helps product managers move from “the AI should be helpful and accurate” to a small, testable definition of good. It can create an eval plan from a PRD or feature idea, guide a team through its first real scoring cycle, critique an existing eval, expand production failures into regression cases, and help calibrate graders.
 
-It does **not** run your evals or replace an eval platform. It helps you decide whether you are measuring the right behaviour before your team automates it.
+It does **not** replace an eval platform or execute your product suite. It helps you decide whether you are measuring the right behaviour, then guides the first manual run before your team automates it.
 
 > Public alpha: the workflow, example and evaluation harness are usable. An initial blinded run is published transparently below; independent replication is still needed.
 
@@ -15,6 +15,7 @@ It does **not** run your evals or replace an eval platform. It helps you decide 
 - A minimum viable test set with normal, edge, adversarial, and critical cases
 - The right grader for each criterion: deterministic, trace, LLM, or human
 - Calibration guidance and explicit release gates
+- A guided first run using actual outputs, independent human scoring and rubric reconciliation
 - Agent tool-call, ordering, budget, and state-reset expectations when relevant
 - An engineering-ready handoff plus a path from manual review to CI and production feedback
 
@@ -53,6 +54,8 @@ $evals-coach Critique this eval. Tell me what could pass while the product still
 $evals-coach Turn these production failures into regression cases. Do not invent missing evidence.
 
 $evals-coach Help me calibrate this LLM judge against human labels.
+
+$evals-coach Run our first eval using these product outputs and this draft rubric.
 ```
 
 ## Common questions
@@ -77,7 +80,7 @@ No. Start with whatever you have: a PRD, feature idea, workflow, sample outputs,
 
 ### Does Evals Coach run the evals?
 
-No. It helps you design a trustworthy, runnable eval and prepare the engineering handoff. Your team can then implement it in Braintrust, LangSmith, Promptfoo, an internal harness or another eval platform.
+It can guide your team through its first manual scoring cycle using actual system outputs: prepare the session, capture independent human labels, reconcile disagreements, trial an LLM judge and produce the engineering handoff. It does not call your product system or execute an automated suite. Your team can implement that in Braintrust, LangSmith, Promptfoo, an internal harness or another eval platform.
 
 ### Should every agent eval prescribe tool calls?
 

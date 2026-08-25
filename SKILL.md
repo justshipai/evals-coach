@@ -1,6 +1,6 @@
 ---
 name: evals-coach
-description: Help product managers design, write, critique, and improve high-quality evaluations for AI features and agents. Use when a PM provides a PRD, feature idea, workflow, examples, traces, user feedback, or an existing eval and needs an eval plan, representative test cases, product-specific success and failure criteria, deterministic, trace, LLM, or human graders, judge prompts, calibration guidance, release thresholds, or an assessment of eval quality. Do not require repository access or technical eval experience.
+description: Help product managers design, write, run, critique, and improve high-quality evaluations for AI features and agents. Use when a PM provides a PRD, feature idea, workflow, examples, outputs, traces, user feedback, or an existing eval and needs an eval plan, representative test cases, a guided first eval run, human scoring, product-specific success and failure criteria, deterministic, trace, LLM, or human graders, judge prompts, calibration guidance, release thresholds, or an assessment of eval quality. Do not require repository access or technical eval experience.
 ---
 
 # Evals Coach
@@ -15,8 +15,9 @@ Choose the mode that matches the request:
 - **Critique:** Review existing evals for weak criteria, poor coverage, unreliable graders, or misleading release thresholds.
 - **Expand:** Turn production failures, traces, support cases, or user feedback into regression cases.
 - **Calibrate:** Improve agreement between human judgement and an automated grader.
+- **Run:** Guide a PM or product team through its first real eval using actual system outputs, human scoring, rubric reconciliation, an optional judge trial, and an engineering handoff.
 
-Default to **Create** when the request is ambiguous.
+Default to **Create** when the request is ambiguous. Choose **Run** when the user asks to run, workshop, trial, or operationalise an eval, or supplies outputs for a first scoring session.
 
 ## Start at the right maturity
 
@@ -45,6 +46,7 @@ Default to a decision brief, not an exhaustive test strategy. For a normal first
 - Do not repeat the same requirement in the definition of good, case table, grader, gate and handoff.
 - Put genuinely necessary low-level detail in a clearly labelled engineering appendix.
 - For Critique and Calibrate requests, answer the decision directly and add only the changes or next steps needed.
+- For Run requests, advance one stage at a time. Do not overwhelm the PM with the entire workshop when the immediate need is to prepare inputs or score the first batch.
 
 If completeness and usability conflict, preserve critical safety detail and cut explanatory prose first.
 
@@ -134,7 +136,20 @@ Combine graders when one signal is insufficient. Treat critical failures as hard
 
 Do not prescribe one ideal agent trajectory unless the route itself is a product, policy, or safety requirement.
 
-### 5. Calibrate automated judgement
+### 5. Run the first eval
+
+For **Run** mode, read [first-run.md](references/first-run.md). Turn the written eval into a completed first scoring cycle:
+
+- Select 10–20 actual system outputs across representative and failure-prone cases
+- Preserve each input, output, relevant trace, model or system version, and source
+- Have humans score an overlapping subset independently before reconciling the rubric
+- Revise ambiguous criteria before automating them
+- Trial an LLM judge only after human labels exist; inspect false passes and false failures rather than rewarding strictness
+- Produce a baseline result, disagreement log, regression candidates, and an implementation-ready next step
+
+If actual outputs or human labels are missing, create the session kit and state what must be collected. Do not fabricate outputs, labels, agreement, or performance results. Use synthetic outputs only for an explicitly requested dry run and label them as synthetic.
+
+### 6. Calibrate automated judgement
 
 Before recommending an LLM judge as a release gate:
 
@@ -148,7 +163,7 @@ Before recommending an LLM judge as a release gate:
 
 Never present an uncalibrated judge score as ground truth.
 
-### 6. Define the release contract
+### 7. Define the release contract
 
 Specify:
 
@@ -164,7 +179,7 @@ Specify:
 
 Prefer a clear “ship”, “do not ship”, or “needs review” contract over a decorative composite score.
 
-### 7. Design the learning loop
+### 8. Design the learning loop
 
 State how the eval will improve after launch:
 
@@ -183,7 +198,7 @@ Also define a practical operating path:
 
 Name the trigger, cadence, and owner at each stage. Adapt the path when the team is already more mature; do not force it to start manually.
 
-### 8. Prepare the engineering handoff
+### 9. Prepare the engineering handoff
 
 End every created eval with a compact, implementation-ready handoff. Translate the PM's product judgement into work an engineer can estimate and execute without forcing a particular eval platform.
 
@@ -201,7 +216,7 @@ Include:
 
 Keep the division of responsibility explicit: the PM owns intended behaviour, acceptable failure, release policy, failure review, and curation of the evolving eval suite; engineering owns reliable execution, instrumentation, and integration with the chosen harness. Flag any criterion that cannot yet be implemented from the available evidence.
 
-### 9. Challenge the draft
+### 10. Challenge the draft
 
 Reject or flag an eval when any of these are true:
 
@@ -228,6 +243,7 @@ Adapt the output to the request:
 - For a first eval, use the minimum viable eval template and resist adding speculative breadth.
 - For a quick review, provide the evaluation question, strongest criteria, missing coverage, and recommended changes inline.
 - For a complete design, produce an eval plan, structured test cases, grader prompts, and a calibration plan.
+- For a first run, produce only the next useful stage: a session kit when outputs are missing, a scored baseline and disagreement log when human scores are available, or a judge comparison when both human and judge labels exist.
 - In every **Create** response, include a copyable structured test-case table. When delivering files or writing into a repository, create `test-cases.csv`.
 - When writing into a repository, place only eval artefacts under `evals/<capability>/` unless the repository establishes another convention.
 - When creating `test-cases.csv`, run `scripts/validate_test_cases.py` and fix errors before delivery.

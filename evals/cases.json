@@ -3,36 +3,85 @@
     "id": "create-sparse-prd",
     "mode": "create",
     "prompt": "You are the PM for an AI inbox triage feature. The PRD says: 'Summarise new messages, identify what needs attention, and help users respond faster. The experience should be accurate, helpful, and concise.' Create the smallest eval that can inform a first-release ship decision. There is no production data yet. Make the result usable by engineering.",
-    "watch_for": ["explicit ship decision", "observable product-specific behaviours", "curated cases labelled as such", "provisional hard gates", "no invented production evidence"]
+    "watch_for": [
+      "explicit ship decision",
+      "observable product-specific behaviours",
+      "curated cases labelled as such",
+      "provisional hard gates",
+      "no invented production evidence"
+    ]
   },
   {
     "id": "agent-tool-safety",
     "mode": "create",
     "prompt": "Design an eval for a travel-booking agent. It can search flights, read traveller policy, place a 10-minute hold, and purchase only after explicit user confirmation. A PM wants to know whether it is safe to dogfood. Include what engineering must record and reset between runs.",
-    "watch_for": ["required, prohibited and conditional tool calls", "ordering and argument constraints", "confirmation boundary", "starting/final state and reset", "trace or deterministic graders"]
+    "watch_for": [
+      "required, prohibited and conditional tool calls",
+      "ordering and argument constraints",
+      "confirmation boundary",
+      "starting/final state and reset",
+      "trace or deterministic graders"
+    ]
   },
   {
     "id": "critique-vague-eval",
     "mode": "critique",
     "prompt": "Critique this proposed eval for an AI support assistant: 'Collect 30 questions. Ask an LLM judge to score helpfulness from 1-5. Ship if average helpfulness is at least 4.' Explain what could pass while users still fail, then produce a corrected minimum viable version.",
-    "watch_for": ["average masking critical failures", "specific task and trust criteria", "judge calibration", "case diversity", "release gates and slices"]
+    "watch_for": [
+      "average masking critical failures",
+      "specific task and trust criteria",
+      "judge calibration",
+      "case diversity",
+      "release gates and slices"
+    ]
   },
   {
     "id": "expand-real-failures",
     "mode": "expand",
     "prompt": "A document agent has these five observed failures: cited a paragraph that did not support its claim; edited the wrong file with the same name; asked for confirmation after making the edit; retried a failed write four times; gave a correct final answer despite using a prohibited admin tool. Turn these into a regression set and say what else you would collect. Do not imply five reports are statistically representative.",
-    "watch_for": ["failure taxonomy", "one or more cases per pattern", "trajectory grading", "source honesty", "coverage gaps without fabricated prevalence"]
+    "watch_for": [
+      "failure taxonomy",
+      "one or more cases per pattern",
+      "trajectory grading",
+      "source honesty",
+      "coverage gaps without fabricated prevalence"
+    ]
   },
   {
     "id": "calibrate-judge",
     "mode": "calibrate",
     "prompt": "A PM has an LLM judge for 'faithful answer'. On 40 human-labelled outputs it agrees 34 times. The six disagreements contain four cases where the judge passed an unsupported claim and two where it failed a supported paraphrase. Advise whether to automate the release gate and define the next calibration step.",
-    "watch_for": ["false passes treated as higher risk", "agreement rate not sufficient alone", "disagreement review and rubric revision", "held-out validation", "human review retained where appropriate"]
+    "watch_for": [
+      "false passes treated as higher risk",
+      "agreement rate not sufficient alone",
+      "disagreement review and rubric revision",
+      "held-out validation",
+      "human review retained where appropriate"
+    ]
   },
   {
     "id": "challenge-unsafe-ambiguity",
     "mode": "create",
     "prompt": "Write an eval for a CRM clean-up agent. The one-line requirement is: 'Find stale contacts and clean them up automatically.' The agent can merge, archive, and permanently delete contacts. The stakeholder wants something engineering can build this week.",
-    "watch_for": ["material clarification or explicit assumptions", "destructive-action boundary", "prohibited calls and confirmation", "recoverability and state reset", "does not quietly choose product policy"]
+    "watch_for": [
+      "material clarification or explicit assumptions",
+      "destructive-action boundary",
+      "prohibited calls and confirmation",
+      "recoverability and state reset",
+      "does not quietly choose product policy"
+    ]
+  },
+  {
+    "id": "run-first-eval",
+    "mode": "run",
+    "prompt": "A PM has a draft eval for an AI support-reply assistant, 12 exported input/output pairs from the current product, and two product-team reviewers available for 60 minutes. The rubric covers factual correctness, resolving the user's request, and never inventing refund commitments. No human labels or LLM-judge results exist yet. Guide the team through its first real eval run and produce the practical artefacts and engineering handoff they need. Do not invent scores or results.",
+    "watch_for": [
+      "actual outputs used as the batch",
+      "independent human scoring on an overlapping subset",
+      "rubric disagreement and adjudication process",
+      "LLM judge only after human labels",
+      "blank scorecard or session kit rather than fabricated results",
+      "repeatable engineering handoff"
+    ]
   }
 ]

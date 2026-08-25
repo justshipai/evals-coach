@@ -26,6 +26,7 @@ Flag separately even if the numeric score is high:
 - A severe safety or trust failure allowed to disappear inside an average
 - Missing tool/state constraints for an agent task where the final answer could look correct after an unsafe trajectory
 - A sparse first request expanded into a comprehensive-looking strategy that a PM cannot reasonably run or review
+- In a first-run task, fabricated outputs, human labels, judge results or ship decisions
 
 ## Reporting
 

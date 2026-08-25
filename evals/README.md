@@ -2,7 +2,7 @@
 
 This directory evaluates the quality of the **skill**, not the quality of an AI product produced with it.
 
-The suite contains six PM-shaped tasks covering creation, critique, production-failure expansion, judge calibration, agent tool expectations, and unsafe ambiguity. Each task should be run twice:
+The suite contains seven PM-shaped tasks covering creation, critique, production-failure expansion, a guided first run, judge calibration, agent tool expectations, and unsafe ambiguity. Each task should be run twice:
 
 - **Baseline:** the model answers without Evals Coach.
 - **Skill:** the same model and prompt answer with Evals Coach available and explicitly invoked.
