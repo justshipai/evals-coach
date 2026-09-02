@@ -3,3 +3,5 @@
 __pycache__/
 *.pyc
 evals-coach-codex-runs.zip
+_to_delete/
+*.plugin
