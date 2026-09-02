@@ -38,7 +38,7 @@ One command instead of a clone, and it brings the guided workbench with it:
 
 ```text
 /plugin marketplace add justshipai/evals-coach
-/plugin install evals-coach@justship
+/plugin install evals-coach@justshipai
 ```
 
 The **workbench** is a seven-step wizard, published to your own account as an Artifact,

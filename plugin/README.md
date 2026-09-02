@@ -7,7 +7,7 @@ Code and Cowork, plus a guided workbench for PMs.
 
 ```
 /plugin marketplace add justshipai/evals-coach
-/plugin install evals-coach@justship
+/plugin install evals-coach@justshipai
 ```
 
 ## What you get
