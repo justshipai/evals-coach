@@ -53,11 +53,13 @@ nav.scrolled{border-bottom-color:var(--line)}
 .btn-ghost{background:transparent; color:var(--ink); border-color:var(--line-strong)}
 .btn-ghost:hover{background:var(--surface)}
 .nav .btn{padding:9px 15px; font-size:14px}
+.btn .ico{width:15px; height:15px; flex:none; fill:currentColor; margin-right:-1px}
+.nav .btn .ico{width:13px; height:13px}
 @media(max-width:640px){ .nav-links a.hide-sm{display:none} }
 
 /* ---- hero ---- */
 .hero{padding-top:62px; padding-bottom:66px; text-align:center}
-.eyebrow{font-family:var(--mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); margin-bottom:26px}
+.eyebrow{font-family:var(--mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-2); margin-bottom:26px}
 h1.headline{font-size:clamp(46px,8.5vw,88px); line-height:.98; letter-spacing:-.02em; max-width:15ch; margin:0 auto}
 h1.headline em{position:relative; white-space:nowrap}
 h1.headline em::after{content:""; position:absolute; left:-.02em; right:-.02em; bottom:.06em; height:.09em; background:var(--coral); border-radius:2px; opacity:.9}
@@ -191,8 +193,7 @@ footer{border-top:1px solid var(--line); padding:40px 0 56px}
     <div class="nav-links">
       <a class="hide-sm" href="#pain">Why</a>
       <a class="hide-sm" href="#how">How it works</a>
-      <a class="hide-sm" href="#install">Install</a>
-      <a class="btn btn-primary" href="#install">Install</a>
+      <a class="btn btn-primary" href="#install"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5528h3.7442L10.5363 3.5409Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z"/></svg> Install</a>
     </div>
   </div>
 </nav>
@@ -202,10 +203,10 @@ footer{border-top:1px solid var(--line); padding:40px 0 56px}
   <h1 class="headline">Know what <em>good</em><br>looks like before you ship.</h1>
   <p class="lede">Evals Coach turns a PRD or feature idea into a small, testable eval your team can run, critique and improve. No eval experience or repository access required.</p>
   <div class="hero-cta">
-    <a class="btn btn-primary" href="#install">Install the plugin</a>
+    <a class="btn btn-primary" href="#install"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5528h3.7442L10.5363 3.5409Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z"/></svg> Install the Claude plugin</a>
     <a class="btn btn-ghost" href="https://github.com/justshipai/evals-coach" target="_blank" rel="noopener">View on GitHub ↗</a>
   </div>
-  <p class="hero-note">Works in Claude Code, Cowork and Codex. Then just say <code>use Evals Coach</code>.</p>
+  <p class="hero-note">Best as a Claude plugin. Also a skill in Codex and other assistants. Then just say <code>use Evals Coach</code>.</p>
 </header>
 
 <div class="divider"></div>
@@ -285,7 +286,7 @@ footer{border-top:1px solid var(--line); padding:40px 0 56px}
 
       <div class="icard">
         <div class="head"><h3>Claude Code &amp; Cowork</h3><span class="pill rec">Recommended · adds the workbench</span></div>
-        <p>One plugin, and it brings the guided workbench with it.</p>
+        <p>One Claude plugin, and it brings the guided workbench with it.</p>
         <div class="code" data-copy="/plugin marketplace add justshipai/evals-coach&#10;/plugin install evals-coach@justshipai">
           <button class="copy">Copy</button>
           <div class="cmd">/plugin marketplace add <b>justshipai/evals-coach</b>
@@ -318,7 +319,7 @@ git clone https://github.com/justshipai/evals-coach.git ~/.claude/skills/evals-c
     <div>
       <h3>The Eval Workbench</h3>
       <p>A seven-step wizard, published to your own account as a private Artifact. Describe your feature; it drafts the evaluation question, criteria, test cases, graders, judge prompts and release gate, each one editable, and hands back an eval plan, a <code style="font-family:var(--mono);font-size:.85em">test-cases.csv</code> and judge prompts.</p>
-      <p style="font-size:14.5px;color:var(--ink-3)">Claude-only: it asks Claude from inside the page, on the account of whoever opens it. Ask for “the eval workbench” once the plugin is installed. Opened without drafting, it degrades gracefully to a worksheet with the same structure and starters.</p>
+      <p style="font-size:14.5px;color:var(--ink-3)">Claude-only: it asks Claude from inside the page, on the account of whoever opens it. Ask for “the eval workbench” once the Claude plugin is installed. Opened without drafting, it degrades gracefully to a worksheet with the same structure and starters.</p>
     </div>
     <div class="mini">
       <div class="row"><b>1</b> Describe your feature</div>
@@ -353,7 +354,7 @@ git clone https://github.com/justshipai/evals-coach.git ~/.claude/skills/evals-c
   <h2>Define good. Then measure it.</h2>
   <p class="lede">Install once and turn your next feature idea into an eval that can actually inform a ship decision.</p>
   <div class="hero-cta">
-    <a class="btn btn-primary" href="#install">Install the plugin</a>
+    <a class="btn btn-primary" href="#install"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5528h3.7442L10.5363 3.5409Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z"/></svg> Install the Claude plugin</a>
     <a class="btn btn-ghost" href="https://github.com/justshipai/evals-coach" target="_blank" rel="noopener">View on GitHub ↗</a>
   </div>
 </section>
