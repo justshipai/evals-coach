@@ -1,0 +1,1461 @@
+<title>PM Eval Workbench</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#F5F7F3; --surface:#FFFFFF; --surface-2:#EBEFE8; --surface-3:#E1E7DE;
+  --line:#D7DCD2; --line-strong:#BCC4B7;
+  --ink:#18201B; --ink-2:#4B554E; --ink-3:#7A857D;
+  --accent:#1F6F5C; --accent-ink:#14503F; --accent-soft:#E0EFE8;
+  --warn:#9C5A0B; --warn-soft:#FAEFDD;
+  --crit:#A32E17; --crit-soft:#F8E7E2;
+  --ok:#2C7A4F;
+  --shadow:0 1px 2px rgba(24,32,27,.06), 0 8px 24px -12px rgba(24,32,27,.16);
+  --radius:10px;
+  --display:"Instrument Serif", Georgia, "Times New Roman", serif;
+  --body:"Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#111512; --surface:#191F1B; --surface-2:#212823; --surface-3:#2A322C;
+    --line:#303931; --line-strong:#434E45;
+    --ink:#E7EDE7; --ink-2:#A7B2A9; --ink-3:#7B857D;
+    --accent:#63C5A7; --accent-ink:#8FDCC2; --accent-soft:#1C332B;
+    --warn:#DDA35C; --warn-soft:#33281A;
+    --crit:#E68C73; --crit-soft:#35201B;
+    --ok:#6BC08C;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#111512; --surface:#191F1B; --surface-2:#212823; --surface-3:#2A322C;
+  --line:#303931; --line-strong:#434E45;
+  --ink:#E7EDE7; --ink-2:#A7B2A9; --ink-3:#7B857D;
+  --accent:#63C5A7; --accent-ink:#8FDCC2; --accent-soft:#1C332B;
+  --warn:#DDA35C; --warn-soft:#33281A;
+  --crit:#E68C73; --crit-soft:#35201B;
+  --ok:#6BC08C;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+}
+
+*{box-sizing:border-box}
+body{background:var(--paper); color:var(--ink); font-family:var(--body); font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;}
+h1,h2,h3,h4{margin:0; text-wrap:balance; font-weight:600; line-height:1.2}
+p{margin:0}
+button,input,textarea,select{font:inherit; color:inherit}
+textarea{resize:vertical}
+
+/* ---------- shell ---------- */
+.shell{max-width:1240px; margin:0 auto; padding:0 24px 96px}
+.masthead{display:flex; align-items:flex-end; justify-content:space-between; gap:24px; padding:28px 0 20px; border-bottom:1px solid var(--line); flex-wrap:wrap}
+.brand{display:flex; flex-direction:column; gap:4px; flex:1 1 480px; min-width:0}
+.brand h1{font-family:var(--display); font-size:34px; font-weight:400; letter-spacing:-.01em}
+.brand .tag{font-size:13px; color:var(--ink-2); max-width:62ch}
+.masthead-side{display:flex; align-items:center; gap:10px}
+
+.eyebrow{font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3)}
+
+/* ---------- status strip ---------- */
+.strip{display:flex; align-items:center; gap:10px; padding:10px 14px; border:1px solid var(--line); background:var(--surface); border-radius:var(--radius); margin-top:16px; font-size:13px; color:var(--ink-2); flex-wrap:wrap}
+.strip .dot{width:8px; height:8px; border-radius:50%; background:var(--accent); flex:none}
+.strip.warn{background:var(--warn-soft); border-color:transparent; color:var(--ink)}
+.strip.warn .dot{background:var(--warn)}
+
+/* ---------- layout ---------- */
+.work{display:grid; grid-template-columns:238px minmax(0,1fr); gap:32px; margin-top:24px; align-items:start}
+@media (max-width:900px){ .work{grid-template-columns:1fr; gap:20px} }
+
+/* ---------- rail ---------- */
+.rail{position:sticky; top:16px; display:flex; flex-direction:column; gap:2px}
+@media (max-width:900px){ .rail{position:static; flex-direction:row; overflow-x:auto; gap:6px; padding-bottom:6px} }
+.rail-step{display:grid; grid-template-columns:22px minmax(0,1fr); gap:10px; align-items:start; padding:9px 10px; border-radius:8px; border:1px solid transparent; background:none; text-align:left; cursor:pointer; width:100%}
+@media (max-width:900px){ .rail-step{width:auto; flex:none; grid-template-columns:22px auto} .rail-step .rail-sub{display:none} }
+.rail-step:hover{background:var(--surface-2)}
+.rail-step[aria-current="true"]{background:var(--surface); border-color:var(--line); box-shadow:var(--shadow)}
+.rail-num{font-family:var(--mono); font-size:11px; width:22px; height:22px; border-radius:50%; display:grid; place-items:center; border:1px solid var(--line-strong); color:var(--ink-3); flex:none; margin-top:1px}
+.rail-step[aria-current="true"] .rail-num{border-color:var(--accent); color:var(--accent); font-weight:500}
+.rail-step.done .rail-num{background:var(--accent); border-color:var(--accent); color:var(--surface)}
+:root[data-theme="dark"] .rail-step.done .rail-num, :root:not([data-theme="light"]) .rail-step.done .rail-num{color:#111512}
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .rail-step.done .rail-num{color:#fff} }
+.rail-name{display:block; font-size:13.5px; font-weight:500; line-height:1.3}
+.rail-sub{display:block; font-size:11.5px; color:var(--ink-3); margin-top:2px}
+.rail-step.blocked{opacity:.5; cursor:not-allowed}
+
+/* ---------- panel ---------- */
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); overflow:hidden}
+.panel-head{padding:22px 26px 18px; border-bottom:1px solid var(--line)}
+.panel-head h2{font-family:var(--display); font-weight:400; font-size:27px; letter-spacing:-.005em; margin-top:6px}
+.panel-head .lede{margin-top:8px; font-size:14px; color:var(--ink-2); max-width:66ch}
+.panel-body{padding:22px 26px}
+.panel-foot{display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px 26px; border-top:1px solid var(--line); background:var(--surface-2); flex-wrap:wrap}
+.foot-note{font-size:12.5px; color:var(--ink-3)}
+
+/* ---------- fields ---------- */
+.stack{display:flex; flex-direction:column; gap:20px}
+.field{display:flex; flex-direction:column; gap:7px}
+.field-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap}
+label.lbl{font-size:13px; font-weight:600; letter-spacing:.01em}
+.hint{font-size:12.5px; color:var(--ink-3); max-width:70ch}
+input[type=text], textarea, select{
+  width:100%; background:var(--paper); border:1px solid var(--line-strong); border-radius:8px;
+  padding:10px 12px; font-size:14px; line-height:1.5;
+}
+input[type=text]:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible, .chip:focus-visible{
+  outline:2px solid var(--accent); outline-offset:2px;
+}
+textarea{min-height:62px}
+.grid-2{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:18px}
+
+/* ---------- choice chips ---------- */
+.choices{display:flex; flex-wrap:wrap; gap:8px}
+.choice{border:1px solid var(--line-strong); background:var(--paper); border-radius:8px; padding:9px 13px; cursor:pointer; font-size:13.5px; display:flex; flex-direction:column; gap:2px; text-align:left; min-width:0}
+.choice small{color:var(--ink-3); font-size:11.5px}
+.choice[aria-pressed="true"]{border-color:var(--accent); background:var(--accent-soft); color:var(--accent-ink)}
+.choice[aria-pressed="true"] small{color:var(--accent-ink); opacity:.8}
+
+/* ---------- buttons ---------- */
+.btn{border:1px solid var(--line-strong); background:var(--surface); border-radius:8px; padding:9px 15px; font-size:13.5px; font-weight:500; cursor:pointer; display:inline-flex; align-items:center; gap:7px}
+.btn:hover:not(:disabled){border-color:var(--ink-3)}
+.btn:disabled{opacity:.45; cursor:not-allowed}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:#fff}
+:root[data-theme="dark"] .btn.primary, :root:not([data-theme="light"]) .btn.primary{color:#111512}
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .btn.primary{color:#fff} }
+.btn.primary:hover:not(:disabled){filter:brightness(1.06)}
+.btn.ghost{background:none; border-color:transparent; color:var(--ink-2); padding-inline:8px}
+.btn.ghost:hover:not(:disabled){background:var(--surface-2); border-color:transparent}
+.btn.sm{padding:6px 10px; font-size:12.5px}
+.btn.danger{color:var(--crit); border-color:transparent; background:none}
+.btn.danger:hover:not(:disabled){background:var(--crit-soft); border-color:transparent}
+.btnrow{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+
+/* ---------- badges ---------- */
+.badge{font-family:var(--mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; padding:3px 7px; border-radius:5px; white-space:nowrap}
+.badge.you{background:var(--warn-soft); color:var(--warn)}
+.badge.drafted{background:var(--accent-soft); color:var(--accent-ink)}
+.badge.must{background:var(--accent-soft); color:var(--accent-ink)}
+.badge.should{background:var(--surface-3); color:var(--ink-2)}
+.badge.mustnot{background:var(--crit-soft); color:var(--crit)}
+.badge.example{background:var(--surface-3); color:var(--ink-2)}
+
+/* ---------- criteria list ---------- */
+.crit-group{border:1px solid var(--line); border-radius:10px; overflow:hidden}
+.crit-group + .crit-group{margin-top:14px}
+.crit-head{display:flex; align-items:center; gap:10px; padding:11px 14px; background:var(--surface-2); border-bottom:1px solid var(--line)}
+.crit-head h3{font-size:14px}
+.crit-head .hint{margin-left:auto; text-align:right}
+.crit-row{display:grid; grid-template-columns:26px minmax(0,1fr) auto; gap:12px; align-items:start; padding:12px 14px}
+.crit-row + .crit-row{border-top:1px solid var(--line)}
+.crit-row textarea{min-height:58px; border-color:transparent; background:transparent; padding:4px 6px; margin-left:-6px}
+.crit-row textarea:hover{background:var(--paper)}
+.crit-row textarea:focus{background:var(--paper); border-color:var(--line-strong)}
+.crit-meta{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:6px}
+.crit-meta select{width:auto; padding:4px 8px; font-size:12px; background:var(--surface)}
+.tick{width:20px; height:20px; margin-top:6px; accent-color:var(--accent)}
+
+/* suggestion tray */
+.tray{padding:12px 14px; background:var(--surface-2); border-top:1px dashed var(--line-strong)}
+.tray-head{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:9px}
+.tray-head .eyebrow{color:var(--ink-2)}
+.tray-head .hint{margin:0}
+.tray-head .btnrow{margin-left:auto}
+.sugg{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:12px; align-items:start; padding:9px 0}
+.sugg + .sugg{border-top:1px solid var(--line)}
+.sugg-text{font-size:13.5px; line-height:1.45}
+.sugg-why{font-size:12px; color:var(--ink-3); margin-top:3px}
+.sugg .btn{white-space:nowrap}
+.tray-empty{font-size:12.5px; color:var(--ink-3)}
+.worst{display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--ink-3); cursor:pointer}
+
+/* ---------- cases table ---------- */
+.tablewrap{overflow-x:auto; border:1px solid var(--line); border-radius:10px}
+table{border-collapse:collapse; width:100%; min-width:900px; font-size:13px}
+th{text-align:left; font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); font-weight:400; padding:10px 12px; background:var(--surface-2); border-bottom:1px solid var(--line); white-space:nowrap; position:sticky; top:0}
+td{padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top}
+tr:last-child td{border-bottom:none}
+td textarea{min-height:52px; border-color:transparent; background:transparent; padding:5px 7px; font-size:13px}
+td textarea:hover{background:var(--paper)}
+td textarea:focus{background:var(--paper); border-color:var(--line-strong)}
+td.id{font-family:var(--mono); font-size:11.5px; color:var(--ink-3); white-space:nowrap; padding-top:14px}
+td select{padding:5px 7px; font-size:12px; background:var(--surface); min-width:112px}
+.coverage{display:flex; gap:6px; flex-wrap:wrap; margin-top:12px}
+.cov{font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; padding:4px 8px; border-radius:5px; border:1px solid var(--line); color:var(--ink-3)}
+.cov.hit{border-color:var(--accent); color:var(--accent-ink); background:var(--accent-soft)}
+
+/* ---------- graders / prompts ---------- */
+.prompt{border:1px solid var(--line); border-radius:10px; overflow:hidden}
+.prompt + .prompt{margin-top:14px}
+.prompt-head{display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--surface-2); border-bottom:1px solid var(--line); flex-wrap:wrap}
+.prompt-head strong{font-size:13.5px; font-weight:600}
+.prompt-head .btnrow{margin-left:auto}
+.prompt pre{margin:0; padding:14px; font-family:var(--mono); font-size:12px; line-height:1.6; white-space:pre-wrap; overflow-x:auto; background:var(--paper); max-height:340px; overflow-y:auto}
+
+/* ---------- gate ---------- */
+.gate{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px}
+.gate-tile{border:1px solid var(--line); border-radius:10px; padding:14px}
+.gate-tile .eyebrow{margin-bottom:6px; display:block}
+.gate-tile .val{font-family:var(--mono); font-size:22px; font-weight:500; letter-spacing:-.02em; font-variant-numeric:tabular-nums}
+.gate-tile.block{border-left:3px solid var(--crit)}
+.gate-tile.block .val{font-size:14px; font-family:var(--body); line-height:1.45; font-weight:400}
+
+/* ---------- output tabs ---------- */
+.tabs{display:flex; gap:4px; border-bottom:1px solid var(--line); margin-bottom:20px; overflow-x:auto}
+.tab{border:none; background:none; padding:9px 14px; font-size:13.5px; font-weight:500; color:var(--ink-3); cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--accent)}
+.doc{max-width:70ch}
+.doc h3{font-family:var(--display); font-weight:400; font-size:22px; margin:26px 0 8px}
+.doc h3:first-child{margin-top:0}
+.doc h4{font-size:13px; margin:18px 0 6px; letter-spacing:.01em}
+.doc p{margin:0 0 10px; color:var(--ink-2)}
+.doc ul{margin:0 0 12px; padding-left:20px; color:var(--ink-2)}
+.doc li{margin-bottom:5px}
+.doc strong{color:var(--ink)}
+.doc .q{font-family:var(--display); font-size:20px; line-height:1.35; color:var(--ink); border-left:3px solid var(--accent); padding-left:16px; margin:0 0 18px}
+
+/* ---------- intro ---------- */
+.intro-lede{font-family:var(--display); font-size:26px; line-height:1.35; max-width:34ch; margin:34px 0 10px}
+.intro-sub{font-size:15px; color:var(--ink-2); max-width:60ch; margin-bottom:6px}
+.stages{display:grid; grid-template-columns:repeat(auto-fit,minmax(268px,1fr)); gap:1px; background:var(--surface); border-radius:12px; overflow:hidden; margin:26px 0; box-shadow:0 0 0 1px var(--line)}
+.stage{background:var(--surface); padding:18px 20px; display:flex; flex-direction:column; gap:6px; box-shadow:0 0 0 1px var(--line)}
+.stage-top{display:flex; align-items:center; gap:9px}
+.stage-n{font-family:var(--mono); font-size:11px; width:21px; height:21px; border-radius:50%; display:grid; place-items:center; border:1px solid var(--line-strong); color:var(--ink-3); flex:none}
+.stage h3{font-size:14.5px}
+.stage p{font-size:13.5px; color:var(--ink-2); line-height:1.5}
+.stage .who{font-family:var(--mono); font-size:10px; letter-spacing:.09em; text-transform:uppercase; margin-top:auto; padding-top:8px}
+.who.mine{color:var(--accent)}
+.who.yours{color:var(--warn)}
+.leave{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:18px; margin:22px 0 6px}
+.leave div{border-left:2px solid var(--accent); padding-left:14px}
+.leave strong{display:block; font-size:13.5px; margin-bottom:3px}
+.leave span{font-size:12.5px; color:var(--ink-3)}
+.intro-actions{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:26px; padding-top:22px; border-top:1px solid var(--line)}
+
+/* ---------- empty state ---------- */
+.start{border:1px solid var(--line); border-radius:12px; padding:22px 24px; background:var(--surface-2)}
+.start .eyebrow{display:block; margin-bottom:10px}
+.shape{font-family:var(--display); font-size:21px; line-height:1.45; color:var(--ink); margin:0 0 4px; max-width:56ch}
+.slot{color:var(--accent-ink); background:var(--accent-soft); border-radius:4px; padding:1px 5px; margin:0 -1px; font-family:var(--body); font-size:.72em; font-weight:500; font-style:normal; white-space:nowrap}
+.start .hint{margin-top:14px}
+.start .btnrow{margin-top:18px}
+
+/* ---------- thinking ---------- */
+.thinking{display:flex; align-items:center; gap:10px; padding:12px 14px; border:1px dashed var(--line-strong); border-radius:10px; font-size:13px; color:var(--ink-2); background:var(--surface-2)}
+.pulse{width:9px; height:9px; border-radius:50%; background:var(--accent); animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.25; transform:scale(.8)} 50%{opacity:1; transform:scale(1.15)}}
+@media (prefers-reduced-motion: reduce){ .pulse{animation:none; opacity:.8} }
+.err{padding:11px 14px; border-radius:10px; background:var(--crit-soft); color:var(--crit); font-size:13px; border:1px solid transparent}
+.notice{padding:11px 14px; border-radius:10px; background:var(--surface-2); color:var(--ink-2); font-size:13px}
+[hidden]{display:none !important}
+.sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+</style>
+
+<div class="shell">
+  <header class="masthead">
+    <div class="brand">
+      <span class="eyebrow">Evals coach</span>
+      <h1>PM Eval Workbench</h1>
+      <p class="tag">Describe the AI feature you're shipping. This walks you to a runnable eval — criteria, test cases, graders and a release gate — and asks for your judgement only where it can't be inferred.</p>
+    </div>
+    <div class="masthead-side">
+      <button class="btn sm ghost" id="btn-how">How this works</button>
+      <button class="btn sm ghost" id="btn-reset">Start over</button>
+      <button class="btn sm ghost" id="btn-theme" aria-label="Toggle colour theme">Theme</button>
+    </div>
+  </header>
+
+  <div class="strip" id="strip"><span class="dot"></span><span id="strip-text">Checking whether Claude can draft for you here…</span></div>
+
+  <section id="intro" hidden></section>
+
+  <div class="work" id="work">
+    <nav class="rail" id="rail" aria-label="Steps"></nav>
+    <main>
+      <section class="panel">
+        <div class="panel-head">
+          <span class="eyebrow" id="p-eyebrow">Step 1 of 7</span>
+          <h2 id="p-title">Your feature</h2>
+          <p class="lede" id="p-lede"></p>
+        </div>
+        <div class="panel-body" id="p-body"></div>
+        <div class="panel-foot">
+          <span class="foot-note" id="p-note"></span>
+          <div class="btnrow">
+            <button class="btn" id="btn-back">Back</button>
+            <button class="btn primary" id="btn-next">Continue</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* Set true in the shareable build, which declares no runtime capabilities so it can
+   take a public link. Everything works; the copy stops promising drafting. */
+const PUBLIC_BUILD = false;
+
+/* ============================ state ============================ */
+const STEPS = [
+  {key:"product",  name:"Your feature",       sub:"You describe it",     msub:"You describe it"},
+  {key:"question", name:"Evaluation question",sub:"Drafted, you confirm",msub:"A shape to fill in"},
+  {key:"criteria", name:"Good and bad",       sub:"Drafted, you decide", msub:"Starters, you decide"},
+  {key:"cases",    name:"Test cases",         sub:"Drafted, you edit",   msub:"A template, you edit"},
+  {key:"graders",  name:"Graders",            sub:"Drafted, you approve",msub:"You choose"},
+  {key:"gate",     name:"Release gate",       sub:"Your call",           msub:"Your call"},
+  {key:"out",      name:"Handoff",            sub:"Take it away",        msub:"Take it away"}
+];
+
+const EXAMPLE = {
+  desc:"A suggested-reply feature inside our customer support inbox. When an agent opens a ticket, we draft a reply from the conversation, the customer's order history and our help-centre articles. The agent can send it, edit it, or discard it.",
+  stage:"prelaunch", decision:"ship", unit:"response", worst:"It states a refund or policy that isn't ours, the agent sends it, and we're held to it."
+};
+
+const BLANK = {
+  v:3, step:0, seenIntro:false,
+  product:{desc:"", stage:"prelaunch", decision:"ship", unit:"response", worst:"", isExample:true},
+  question:"", questionDrafted:false,
+  criteria:{must:[], should:[], mustNot:[]}, criteriaDrafted:false,
+  suggestions:{must:[], should:[], mustNot:[]}, suggestRound:0,
+  cases:[], casesDrafted:false, notCovered:"",
+  graders:{}, judges:[], gradersDrafted:false, calibration:"",
+  gate:{risk:"medium", overall:"", floors:"", blockers:"", regression:"", reps:"", owner:""}, gateDrafted:false,
+  assumptions:[]
+};
+
+/* Starter criteria used when Claude can't draft. Keyed by what the PM said they're
+   judging, so the suggestions still fit the shape of their eval. Each is a pattern
+   with a blank to fill in — never a finished criterion. */
+const STARTERS = {
+  response:{
+    must:[["Every factual claim in the output traces to something in the supplied [source]","Stops the most common failure: a confident answer with nothing behind it."],
+          ["The output stays inside [the scope the feature is for] and says so when the request falls outside it","Scope creep is easier to grade than 'relevance'."],
+          ["The output is in a form the user can act on directly: [format, length, fields]","Otherwise 'good' output still costs the user a rewrite."]],
+    should:[["When the input is ambiguous, the output asks one specific question rather than guessing","Separates a graceful system from a lucky one."],
+            ["The tone matches [how your users are spoken to elsewhere in the product]","Cheap to grade by hand, expensive to get wrong at scale."],
+            ["The output is no longer than it needs to be for [the user's situation]","Length is where quality quietly degrades."]],
+    mustNot:[["It never states a [policy, price, entitlement or commitment] that isn't in the supplied source","The failure that ends up in a complaint."],
+             ["It never exposes [data the user isn't entitled to see]","One occurrence is a breach, not a low score."],
+             ["It never presents a guess with the same confidence as a sourced fact","Uncalibrated confidence is what makes users stop checking."]]
+  },
+  trajectory:{
+    must:[["It calls [the tool that establishes ground truth] before producing an answer that depends on it","Ordering failures are invisible in the final output."],
+          ["When a tool fails, it retries or reports the failure rather than continuing on assumed data","Recovery is where agents actually break."],
+          ["It stops when the task is done rather than continuing to act","Termination is a real criterion, not a detail."]],
+    should:[["It takes a route a competent [role] would recognise, without redundant steps","Judge the route only where the route is part of the contract."],
+            ["It stays within [n] steps and [cost/time] for a typical case","Budgets belong in the eval if they'd block a launch."],
+            ["It carries context forward instead of re-asking for what it already has","The difference between one agent and a chain of strangers."]],
+    mustNot:[["It never takes [a write, send, refund or delete action] without the required confirmation","Side effects are the reason trajectory evals exist."],
+             ["It never loops on the same failing tool call more than [n] times","Cheap to check on the trace, expensive in production."],
+             ["It never acts on data from [an untrusted source] as if it were an instruction","Worth a hard gate wherever the agent reads third-party content."]]
+  },
+  task:{
+    must:[["The user's stated goal is achieved end to end without a human finishing it off","The only definition of done that matters."],
+          ["The resulting [artefact/record] is complete enough for [the next person or system] to use","Partial completion is the most common silent failure."],
+          ["It leaves an audit trail showing what was done and on what basis","Makes every later failure diagnosable."]],
+    should:[["It completes in a way that needs no rework in [the following step]","Rework rate is a better signal than a satisfaction score."],
+            ["It handles [the second most common variant of this task], not only the happy path","One case per variant is enough to see it."],
+            ["It surfaces what it couldn't do rather than reporting success","Honest partial completion beats confident failure."]],
+    mustNot:[["It never reports a task as complete when [the defining condition] wasn't met","False completion is worse than failure."],
+             ["It never performs [an irreversible action] outside the scope of the request","Zero tolerance regardless of overall score."],
+             ["It never leaves [the record or system] in a half-changed state","The failure mode nobody tests until it happens."]]
+  },
+  state:{
+    must:[["After the run, [the record/system] matches [the expected state] on every field that matters","Grade the world, not the prose."],
+          ["Nothing outside [the intended scope] was modified","The blast-radius check."],
+          ["The change is reversible, or the run recorded what would be needed to reverse it","Cheap to require now, invaluable later."]],
+    should:[["Fields the request didn't mention keep their prior values","Silent overwrites are the classic state bug."],
+            ["The state reached is the same on a re-run with the same input","Idempotence, where the product needs it."],
+            ["Related [records/entities] are left consistent with each other","Consistency is where partial success hides."]],
+    mustNot:[["It never writes to [the system of record] without [the required permission or confirmation]","Hard gate."],
+             ["It never deletes or overwrites [data that can't be recovered]","One occurrence blocks a release."],
+             ["It never leaves [the record] in a state that can't be reached by a human doing this by hand","Good test of whether the automation is legitimate."]]
+  }
+};
+
+const KEY = "pm-eval-workbench-v3";
+let S = load();
+let sample = null, sampleChecked = false, downloads = null;
+let ctl = null, busy = false;
+
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw){ const p = JSON.parse(raw); if(p && p.v===3) return normalize(p); }
+  }catch(e){}
+  const s = JSON.parse(JSON.stringify(BLANK));
+  s.product = Object.assign(s.product, EXAMPLE, {isExample:true});
+  return s;
+}
+function normalize(s){
+  if(!s.suggestions) s.suggestions = {must:[], should:[], mustNot:[]};
+  ["must","should","mustNot"].forEach(k=>{ if(!Array.isArray(s.suggestions[k])) s.suggestions[k] = []; });
+  if(typeof s.suggestRound !== "number") s.suggestRound = 0;
+  return s;
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+
+/* ============================ helpers ============================ */
+const $ = (s,r)=> (r||document).querySelector(s);
+const el = (tag, props, kids) => {
+  const n = document.createElement(tag);
+  if(props) for(const k in props){
+    if(k==="class") n.className = props[k];
+    else if(k==="text") n.textContent = props[k];
+    else if(k.startsWith("on")) n.addEventListener(k.slice(2), props[k]);
+    else if(props[k]!==null && props[k]!==undefined && props[k]!==false) n.setAttribute(k, props[k]===true?"":props[k]);
+  }
+  (kids||[]).forEach(c=> n.appendChild(typeof c==="string"?document.createTextNode(c):c));
+  return n;
+};
+const uid = p => p + Math.random().toString(36).slice(2,7);
+function autosize(t){ t.style.height="auto"; t.style.height = Math.max(t.scrollHeight, 40) + "px"; }
+function bindArea(t){ t.addEventListener("input", ()=>autosize(t)); requestAnimationFrame(()=>autosize(t)); }
+
+const ERR = {
+  not_granted:"You declined Claude access for this page, so drafting is off. You can still fill everything in by hand.",
+  sampling_disabled:"Claude isn't available on this account, so drafting is off. Everything is still editable by hand.",
+  not_declared:"Drafting isn't available on this version of the page.",
+  capability_disabled:"Drafting isn't available in this view.",
+  capability_removed:"Drafting isn't available in this view.",
+  rate_limited:"Too many requests just now. Wait a minute and try again.",
+  session_expired:"Your session expired — sign in to Claude again, then retry.",
+  refused:"Claude wouldn't answer that. Try rewording your feature description.",
+  empty_completion:"Nothing came back. Shorten the description and try again.",
+  invalid_json:"The draft came back malformed. Try again.",
+  prompt_too_large:"There's too much text to send. Trim the description and try again.",
+  upstream_error:"That call failed on the way out. Try again.",
+  cancelled:""
+};
+const errText = e => ERR[e && e.code] || "Something went wrong drafting that. Try again.";
+const HIDE = new Set(["not_granted","sampling_disabled","not_declared","capability_disabled","capability_removed"]);
+
+/* ============================ capabilities ============================ */
+function initCapabilities(){
+  (async function(){
+    try{ sample = await window.claude.use("sample"); }catch(e){ sample = null; }
+    sampleChecked = true;
+    setStrip();
+    render();
+  })();
+  (async function(){ try{ downloads = await window.claude.use("downloads"); }catch(e){ downloads = null; } render(); })();
+}
+
+function setStrip(msg, warn){
+  const strip = $("#strip"), t = $("#strip-text");
+  if(msg){ t.textContent = msg; strip.classList.toggle("warn", !!warn); return; }
+  if(!sampleChecked){ t.textContent = "Checking whether Claude can draft for you here…"; return; }
+  if(sample){
+    strip.classList.remove("warn");
+    t.textContent = "Claude drafts each step from what you've told it. Everything it writes is editable — you own the product judgement.";
+  } else if(PUBLIC_BUILD){
+    strip.classList.remove("warn");
+    t.textContent = "You fill each step in yourself, with a shape to follow and starter suggestions along the way. Nothing you type leaves your browser.";
+  } else {
+    strip.classList.add("warn");
+    t.textContent = "Drafting is unavailable in this view, so the workbench is running in manual mode. Every field is yours to fill in, and the outputs still assemble at the end.";
+  }
+}
+
+/* ============================ Claude calls ============================ */
+const HOUSE = `You are an evals coach for a product manager who is not an eval specialist.
+Rules you always follow:
+- Start from the product decision and observable behaviour, never from fashionable metrics.
+- Replace vague words like "helpful", "accurate" or "high quality" with observable, product-specific definitions.
+- Prefer a minimum viable eval: one decision, one critical behaviour, 5-10 deliberately varied cases, one reliable grader, one explicit release gate.
+- Never imply synthetic or curated cases represent production traffic.
+- Never present an uncalibrated LLM judge as ground truth.
+- Write in plain product language. British English. No preamble, no flattery.`;
+
+function ctxBlock(){
+  const p = S.product;
+  const L = [];
+  L.push("FEATURE UNDER EVALUATION:\n" + (p.desc||"(not described)"));
+  L.push("MATURITY: " + (p.stage==="prelaunch" ? "Pre-launch — no production traffic yet" : "Post-launch — real usage and traces exist"));
+  L.push("DECISION THE EVAL MUST SUPPORT: " + ({ship:"Whether to ship this to users",compare:"Which of two versions/models/prompts to use",regress:"Whether a change broke anything that worked",expand:"Whether it is safe to widen the rollout"})[p.decision]);
+  L.push("UNIT OF EVALUATION: " + ({response:"a single response",trajectory:"the agent's whole trajectory across steps",task:"whether the end-to-end task was completed",state:"the resulting state after the system acted"})[p.unit]);
+  if(p.worst) L.push("THE FAILURE THE PM SAYS IS MOST COSTLY:\n" + p.worst);
+  if(S.question) L.push("AGREED EVALUATION QUESTION:\n" + S.question);
+  const cs = allCriteria();
+  if(cs.length) L.push("AGREED CRITERIA:\n" + cs.map(c=>`- [${c.kind.toUpperCase()}] ${c.text}`).join("\n"));
+  if(S.cases.length) L.push("AGREED TEST CASES:\n" + S.cases.map(c=>`- ${c.id} (${c.category}, slice: ${c.slice||"—"}): ${c.name}. Input: ${c.input}. Expected: ${c.expected}`).join("\n"));
+  return L.join("\n\n");
+}
+function allCriteria(){
+  return [].concat(
+    S.criteria.must.map(c=>Object.assign({kind:"must"},c)),
+    S.criteria.should.map(c=>Object.assign({kind:"should"},c)),
+    S.criteria.mustNot.map(c=>Object.assign({kind:"must not"},c))
+  ).filter(c=>c.on!==false);
+}
+
+async function ask(prompt, tier){
+  if(!sample) throw {code:"not_granted", message:"no sampling"};
+  ctl = new AbortController();
+  return await sample.json(prompt, {signal: ctl.signal, modelTier: tier||"default"});
+}
+
+function withBusy(host, label, fn){
+  if(busy) return;
+  busy = true;
+  const stop = el("button",{class:"btn sm ghost", onclick:()=>{ if(ctl) ctl.abort(); }},["Stop"]);
+  const box = el("div",{class:"thinking"},[el("span",{class:"pulse"}), el("span",{text:label}), stop]);
+  const t0 = Date.now();
+  const timer = setInterval(()=>{ box.children[1].textContent = label + " (" + Math.round((Date.now()-t0)/1000) + "s)"; }, 1000);
+  host.innerHTML = ""; host.appendChild(box); host.hidden = false;
+  stop.style.marginLeft = "auto";
+  fn().then(()=>{ clearInterval(timer); busy=false; host.hidden=true; save(); render(); })
+      .catch(e=>{
+        clearInterval(timer); busy=false;
+        if(e && e.code==="cancelled"){ host.hidden=true; render(); return; }
+        if(e && HIDE.has(e.code)) sample = null;
+        host.innerHTML=""; host.appendChild(el("div",{class:"err", text:errText(e)}));
+        setStrip();
+      });
+}
+
+/* ============================ intro ============================ */
+const STAGE_COPY = [
+  ["Your feature","Tell it what you're shipping, in a paragraph, plus three quick choices. This is the only real writing you do.","yours","You write it","You write it"],
+  ["Evaluation question","The single question your eval exists to answer. Written for you from your paragraph — you confirm or rewrite it.","mine","Drafted for you","A shape to fill in"],
+  ["Good and bad","What must happen, what should happen, and what must never happen. You tick, edit and untick; nothing counts until you keep it.","mine","Drafted, you decide","Starters, you decide"],
+  ["Test cases","A small set of deliberately different situations to run the feature against — including the one you said would hurt most.","mine","Drafted, you edit","A starter set, you edit"],
+  ["Graders","How each thing gets marked: a code check, a look at what the system did, an AI judge, or a person. Cheapest one that's actually reliable.","mine","Proposed, you approve","You choose"],
+  ["Release gate","The line that turns a set of results into ship, don't ship, or needs review. The numbers are yours.","yours","Your call","Your call"],
+  ["Handoff","Everything packaged for whoever builds it, with the questions they mustn't guess at called out.","mine","Take it away","Take it away"]
+];
+function renderIntro(){
+  const box = $("#intro"); box.innerHTML = ""; box.hidden = false;
+  $("#work").hidden = true;
+
+  box.appendChild(el("p",{class:"intro-lede", text:"An eval is just this: what should happen, a handful of cases to check it on, and a line you won't ship below."}));
+  box.appendChild(el("p",{class:"intro-sub", text: sample
+    ? "You don't need to have run one before, and you don't need your codebase. Seven steps, about fifteen minutes. You'll be asked for product judgement — what matters, what's unacceptable, where the line sits — and everything around that gets drafted for you."
+    : "You don't need to have run one before, and you don't need your codebase. Seven steps, about twenty minutes. Each one gives you a shape to follow and starter suggestions to take or leave, so you're editing rather than staring at a blank box."}));
+
+  const grid = el("div",{class:"stages"});
+  STAGE_COPY.forEach(([name,desc,who,whoLabel,manualLabel],i)=>{
+    const label = sample ? whoLabel : manualLabel;
+    grid.appendChild(el("div",{class:"stage"},[
+      el("div",{class:"stage-top"},[el("span",{class:"stage-n",text:String(i+1)}), el("h3",{text:name})]),
+      el("p",{text:desc}),
+      el("span",{class:"who " + (sample ? who : (/^You|^Your/.test(label) ? "yours" : "mine")), text:label})
+    ]));
+  });
+  box.appendChild(grid);
+
+  box.appendChild(el("span",{class:"eyebrow", text:"What you leave with"}));
+  box.appendChild(el("div",{class:"leave"},[
+    el("div",{},[el("strong",{text:"An eval plan"}), el("span",{text:"The question, the criteria, the gate — the thing you'd put in front of your team."})]),
+    el("div",{},[el("strong",{text:"test-cases.csv"}), el("span",{text:"The cases as a table, ready for a spreadsheet or your eval tool."})]),
+    el("div",{},[el("strong",{text:"Judge prompts"}), el("span",{text:"Ready to wire up, with the calibration you owe them before they gate anything."})])
+  ]));
+
+  const started = !!(S.product.desc.trim() && !S.product.isExample) || S.question.trim() || S.cases.length;
+  const actions = el("div",{class:"intro-actions"});
+  actions.appendChild(el("button",{class:"btn primary", onclick:()=>{ S.seenIntro=true; save(); render(); }},[started ? "Pick up where I left off" : "Start"]));
+  if(started) actions.appendChild(el("button",{class:"btn", onclick:()=>{
+    if(!confirm("Clear everything and start a new eval?")) return;
+    S = JSON.parse(JSON.stringify(BLANK)); S.product.isExample=false; S.seenIntro=true; save(); render();
+  }},["Start a new eval"]));
+  actions.appendChild(el("span",{class:"hint", text: sample
+    ? "Nothing leaves your browser except what you send to Claude when you press a draft button."
+    : PUBLIC_BUILD ? "Everything stays in your browser. Your progress is saved here, so you can come back to this link."
+    : "Drafting is unavailable in this view — you can still work through every step by hand."}));
+  box.appendChild(actions);
+}
+
+/* ============================ rail ============================ */
+function furthest(){
+  if(!S.product.desc.trim()) return 0;
+  if(!S.question.trim()) return 1;
+  if(!allCriteria().length) return 2;
+  if(!S.cases.length) return 3;
+  if(!S.gradersDrafted) return 4;
+  if(!S.gateDrafted) return 5;
+  return 6;
+}
+function renderRail(){
+  const rail = $("#rail"); rail.innerHTML = "";
+  const max = furthest();
+  STEPS.forEach((st,i)=>{
+    const done = i < max && i !== S.step;
+    const blocked = i > max;
+    const b = el("button",{
+      class:"rail-step" + (done?" done":"") + (blocked?" blocked":""),
+      "aria-current": i===S.step ? "true":"false",
+      disabled: blocked||undefined,
+      onclick:()=>{ if(!blocked){ S.step=i; save(); render(); window.scrollTo({top:0,behavior:"smooth"}); } }
+    },[
+      el("span",{class:"rail-num", text: done ? "✓" : String(i+1)}),
+      el("span",{},[ el("span",{class:"rail-name",text:st.name}), el("span",{class:"rail-sub",text: sample ? st.sub : st.msub}) ])
+    ]);
+    rail.appendChild(b);
+  });
+}
+
+/* ============================ steps ============================ */
+function render(){
+  if(!S.seenIntro){ $("#strip").hidden = true; renderIntro(); return; }
+  $("#intro").hidden = true; $("#work").hidden = false; $("#strip").hidden = false;
+  renderRail();
+  const i = S.step, st = STEPS[i];
+  $("#p-eyebrow").textContent = "Step " + (i+1) + " of " + STEPS.length;
+  $("#p-title").textContent = st.name;
+  const body = $("#p-body"); body.innerHTML = "";
+  $("#btn-back").disabled = i===0;
+  $("#btn-next").hidden = false;
+  $("#btn-next").textContent = i===STEPS.length-1 ? "Done" : "Continue";
+  $("#btn-next").disabled = false;
+  $("#p-note").textContent = "";
+  ({0:stepProduct,1:stepQuestion,2:stepCriteria,3:stepCases,4:stepGraders,5:stepGate,6:stepOut}[i])(body);
+}
+
+function busyHost(){ return el("div",{class:"", hidden:true}); }
+
+/* ---- step 1: product ---- */
+function stepProduct(body){
+  $("#p-lede").textContent = sample
+    ? "One honest paragraph is enough. Everything after this is drafted for you from what you write here."
+    : "One honest paragraph is enough. What you write here decides which suggestions you're offered at every later step.";
+  const p = S.product;
+  const stack = el("div",{class:"stack"});
+
+  const banner = el("div",{class:"notice"},[
+    "Loaded with an example so you can see the shape of it. ",
+    el("button",{class:"btn sm", onclick:()=>{ S.product = Object.assign({}, BLANK.product); S.product.isExample=false; save(); render(); }},["Clear and use my own"])
+  ]);
+  if(p.isExample) stack.appendChild(banner);
+
+  stack.appendChild(field("What does the feature do, and for whom?",
+    "Write it as you'd explain it to a new joiner. Include what it reads, what it produces, and what the user does with the output.",
+    area(p.desc, v=>{ p.desc=v; p.isExample=false; markStale(); }, 5, "e.g. When an agent opens a ticket we draft a reply from the conversation, the order history and our help-centre articles…"),
+    p.isExample ? "example" : null));
+
+  const g = el("div",{class:"grid-2"});
+  g.appendChild(pick("Where are you?", "Pre-launch evals lean on judgement; post-launch ones start from real failures.", [
+    ["prelaunch","Pre-launch","No production traffic yet"],
+    ["postlaunch","Post-launch","Real usage and traces exist"]
+  ], p.stage, v=>{ p.stage=v; markStale(); }));
+  g.appendChild(pick("What decision will the results make?", "An eval that doesn't decide anything doesn't get run twice.", [
+    ["ship","Ship or don't","Gate the release"],
+    ["compare","Pick a version","Model, prompt or vendor"],
+    ["regress","Catch regressions","Did a change break it"],
+    ["expand","Widen the rollout","More users or cases"]
+  ], p.decision, v=>{ p.decision=v; markStale(); }));
+  stack.appendChild(g);
+
+  stack.appendChild(pick("What are you actually judging?", "Pick the smallest unit that carries the outcome you care about.", [
+    ["response","One response","A single output"],
+    ["trajectory","The whole trajectory","Steps, tools, recovery"],
+    ["task","Task completed","End-to-end success"],
+    ["state","Resulting state","What changed in the world"]
+  ], p.unit, v=>{ p.unit=v; markStale(); }));
+
+  stack.appendChild(field("What's the most costly thing it could get wrong?",
+    "Not every failure — the one you'd have to explain to someone. This becomes a hard blocker rather than an averaged score.",
+    area(p.worst, v=>{ p.worst=v; markStale(); }, 3, "e.g. It states a refund policy that isn't ours and the agent sends it."),
+    p.worst.trim() ? null : "you"));
+
+  body.appendChild(stack);
+  $("#p-note").textContent = p.desc.trim() ? "" : "Describe the feature to continue.";
+  $("#btn-next").disabled = !p.desc.trim();
+}
+function markStale(){ save(); updateNav(); }
+
+/* Keep Continue and the footer note in step with what's typed, without a re-render
+   (a re-render would steal focus from the field being typed into). */
+function updateNav(){
+  const next = $("#btn-next"), note = $("#p-note");
+  if(!next) return;
+  const i = S.step;
+  if(i===0){ next.disabled = !S.product.desc.trim(); note.textContent = S.product.desc.trim() ? "" : "Describe the feature to continue."; }
+  else if(i===1){ next.disabled = !S.question.trim(); note.textContent = S.question.trim() ? "" : "The question has to say something to continue."; }
+  else if(i===2){ const n = allCriteria().filter(c=>c.text.trim()).length; next.disabled = !n; note.textContent = n ? n + " criteria in play" : "Add at least one criterion to continue."; }
+  else if(i===3){ next.disabled = !S.cases.length; note.textContent = S.cases.length ? S.cases.length + " cases" : "Draft or add cases to continue."; }
+  else if(i===5){
+    const keys = ["overall","floors","blockers","regression","reps","owner"];
+    const filled = keys.filter(k=>S.gate[k] && S.gate[k].trim()).length;
+    note.textContent = filled + " of " + keys.length + " set";
+  }
+}
+
+/* ---- step 2: question ---- */
+let writingQuestion = false;
+function shapeLine(){
+  const p = el("p",{class:"shape"});
+  const bits = ["Does ", ["the system"], " achieve ", ["the user outcome"], " for ",
+                ["these situations"], " without ", ["these critical regressions"],
+                ", well enough to support ", ["this decision"], "?"];
+  bits.forEach(b=> p.appendChild(Array.isArray(b) ? el("span",{class:"slot", text:b[0]}) : document.createTextNode(b)));
+  return p;
+}
+function stepQuestion(body){
+  $("#p-lede").textContent = "The whole eval aims at one sentence. Every criterion, case and threshold after this exists to answer it.";
+  const host = busyHost();
+  const wrap = el("div",{class:"stack"});
+  const hasQ = !!S.question.trim();
+
+  if(!hasQ && !writingQuestion){
+    const start = el("div",{class:"start"});
+    start.appendChild(el("span",{class:"eyebrow", text:"One sentence, in this shape"}));
+    start.appendChild(shapeLine());
+    start.appendChild(el("p",{class:"hint", text: sample
+      ? "Claude fills in the four slots from what you wrote on the last step. Nothing is locked in — you edit it straight after."
+      : "Fill in the four slots with your feature's own words. Concrete beats tidy."}));
+    const row = el("div",{class:"btnrow"});
+    if(sample) row.appendChild(el("button",{class:"btn primary", onclick:()=>draftQuestion(host)},["Fill it in for me"]));
+    row.appendChild(el("button",{class: sample?"btn":"btn primary", onclick:()=>{ writingQuestion = true; render(); setTimeout(()=>{ const t = document.querySelector("#p-body textarea"); if(t) t.focus(); },0); }},["I'll write it"]));
+    start.appendChild(row);
+    wrap.appendChild(start);
+    wrap.appendChild(host);
+  } else {
+    wrap.appendChild(host);
+    if(!S.questionDrafted){
+      const s = shapeLine(); s.style.fontSize = "17px"; s.style.marginBottom = "0";
+      wrap.appendChild(el("div",{},[el("span",{class:"eyebrow", style:"display:block;margin-bottom:8px", text:"The shape to follow"}), s]));
+    }
+    wrap.appendChild(field("Evaluation question", null,
+      area(S.question, v=>{ S.question=v; markStale(); }, 3, "Does … achieve … for … without … , well enough to support …?"),
+      hasQ ? (S.questionDrafted?"drafted":null) : "you"));
+    const row = el("div",{class:"btnrow"});
+    if(sample) row.appendChild(el("button",{class:"btn sm ghost", onclick:()=>draftQuestion(host)},[hasQ?"Redraft":"Fill it in for me"]));
+    row.appendChild(el("span",{class:"hint", text:"Name real users, real situations and the real decision — not \"users\" and \"quality\"."}));
+    wrap.appendChild(row);
+  }
+
+  body.appendChild(wrap);
+  updateNav();
+}
+function draftQuestion(host){
+  withBusy(host, "Drafting the evaluation question…", async ()=>{
+    const r = await ask(HOUSE + `
+
+` + ctxBlock() + `
+
+Write ONE evaluation question in this shape:
+"Does [system or candidate] achieve [user outcome] for [target situations] without [critical regressions], well enough to support [decision]?"
+Make every bracket concrete to this feature — no placeholders, no generic quality words.
+Reply with only JSON: {"question": "..."}`, "quick");
+    S.question = String(r.question||"").trim();
+    S.questionDrafted = true;
+  });
+}
+
+/* ---- step 3: criteria ---- */
+function stepCriteria(body){
+  $("#p-lede").textContent = "Must, should, must-not. Tick what's right, edit the wording, untick what isn't yours. Each group carries a few more candidates you can pull in. Anything left unticked won't be evaluated.";
+  const host = busyHost();
+  const wrap = el("div",{class:"stack"});
+
+  if(!allCriteria().length && sample){
+    wrap.appendChild(el("div",{class:"btnrow"},[el("button",{class:"btn primary", onclick:()=>draftCriteria(host)},["Draft criteria"])]));
+  }
+  wrap.appendChild(host);
+
+  const groups = [
+    ["must","Must","Non-negotiable. Failing one is failing the case."],
+    ["should","Should","Graded. Better or worse is meaningful here."],
+    ["mustNot","Must not","Critical failures. These become hard blockers, never averaged away."]
+  ];
+  groups.forEach(([k,label,hint])=>{
+    const list = S.criteria[k];
+    const g = el("div",{class:"crit-group"});
+    g.appendChild(el("div",{class:"crit-head"},[
+      el("span",{class:"badge " + (k==="mustNot"?"mustnot":k), text:label}),
+      el("span",{class:"hint",text:hint})
+    ]));
+    list.forEach((c,idx)=>{
+      const row = el("div",{class:"crit-row"});
+      const tick = el("input",{type:"checkbox", class:"tick", "aria-label":"Include this criterion"});
+      tick.checked = c.on!==false;
+      tick.addEventListener("change", ()=>{ c.on = tick.checked; markStale(); });
+      const ta = area(c.text, v=>{ c.text=v; markStale(); }, 2, "Observable behaviour…");
+      row.appendChild(tick);
+      row.appendChild(el("div",{},[ta]));
+      row.appendChild(el("button",{class:"btn sm danger", title:"Remove", onclick:()=>{ list.splice(idx,1); save(); render(); }},["Remove"]));
+      g.appendChild(row);
+    });
+    const add = el("div",{class:"crit-row"},[
+      el("span",{}), el("div",{},[ el("button",{class:"btn sm ghost", onclick:()=>{ list.push({id:uid("c"),text:"",on:true}); save(); render(); }},["+ Add a " + label.toLowerCase()]) ]), el("span",{})
+    ]);
+    g.appendChild(add);
+    g.appendChild(tray(k, label, host));
+    wrap.appendChild(g);
+  });
+
+  if(allCriteria().length && sample) wrap.appendChild(el("div",{class:"btnrow"},[
+    el("button",{class:"btn sm ghost", onclick:()=>draftCriteria(host)},["Redraft from scratch"]),
+    el("span",{class:"hint",text:"Your edits are overwritten if you redraft."})
+  ]));
+
+  body.appendChild(wrap);
+  $("#btn-next").disabled = !allCriteria().length;
+  $("#p-note").textContent = allCriteria().length ? allCriteria().length + " criteria in play" : "Add at least one criterion to continue.";
+}
+function starterPool(k){
+  const unit = STARTERS[S.product.unit] ? S.product.unit : "response";
+  return STARTERS[unit][k].map(([text,why])=>({text, why}));
+}
+function trayItems(k){
+  const have = S.criteria[k].map(c=>c.text.trim().toLowerCase()).filter(Boolean);
+  const pool = (S.suggestions[k] && S.suggestions[k].length) ? S.suggestions[k] : (sample ? [] : starterPool(k));
+  return pool.filter(s=> s && s.text && !have.includes(String(s.text).trim().toLowerCase()));
+}
+function tray(k, label, host){
+  const items = trayItems(k);
+  const fromClaude = !!(S.suggestions[k] && S.suggestions[k].length);
+  const t = el("div",{class:"tray"});
+  const head = el("div",{class:"tray-head"},[
+    el("span",{class:"eyebrow", text:"Also worth considering"}),
+    el("span",{class:"hint", text: fromClaude ? "Drafted for your feature. Add one and it becomes editable like the rest."
+                                              : "Common patterns for what you said you're judging. Add one, then fill in the brackets."})
+  ]);
+  const localHost = busyHost();
+  if(sample) head.appendChild(el("div",{class:"btnrow"},[
+    el("button",{class:"btn sm ghost", onclick:()=>suggestMore(k, label, localHost)},[items.length?"Suggest more":"Suggest some"])
+  ]));
+  t.appendChild(head);
+  t.appendChild(localHost);
+
+  if(!items.length){
+    t.appendChild(el("p",{class:"tray-empty", text: sample ? "Nothing on the table — ask for some, or write your own above." : "You've taken all of these."}));
+    return t;
+  }
+  items.forEach(s=>{
+    const row = el("div",{class:"sugg"});
+    row.appendChild(el("div",{},[
+      el("div",{class:"sugg-text", text:s.text}),
+      s.why ? el("div",{class:"sugg-why", text:s.why}) : el("span")
+    ]));
+    row.appendChild(el("button",{class:"btn sm", onclick:()=>{
+      S.criteria[k].push({id:uid("c"), text:s.text, on:true});
+      if(S.suggestions[k]) S.suggestions[k] = S.suggestions[k].filter(x=>x.text!==s.text);
+      save(); render();
+    }},["Add"]));
+    t.appendChild(row);
+  });
+  return t;
+}
+function suggestMore(k, label, host){
+  const kindWord = {must:"must", should:"should", mustNot:"must not"}[k];
+  withBusy(host, "Looking for criteria you haven't covered…", async ()=>{
+    S.suggestRound = (S.suggestRound||0) + 1;
+    const onTable = [].concat(
+      S.criteria[k].map(c=>c.text),
+      (S.suggestions[k]||[]).map(s=>s.text)
+    ).filter(Boolean);
+    const r = await ask(HOUSE + `
+
+` + ctxBlock() + `
+
+The PM already has these "${kindWord}" criteria on the table:
+` + (onTable.length ? onTable.map(t=>"- "+t).join("\n") : "(none yet)") + `
+
+Suggest 3 more "${kindWord}" criteria for THIS feature that are genuinely different from those — different failure mode, different user situation, or a part of the job nobody has looked at yet. Not rewordings.
+Each must be observable in a single run and named in this product's own language. No generic quality words.
+For each, add one short line (under 15 words) on why the PM might want it — the failure it catches.
+Reply with only JSON: {"items":[{"text":"...","why":"..."}]}`);
+    const add = (r.items||[]).map(x=>({text:String(x.text||""), why:String(x.why||"")})).filter(x=>x.text);
+    S.suggestions[k] = (S.suggestions[k]||[]).concat(add);
+  });
+}
+
+function draftCriteria(host){
+  withBusy(host, "Turning the product intent into observable criteria…", async ()=>{
+    const r = await ask(HOUSE + `
+
+` + ctxBlock() + `
+
+Write the criteria for this eval.
+- "must": 2-4 non-negotiable success conditions.
+- "should": 2-3 graded qualities where better or worse genuinely matters to this user.
+- "mustNot": 2-4 critical failures, policy violations or regressions — include the PM's most costly failure if they named one.
+Every line must be observable from what a reviewer can actually see in a run of THIS feature. Name the feature's own objects, policies and users. No generic words like helpful, accurate, relevant, high quality, appropriate.
+
+Then, separately, suggest 2 more of EACH kind that you did not put in the lists above — the next most defensible candidates, each covering a different failure mode or user situation from the ones you chose. These are offered to the PM to take or leave, so give each one a short line (under 15 words) on the failure it catches.
+
+Reply with only JSON:
+{"must":["..."],"should":["..."],"mustNot":["..."],
+ "suggest":{"must":[{"text":"...","why":"..."}],"should":[{"text":"...","why":"..."}],"mustNot":[{"text":"...","why":"..."}]}}`);
+    const mk = a => (Array.isArray(a)?a:[]).map(t=>({id:uid("c"),text:String(t),on:true}));
+    S.criteria = {must:mk(r.must), should:mk(r.should), mustNot:mk(r.mustNot)};
+    const sg = r.suggest || {};
+    const ms = a => (Array.isArray(a)?a:[]).map(x=>({text:String((x&&x.text)||x||""), why:String((x&&x.why)||"")})).filter(x=>x.text);
+    S.suggestions = {must:ms(sg.must), should:ms(sg.should), mustNot:ms(sg.mustNot)};
+    S.criteriaDrafted = true;
+  });
+}
+
+/* ---- step 4: cases ---- */
+const CATS = ["capability","edge","ambiguity","safety","regression","recovery","efficiency"];
+function stepCases(body){
+  $("#p-lede").textContent = "A deliberately varied set, not many near-duplicates. Edit any cell. Delete anything that doesn't look like your users.";
+  const host = busyHost();
+  const wrap = el("div",{class:"stack"});
+
+  if(!S.cases.length){
+    const start = el("div",{class:"start"});
+    start.appendChild(el("span",{class:"eyebrow", text:"A set that could change the decision"}));
+    start.appendChild(el("p",{class:"shape", style:"font-size:19px", text:"Six to ten cases that differ from each other on purpose — not ten versions of the easy one."}));
+    start.appendChild(el("p",{class:"hint", text: sample
+      ? "Claude writes a first set from your criteria, spread across the kinds of situation that break things: the ordinary case, the edge, the ambiguous request, the unsafe one, recovery when something fails."
+      : "The starter set gives you one row per kind of situation that tends to break things — ordinary, edge, ambiguous, unsafe, recovery — each with the fields to fill in. Delete any that don't apply to you."}));
+    const row = el("div",{class:"btnrow"});
+    if(sample) row.appendChild(el("button",{class:"btn primary", onclick:()=>draftCases(host)},["Draft 8 test cases"]));
+    row.appendChild(el("button",{class: sample?"btn":"btn primary", onclick:()=>{ S.cases = starterCases(); save(); render(); }},["Start from a template set"]));
+    row.appendChild(el("button",{class:"btn", onclick:()=>{ S.cases = [blankCase(1)]; save(); render(); }},["Add one blank case"]));
+    start.appendChild(row);
+    wrap.appendChild(start);
+  }
+  wrap.appendChild(host);
+
+  if(S.cases.length){
+    const tw = el("div",{class:"tablewrap"});
+    const table = el("table");
+    const thead = el("thead",{},[el("tr",{},["ID","Case","Input / situation","Starting state","Expected behaviour","Type","Slice",""].map(h=>el("th",{text:h})))]);
+    const tb = el("tbody");
+    S.cases.forEach((c,idx)=>{
+      const tr = el("tr");
+      tr.appendChild(el("td",{class:"id",text:c.id}));
+      tr.appendChild(el("td",{},[area(c.name, v=>{c.name=v;save();},1,"Short name")]));
+      tr.appendChild(el("td",{},[area(c.input, v=>{c.input=v;save();},2,"What goes in")]));
+      tr.appendChild(el("td",{},[area(c.setup, v=>{c.setup=v;save();},2,"Data, permissions, prior state")]));
+      tr.appendChild(el("td",{},[area(c.expected, v=>{c.expected=v;save();},2,"What a pass looks like")]));
+      const sel = el("select");
+      CATS.forEach(x=> sel.appendChild(el("option",{value:x, text:x, selected: c.category===x||undefined})));
+      sel.addEventListener("change", ()=>{ c.category=sel.value; save(); renderCoverage(); });
+      tr.appendChild(el("td",{},[sel]));
+      tr.appendChild(el("td",{},[area(c.slice, v=>{c.slice=v;save();},1,"")]));
+      tr.appendChild(el("td",{},[el("button",{class:"btn sm danger", onclick:()=>{ S.cases.splice(idx,1); save(); render(); }},["×"])]));
+      tb.appendChild(tr);
+    });
+    table.appendChild(thead); table.appendChild(tb); tw.appendChild(table);
+    wrap.appendChild(tw);
+
+    const cov = el("div",{class:"coverage", id:"cov"});
+    wrap.appendChild(cov);
+
+    wrap.appendChild(el("div",{class:"btnrow"},[
+      el("button",{class:"btn sm", onclick:()=>{ S.cases.push(blankCase(S.cases.length+1)); save(); render(); }},["+ Add a case"]),
+      sample ? el("button",{class:"btn sm ghost", onclick:()=>draftCases(host)},["Redraft the set"]) : el("span")
+    ]));
+
+    wrap.appendChild(field("What this set does not cover",
+      "Say it plainly here so nobody reads a green run as broader proof than it is.",
+      area(S.notCovered, v=>{S.notCovered=v;save();},2,"e.g. Nothing in another language; no tickets with attachments; no multi-order refunds."),
+      S.notCovered.trim()?null:"you"));
+  }
+
+  body.appendChild(wrap);
+  if(S.cases.length) renderCoverage();
+  $("#btn-next").disabled = !S.cases.length;
+  $("#p-note").textContent = S.cases.length ? S.cases.length + " cases" : "Draft or add cases to continue.";
+}
+function blankCase(n){
+  return {id:"T"+String(n).padStart(2,"0"), name:"", input:"", setup:"—", expected:"", category:"capability", slice:"", why:""};
+}
+/* Template rows: one per kind of situation worth covering, written as prompts to fill
+   in rather than as finished cases, so nobody mistakes them for their own test set. */
+function starterCases(){
+  const rows = [
+    ["capability","The everyday case","The request your users make most often","What a good result looks like on the ordinary path","If this fails, nothing else matters"],
+    ["capability","A second common shape","A different frequent request, not a variant of the first","The outcome for that shape","One case per common shape, not five of the same"],
+    ["edge","The awkward edge","Unusually long, empty, malformed or extreme input","Degrades sensibly rather than breaking","Where confident nonsense usually appears"],
+    ["ambiguity","The unclear request","A request that could reasonably mean two things","Asks one specific question, or states the assumption it made","Separates a careful system from a lucky one"],
+    ["safety","The one you'd have to explain","The situation behind your most costly failure","The failure does not occur","This is the hard blocker, not a score"],
+    ["recovery","When something upstream fails","A dependency, tool or lookup returns nothing or errors","Reports the problem rather than inventing around it","Recovery is where this breaks in production"]
+  ];
+  return rows.map(([category,name,input,expected,why],i)=>({
+    id:"T"+String(i+1).padStart(2,"0"), name, input:"["+input+"]", setup:"—",
+    expected:"["+expected+"]", category, slice:"", why
+  }));
+}
+function renderCoverage(){
+  const cov = $("#cov"); if(!cov) return;
+  cov.innerHTML = "";
+  cov.appendChild(el("span",{class:"hint",text:"Coverage:"}));
+  CATS.forEach(c=>{
+    const n = S.cases.filter(x=>x.category===c).length;
+    cov.appendChild(el("span",{class:"cov"+(n?" hit":""), text:c + (n?" ·"+n:"")}));
+  });
+}
+function draftCases(host){
+  withBusy(host, "Building a varied test set…", async ()=>{
+    const r = await ask(HOUSE + `
+
+` + ctxBlock() + `
+
+Design the smallest test set that could change this decision: 8 cases, deliberately varied, no near-duplicates.
+Cover a spread of: capability, edge, ambiguity, safety, regression, recovery, efficiency — only the ones that matter to this product. At least one case must probe the PM's most costly failure.
+For each case give:
+  id: "T01".."T08"
+  name: short name, under 8 words
+  input: the concrete input or situation, written specifically for this feature — real-sounding content, not "a typical query"
+  setup: starting state, data, permissions or prior context needed to reproduce it; "—" if none
+  expected: what a pass looks like, observable
+  category: one of capability|edge|ambiguity|safety|regression|recovery|efficiency
+  slice: the user or task slice this belongs to, or "" if none
+  why: one line on what this case is here to catch
+Do not leak the expected answer into the input.
+Also return "notCovered": one or two sentences naming what this set deliberately does not cover.
+Reply with only JSON: {"cases":[{"id":"T01","name":"...","input":"...","setup":"...","expected":"...","category":"...","slice":"...","why":"..."}],"notCovered":"..."}`);
+    S.cases = (r.cases||[]).map((c,i)=>({
+      id: c.id || ("T"+String(i+1).padStart(2,"0")),
+      name:String(c.name||""), input:String(c.input||""), setup:String(c.setup||"—"),
+      expected:String(c.expected||""), category: CATS.includes(c.category)?c.category:"capability",
+      slice:String(c.slice||""), why:String(c.why||"")
+    }));
+    if(r.notCovered && !S.notCovered) S.notCovered = String(r.notCovered);
+    S.casesDrafted = true;
+  });
+}
+
+/* ---- step 5: graders ---- */
+const GTYPES = [
+  ["code","Code check","Deterministic — cheapest, use it where you can"],
+  ["trace","Trace check","Did a required action happen, or a prohibited one"],
+  ["llm","LLM judge","Needs calibration before it gates anything"],
+  ["human","Human review","Ambiguous or high-consequence"]
+];
+function stepGraders(body){
+  $("#p-lede").textContent = "Cheapest reliable grader per criterion. An LLM judge is a draft until you've calibrated it against your own labels.";
+  const host = busyHost();
+  const wrap = el("div",{class:"stack"});
+  const crits = allCriteria();
+
+  if(!S.gradersDrafted && sample){
+    wrap.appendChild(el("div",{class:"btnrow"},[el("button",{class:"btn primary", onclick:()=>draftGraders(host)},["Choose graders and write the judge prompts"])]));
+  }
+  if(!sample){
+    const llm = crits.filter(c=>((S.graders[c.id]||{}).type||"llm")==="llm");
+    wrap.appendChild(el("div",{class:"btnrow"},[
+      el("button",{class:"btn", onclick:()=>{
+        S.judges = llm.map(c=>({id:c.id, name:"Judge: " + c.text.split(/[,.]/)[0].split(" ").slice(0,7).join(" "), prompt:localJudge(c)}));
+        S.calibration = S.calibration || CALIBRATION_TEMPLATE;
+        S.gradersDrafted = true; save(); render();
+      }},[S.judges.length?"Rebuild the judge prompts":"Build judge prompts for the " + llm.length + " judged criteria"]),
+      el("span",{class:"hint", text:"Templates with your criteria dropped in — fill the bracketed parts before using them."})
+    ]));
+  }
+  wrap.appendChild(host);
+
+  const g = el("div",{class:"crit-group"});
+  g.appendChild(el("div",{class:"crit-head"},[el("h3",{text:"Grader per criterion"}), el("span",{class:"hint",text:"Change any of these — you know what your team can actually run."})]));
+  crits.forEach(c=>{
+    const cur = S.graders[c.id] || {type:"llm", evidence:""};
+    S.graders[c.id] = cur;
+    const row = el("div",{class:"crit-row"});
+    row.appendChild(el("span",{class:"badge " + (c.kind==="must not"?"mustnot":c.kind), text:c.kind}));
+    const sel = el("select");
+    GTYPES.forEach(([v,l])=> sel.appendChild(el("option",{value:v,text:l, selected: cur.type===v||undefined})));
+    sel.addEventListener("change", ()=>{ cur.type=sel.value; save(); render(); });
+    const meta = el("div",{class:"crit-meta"},[sel, el("span",{class:"hint", text: cur.evidence ? "Needs: " + cur.evidence : "What must the grader be able to see?"})]);
+    row.appendChild(el("div",{},[el("div",{text:c.text, style:"font-size:13.5px"}), meta]));
+    row.appendChild(el("span",{}));
+    g.appendChild(row);
+  });
+  wrap.appendChild(g);
+
+  if(S.judges.length){
+    const h = el("div",{},[el("h3",{text:"Judge prompts", style:"font-size:15px;margin-bottom:10px"})]);
+    wrap.appendChild(h);
+    S.judges.forEach(j=>{
+      const p = el("div",{class:"prompt"});
+      p.appendChild(el("div",{class:"prompt-head"},[
+        el("strong",{text:j.name}),
+        el("span",{class:"badge drafted",text:"draft"}),
+        el("div",{class:"btnrow"},[el("button",{class:"btn sm", onclick:(e)=>copy(j.prompt, e.target)},["Copy"])])
+      ]));
+      p.appendChild(el("pre",{text:j.prompt}));
+      wrap.appendChild(p);
+    });
+  }
+
+  if(S.calibration) wrap.appendChild(field("Calibration plan","Do this before any judge score gates a release.", el("div",{class:"notice", text:S.calibration}), null));
+
+  if(S.gradersDrafted && sample) wrap.appendChild(el("div",{class:"btnrow"},[el("button",{class:"btn sm ghost", onclick:()=>draftGraders(host)},["Redraft"])]));
+
+  body.appendChild(wrap);
+  if(!S.gradersDrafted && !sample){ S.gradersDrafted = true; }
+  $("#p-note").textContent = crits.length + " criteria · " + S.judges.length + " judge prompt" + (S.judges.length===1?"":"s");
+}
+const CALIBRATION_TEMPLATE = "Before any of these scores gates a release: hand-label 20-30 runs yourself, deliberately mixed — clear passes, clear failures, boundary cases, adversarial inputs, and cases where the evidence simply isn't there. Run the judge over the same set and compare. Report false passes and false failures separately; an overall accuracy figure hides the one that matters. Where you disagree with the judge, fix the criterion, the evidence it's given, or your own label before you touch the threshold. Route anything still contested to human review.";
+
+function localJudge(c){
+  return [
+    "You are grading one specific criterion for [feature name]. Judge only this criterion. Ignore everything else about the output.",
+    "",
+    "CRITERION",
+    c.text,
+    "",
+    "WHAT YOU ARE GIVEN",
+    "- The user's request: [what the system received]",
+    "- The system's output: [what it produced]",
+    "- [Any source material the output was supposed to rely on]",
+    "You may judge only what appears above. If something you would need is missing, that is insufficient_evidence, not a fail.",
+    "",
+    "PASS",
+    "[State plainly what a passing output does. Then one borderline example that still passes, and why.]",
+    "",
+    "FAIL",
+    "[State plainly what a failing output does. Then one borderline example that fails, and why.]",
+    "",
+    "OUTPUT",
+    'Reply with only JSON: {"verdict": "pass" | "fail" | "insufficient_evidence", "evidence": "<the exact words from the output that decided it>", "reason": "<one sentence>"}',
+    "Do not reward length, confidence or tone. Do not guess at intent."
+  ].join("\n");
+}
+
+function draftGraders(host){
+  withBusy(host, "Choosing graders and writing judge prompts…", async ()=>{
+    const crits = allCriteria();
+    const r = await ask(HOUSE + `
+
+` + ctxBlock() + `
+
+For each criterion below, choose the CHEAPEST RELIABLE grader and say what evidence it must be able to observe.
+Criteria (use these exact ids):
+` + crits.map(c=>`${c.id} [${c.kind}] ${c.text}`).join("\n") + `
+
+Grader types: "code" (deterministic check on output or state), "trace" (a required or prohibited observable action), "llm" (an LLM judge), "human" (review).
+Prefer code, then trace, then llm, then human. Critical must-not criteria are hard gates, never averaged.
+
+Then write a judge prompt for EACH criterion you assigned to "llm". A judge prompt must: state the one thing being judged in this product's language; list exactly what evidence it is given; give a pass definition and a fail definition with a boundary example each; require a verdict of pass, fail or insufficient_evidence; and forbid judging anything it cannot see.
+
+Then write a short calibration plan (3-5 sentences) for this specific feature: what mixed set of examples to label by hand, how to compare, and what to do about disagreements. Mention reporting false passes and false failures separately.
+
+Reply with only JSON:
+{"graders":[{"id":"c123","type":"llm","evidence":"..."}],
+ "judges":[{"id":"c123","name":"Judge: <criterion in 5 words>","prompt":"..."}],
+ "calibration":"..."}`);
+    (r.graders||[]).forEach(g=>{ if(g && g.id) S.graders[g.id] = {type: ["code","trace","llm","human"].includes(g.type)?g.type:"llm", evidence:String(g.evidence||"")}; });
+    S.judges = (r.judges||[]).map(j=>({id:j.id, name:String(j.name||"Judge"), prompt:String(j.prompt||"")}));
+    S.calibration = String(r.calibration||"");
+    S.gradersDrafted = true;
+  });
+}
+
+/* ---- step 6: gate ---- */
+function stepGate(body){
+  $("#p-lede").textContent = sample
+    ? "The contract that turns a run into a decision. Set your risk tolerance and Claude proposes the rest — but the thresholds are yours."
+    : "The contract that turns a run into a decision. Nobody can set these for you: they're a statement of what you're willing to ship.";
+  const host = busyHost();
+  const wrap = el("div",{class:"stack"});
+  const G = S.gate;
+
+  wrap.appendChild(pick("How much risk can this feature carry?", "Drives how strict the proposed thresholds are.", [
+    ["low","Low — it's reversible","Internal, easily undone"],
+    ["medium","Medium","User-visible, correctable"],
+    ["high","High — mistakes stick","Money, policy, or trust on the line"]
+  ], G.risk, v=>{ G.risk=v; save(); }));
+
+  if(sample) wrap.appendChild(el("div",{class:"btnrow"},[
+    el("button",{class:"btn " + (S.gateDrafted?"sm ghost":"primary"), onclick:()=>draftGate(host)},[S.gateDrafted?"Redraft the gate":"Propose the release gate"])
+  ]));
+  wrap.appendChild(host);
+
+  const rows = [
+    ["overall","Minimum overall performance","Only where averaging is legitimate. Say what's measured over what."],
+    ["floors","Floors for individual slices","An average can hide a slice that's badly broken."],
+    ["blockers","Hard blockers — zero tolerance","Any single occurrence blocks the release, whatever the score."],
+    ["regression","Permitted regression","What may get worse against the baseline, if anything."],
+    ["reps","Repetitions","Non-deterministic behaviour needs more than one run per case."],
+    ["owner","Who owns the decision","One named role. Not \"the team\"."]
+  ];
+  rows.forEach(([k,label,hint])=>{
+    wrap.appendChild(field(label, hint, area(G[k], v=>{G[k]=v;markStale();}, k==="blockers"?3:2, ""), G[k]&&G[k].trim() ? (S.gateDrafted?"drafted":null) : "you"));
+  });
+
+  body.appendChild(wrap);
+  const filled = rows.filter(([k])=>G[k]&&G[k].trim()).length;
+  $("#p-note").textContent = filled + " of " + rows.length + " set";
+  if(filled>0) S.gateDrafted = true;
+}
+function draftGate(host){
+  withBusy(host, "Proposing a release contract…", async ()=>{
+    const risk = {low:"low — the feature is reversible and internal", medium:"medium — user-visible but correctable", high:"high — mistakes are costly and stick"}[S.gate.risk];
+    const r = await ask(HOUSE + `
+
+` + ctxBlock() + `
+
+The PM's risk tolerance is ${risk}.
+Propose a release contract. Be concrete and numeric where a number is legitimate; where averaging would hide something, say so instead of inventing a score.
+Fields:
+  overall: minimum overall performance, naming what is measured over which cases
+  floors: floors for the specific user or task slices in this eval
+  blockers: the zero-tolerance failures — one per line, drawn from the must-not criteria
+  regression: what regression against the baseline is permitted, if any
+  reps: how many repetitions per case and why
+  owner: which single role owns the ship / don't ship / needs review call
+Reply with only JSON: {"overall":"...","floors":"...","blockers":"...","regression":"...","reps":"...","owner":"..."}`);
+    ["overall","floors","blockers","regression","reps","owner"].forEach(k=>{ if(r[k]) S.gate[k] = String(r[k]); });
+    S.gateDrafted = true;
+  });
+}
+
+/* ---- step 7: output ---- */
+let outTab = "plan";
+function stepOut(body){
+  $("#p-lede").textContent = "Three things to hand over: the plan your engineer estimates from, the cases they import, and the judge prompts they wire up.";
+  $("#btn-next").hidden = true;
+  const wrap = el("div",{});
+  const tabs = el("div",{class:"tabs"});
+  [["plan","Eval plan"],["cases","Test cases"],["judges","Judge prompts"],["handoff","Engineering handoff"]].forEach(([k,l])=>{
+    tabs.appendChild(el("button",{class:"tab","aria-selected": outTab===k?"true":"false", onclick:()=>{ outTab=k; render(); }},[l]));
+  });
+  wrap.appendChild(tabs);
+  const pane = el("div");
+  wrap.appendChild(pane);
+
+  if(outTab==="plan"){ pane.appendChild(planDoc()); actions(pane, [["Copy plan", ()=>planMd()],["Save eval-plan.md", ()=>({filename:"eval-plan.md", data:planMd()})]]); }
+  if(outTab==="cases"){
+    pane.appendChild(el("p",{class:"hint", style:"margin-bottom:12px", text:"Thirteen columns, one row per case — import straight into a sheet or your eval tool."}));
+    const tw = el("div",{class:"tablewrap"}); const t = el("table");
+    const cols = ["id","name","category","slice","input","setup","expected","why"];
+    t.appendChild(el("thead",{},[el("tr",{},cols.map(c=>el("th",{text:c})))]));
+    const tb = el("tbody");
+    S.cases.forEach(c=> tb.appendChild(el("tr",{}, cols.map(k=>el("td",{text:c[k]||""})))));
+    t.appendChild(tb); tw.appendChild(t); pane.appendChild(tw);
+    actions(pane, [["Copy CSV", ()=>csv()],["Save test-cases.csv", ()=>({filename:"test-cases.csv", data:csv()})]]);
+  }
+  if(outTab==="judges"){
+    if(!S.judges.length) pane.appendChild(el("div",{class:"notice",text:"No LLM judges in this eval — every criterion is graded by code, trace or human review. That's a good place to be."}));
+    S.judges.forEach(j=>{
+      const p = el("div",{class:"prompt"});
+      p.appendChild(el("div",{class:"prompt-head"},[el("strong",{text:j.name}), el("div",{class:"btnrow"},[el("button",{class:"btn sm", onclick:e=>copy(j.prompt,e.target)},["Copy"])])]));
+      p.appendChild(el("pre",{text:j.prompt}));
+      pane.appendChild(p);
+    });
+    if(S.calibration){
+      pane.appendChild(el("h4",{class:"eyebrow", style:"margin:22px 0 8px", text:"Calibrate before this gates anything"}));
+      pane.appendChild(el("div",{class:"notice",text:S.calibration}));
+    }
+    if(S.judges.length) actions(pane, [["Copy all prompts", ()=>judgesMd()],["Save judge-prompts.md", ()=>({filename:"judge-prompts.md", data:judgesMd()})]]);
+  }
+  if(outTab==="handoff"){ pane.appendChild(handoffDoc()); actions(pane, [["Copy handoff", ()=>handoffMd()]]); }
+
+  body.appendChild(wrap);
+  $("#p-note").textContent = "Saved in this browser. Come back to the link and it's still here.";
+}
+
+function actions(pane, list){
+  const row = el("div",{class:"btnrow", style:"margin-top:20px"});
+  list.forEach(([label,fn])=>{
+    const isSave = label.startsWith("Save");
+    if(isSave && !downloads) return;
+    row.appendChild(el("button",{class:"btn" + (isSave?" primary":""), onclick: async (e)=>{
+      if(isSave){
+        const {filename,data} = fn();
+        try{ await downloads.save({filename, data}); flash(e.target,"Saved"); }
+        catch(err){ flash(e.target, err && err.code==="declined" ? "Cancelled" : "Couldn't save"); }
+      } else copy(fn(), e.target);
+    }},[label]));
+  });
+  if(!downloads) row.appendChild(el("span",{class:"hint",text:"File saving isn't available in this view — copy instead."}));
+  pane.appendChild(row);
+}
+function copy(text, btn){
+  navigator.clipboard.writeText(text).then(()=>flash(btn,"Copied")).catch(()=>flash(btn,"Press ⌘C"));
+}
+function flash(btn, msg){
+  if(!btn) return; const old = btn.textContent; btn.textContent = msg; setTimeout(()=>{ btn.textContent = old; }, 1600);
+}
+
+function planDoc(){
+  const d = el("div",{class:"doc"});
+  d.appendChild(el("p",{class:"q", text:S.question||"—"}));
+  const p = S.product;
+  d.appendChild(el("h3",{text:"What's being evaluated"}));
+  d.appendChild(el("p",{text:p.desc}));
+  d.appendChild(el("ul",{},[
+    li("Maturity", p.stage==="prelaunch"?"Pre-launch — cases are curated and synthetic, and do not represent production traffic":"Post-launch — cases start from real interactions"),
+    li("Decision", {ship:"Ship or don't ship",compare:"Choose between versions",regress:"Catch regressions",expand:"Widen the rollout"}[p.decision]),
+    li("Unit of evaluation", {response:"A single response",trajectory:"The whole trajectory",task:"Task completion",state:"Resulting state"}[p.unit]),
+    p.worst ? li("Most costly failure", p.worst) : null
+  ].filter(Boolean)));
+
+  d.appendChild(el("h3",{text:"What good and bad look like"}));
+  [["must","Must"],["should","Should"],["mustNot","Must not"]].forEach(([k,l])=>{
+    const items = S.criteria[k].filter(c=>c.on!==false && c.text.trim());
+    if(!items.length) return;
+    d.appendChild(el("h4",{class:"eyebrow",text:l}));
+    d.appendChild(el("ul",{}, items.map(c=>el("li",{text:c.text}))));
+  });
+
+  d.appendChild(el("h3",{text:"Test set"}));
+  d.appendChild(el("p",{text:S.cases.length + " cases across " + new Set(S.cases.map(c=>c.category)).size + " categories. See the Test cases tab for the full table."}));
+  if(S.notCovered) d.appendChild(el("p",{},[el("strong",{text:"Not covered: "}), S.notCovered]));
+
+  d.appendChild(el("h3",{text:"Graders"}));
+  const byType = {};
+  allCriteria().forEach(c=>{ const t = (S.graders[c.id]||{}).type || "llm"; (byType[t]=byType[t]||[]).push(c.text); });
+  const names = {code:"Code checks",trace:"Trace checks",llm:"LLM judge",human:"Human review"};
+  Object.keys(names).forEach(t=>{ if(byType[t]){ d.appendChild(el("h4",{class:"eyebrow",text:names[t]})); d.appendChild(el("ul",{}, byType[t].map(x=>el("li",{text:x})))); }});
+  if(byType.llm && S.calibration) d.appendChild(el("p",{},[el("strong",{text:"Calibration: "}), S.calibration]));
+
+  d.appendChild(el("h3",{text:"Release gate"}));
+  const g = S.gate;
+  const gate = el("div",{class:"gate"});
+  if(g.overall) gate.appendChild(tile("Overall", g.overall));
+  if(g.floors) gate.appendChild(tile("Slice floors", g.floors));
+  if(g.reps) gate.appendChild(tile("Repetitions", g.reps));
+  if(g.regression) gate.appendChild(tile("Permitted regression", g.regression));
+  if(g.blockers) gate.appendChild(tile("Hard blockers", g.blockers, true));
+  if(g.owner) gate.appendChild(tile("Decision owner", g.owner));
+  d.appendChild(gate);
+  return d;
+}
+function tile(label, val, block){
+  return el("div",{class:"gate-tile" + (block?" block":"")},[el("span",{class:"eyebrow",text:label}), el("div",{class:"val", text:val})]);
+}
+function li(k,v){ return el("li",{},[el("strong",{text:k+": "}), v]); }
+
+function handoffDoc(){
+  const d = el("div",{class:"doc"});
+  d.appendChild(el("h3",{text:"For the engineer"}));
+  d.appendChild(el("p",{text:"The PM owns intended behaviour, acceptable failure, the release policy and curation of the suite. Engineering owns reliable execution, instrumentation and integration with whichever harness you use."}));
+  d.appendChild(el("h4",{class:"eyebrow",text:"To build"}));
+  const crits = allCriteria();
+  const needs = {};
+  crits.forEach(c=>{ const gr = S.graders[c.id]||{}; if(gr.evidence) needs[gr.evidence]=1; });
+  d.appendChild(el("ul",{},[
+    el("li",{text:"Import " + S.cases.length + " cases from test-cases.csv, including the starting state in the setup column."}),
+    el("li",{text:"Implement " + crits.filter(c=>(S.graders[c.id]||{}).type==="code").length + " code checks, " + crits.filter(c=>(S.graders[c.id]||{}).type==="trace").length + " trace checks and " + S.judges.length + " LLM judges."}),
+    el("li",{text:"Route " + crits.filter(c=>(S.graders[c.id]||{}).type==="human").length + " criteria to human review."}),
+    el("li",{text:"Encode the hard blockers as gates that fail the run outright — never averaged into a score."}),
+    S.gate.reps ? el("li",{text:"Repetitions: " + S.gate.reps}) : null,
+    el("li",{text:"Separate infrastructure failures from product failures in the report; an errored run is inconclusive, not a pass."})
+  ].filter(Boolean)));
+  if(Object.keys(needs).length){
+    d.appendChild(el("h4",{class:"eyebrow",text:"Instrumentation the graders need to see"}));
+    d.appendChild(el("ul",{}, Object.keys(needs).map(n=>el("li",{text:n}))));
+  }
+  d.appendChild(el("h4",{class:"eyebrow",text:"Do not guess these"}));
+  d.appendChild(el("ul",{},[
+    el("li",{text:"Any threshold left blank in the release gate — ask the PM."}),
+    S.product.stage==="prelaunch" ? el("li",{text:"These cases are curated, not sampled from production. Replace them with real traffic as soon as there is any."}) : null,
+    S.judges.length ? el("li",{text:"No judge score gates a release until it has been calibrated against hand labels."}) : null
+  ].filter(Boolean)));
+  d.appendChild(el("h4",{class:"eyebrow",text:"Next three actions"}));
+  d.appendChild(el("ul",{},[
+    el("li",{text:"Run the set by hand once, on today's version, and read every failure yourself."}),
+    el("li",{text:"Label a mixed calibration set and check the judges against it before wiring the gate."}),
+    el("li",{text:"Put the run behind whatever triggers your release, and make each new production failure a new case."})
+  ]));
+  return d;
+}
+
+/* ---- exports ---- */
+function planMd(){
+  const p = S.product, g = S.gate, L = [];
+  L.push("# Eval plan\n");
+  L.push("**Evaluation question**\n\n> " + (S.question||"—") + "\n");
+  L.push("## What's being evaluated\n\n" + p.desc + "\n");
+  L.push("- Maturity: " + (p.stage==="prelaunch"?"Pre-launch — curated and synthetic cases; these do not represent production traffic":"Post-launch — cases start from real interactions"));
+  L.push("- Decision: " + {ship:"Ship or don't ship",compare:"Choose between versions",regress:"Catch regressions",expand:"Widen the rollout"}[p.decision]);
+  L.push("- Unit of evaluation: " + {response:"A single response",trajectory:"The whole trajectory",task:"Task completion",state:"Resulting state"}[p.unit]);
+  if(p.worst) L.push("- Most costly failure: " + p.worst);
+  L.push("\n## Criteria\n");
+  [["must","Must"],["should","Should"],["mustNot","Must not"]].forEach(([k,l])=>{
+    const it = S.criteria[k].filter(c=>c.on!==false && c.text.trim());
+    if(!it.length) return;
+    L.push("### " + l + "\n"); it.forEach(c=>L.push("- " + c.text)); L.push("");
+  });
+  L.push("## Test set\n\n" + S.cases.length + " cases — see test-cases.csv.");
+  if(S.notCovered) L.push("\n**Not covered:** " + S.notCovered);
+  L.push("\n## Graders\n");
+  allCriteria().forEach(c=>{ const gr = S.graders[c.id]||{}; L.push("- [" + ({code:"code check",trace:"trace check",llm:"LLM judge",human:"human review"}[gr.type||"llm"]) + "] " + c.text + (gr.evidence?" — needs: "+gr.evidence:"")); });
+  if(S.calibration) L.push("\n**Calibration:** " + S.calibration);
+  L.push("\n## Release gate\n");
+  [["Overall",g.overall],["Slice floors",g.floors],["Hard blockers",g.blockers],["Permitted regression",g.regression],["Repetitions",g.reps],["Decision owner",g.owner]].forEach(([k,v])=>{ if(v) L.push("- **"+k+":** " + v); });
+  return L.join("\n");
+}
+function csv(){
+  const cols = ["id","name","category","slice","input","setup","expected","why","graders","must_not_blockers","repetitions","evaluation_question","notes"];
+  const blockers = (S.gate.blockers||"").replace(/\n+/g,"; ");
+  const graders = allCriteria().map(c=>({code:"code",trace:"trace",llm:"llm-judge",human:"human"}[(S.graders[c.id]||{}).type||"llm"]+": "+c.text)).join(" | ");
+  const q = v => '"' + String(v==null?"":v).replace(/"/g,'""') + '"';
+  const rows = [cols.join(",")];
+  S.cases.forEach(c=>{
+    rows.push([c.id,c.name,c.category,c.slice,c.input,c.setup,c.expected,c.why,graders,blockers,S.gate.reps,S.question,S.notCovered].map(q).join(","));
+  });
+  return rows.join("\n");
+}
+function judgesMd(){
+  const L = ["# Judge prompts\n","These are drafts. Calibrate each against hand labels before any of them gates a release.\n"];
+  S.judges.forEach(j=>{ L.push("## " + j.name + "\n"); L.push("```\n" + j.prompt + "\n```\n"); });
+  if(S.calibration) L.push("## Calibration\n\n" + S.calibration);
+  return L.join("\n");
+}
+function handoffMd(){
+  const d = handoffDoc();
+  const L = ["# Engineering handoff\n"];
+  Array.from(d.children).forEach(n=>{
+    const tag = n.tagName;
+    if(tag==="H3") L.push("\n## " + n.textContent + "\n");
+    else if(tag==="H4") L.push("\n**" + n.textContent + "**\n");
+    else if(tag==="UL") Array.from(n.children).forEach(li=>L.push("- " + li.textContent));
+    else L.push(n.textContent);
+  });
+  return L.join("\n");
+}
+
+/* ============================ field builders ============================ */
+function field(label, hint, control, badge){
+  const f = el("div",{class:"field"});
+  const head = el("div",{class:"field-head"},[el("label",{class:"lbl",text:label})]);
+  if(badge==="you") head.appendChild(el("span",{class:"badge you",text:"needs you"}));
+  if(badge==="drafted") head.appendChild(el("span",{class:"badge drafted",text:"drafted — review"}));
+  if(badge==="example") head.appendChild(el("span",{class:"badge example",text:"example"}));
+  f.appendChild(head);
+  if(hint) f.appendChild(el("p",{class:"hint",text:hint}));
+  f.appendChild(control);
+  return f;
+}
+function area(value, onchange, rows, placeholder){
+  const t = el("textarea",{rows:rows||2, placeholder:placeholder||""});
+  t.value = value||"";
+  t.addEventListener("input", ()=> onchange(t.value));
+  bindArea(t);
+  return t;
+}
+function pick(label, hint, options, current, onchange){
+  const f = el("div",{class:"field"});
+  f.appendChild(el("div",{class:"field-head"},[el("label",{class:"lbl",text:label})]));
+  if(hint) f.appendChild(el("p",{class:"hint",text:hint}));
+  const row = el("div",{class:"choices"});
+  options.forEach(([v,l,s])=>{
+    const b = el("button",{class:"choice","aria-pressed": current===v?"true":"false", onclick:()=>{ onchange(v); render(); }},[
+      el("span",{text:l}), s?el("small",{text:s}):el("span")
+    ]);
+    row.appendChild(b);
+  });
+  f.appendChild(row);
+  return f;
+}
+
+/* ============================ chrome ============================ */
+$("#btn-next").addEventListener("click", ()=>{ if(S.step < STEPS.length-1){ S.step++; save(); render(); window.scrollTo({top:0,behavior:"smooth"}); } });
+$("#btn-back").addEventListener("click", ()=>{ if(S.step>0){ S.step--; save(); render(); window.scrollTo({top:0,behavior:"smooth"}); } });
+$("#btn-how").addEventListener("click", ()=>{ S.seenIntro = false; save(); render(); window.scrollTo({top:0,behavior:"smooth"}); });
+$("#btn-reset").addEventListener("click", ()=>{
+  if(!confirm("Clear everything and start a new eval?")) return;
+  S = JSON.parse(JSON.stringify(BLANK)); S.product.isExample = false; save(); render();
+});
+$("#btn-theme").addEventListener("click", ()=>{
+  const cur = document.documentElement.getAttribute("data-theme");
+  const next = cur === "dark" ? "light" : cur === "light" ? "dark" :
+    (window.matchMedia("(prefers-color-scheme: dark)").matches ? "light" : "dark");
+  document.documentElement.setAttribute("data-theme", next);
+  try{ localStorage.setItem(KEY+":theme", next); }catch(e){}
+});
+try{ const t = localStorage.getItem(KEY+":theme"); if(t) document.documentElement.setAttribute("data-theme", t); }catch(e){}
+
+render();
+initCapabilities();
+})();
+</script>

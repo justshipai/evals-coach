@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "justship",
+  "description": "Practical tools for AI product managers, starting with eval design.",
+  "owner": {
+    "name": "Just Ship AI",
+    "url": "https://github.com/justshipai"
+  },
+  "plugins": [
+    {
+      "name": "evals-coach",
+      "source": "./plugin",
+      "displayName": "Evals Coach",
+      "description": "Turn product intent into evals your team can implement, run and improve — plus a guided workbench for PMs who would rather fill in a form than write a prompt.",
+      "version": "0.1.0",
+      "author": { "name": "Just Ship AI", "url": "https://github.com/justshipai" },
+      "homepage": "https://github.com/justshipai/evals-coach",
+      "repository": "https://github.com/justshipai/evals-coach",
+      "license": "MIT",
+      "category": "product",
+      "keywords": ["evals", "evaluation", "product-management", "llm-judge", "test-cases", "ai-quality"]
+    }
+  ]
+}
