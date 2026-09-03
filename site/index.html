@@ -94,6 +94,7 @@ h2{font-size:clamp(30px,4.4vw,44px); letter-spacing:-.015em; max-width:20ch}
 
 /* ---- modes ---- */
 .modes{display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-top:38px}
+.mode.wide{grid-column:1 / -1; background:linear-gradient(180deg,#FBF3FF,#FEFCFF); border-color:var(--lilac-line)}
 .mode{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:24px; position:relative; overflow:hidden}
 .mode .tag{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--lilac-ink); background:var(--lilac); border:1px solid var(--lilac-line); padding:3px 9px; border-radius:20px; display:inline-block; margin-bottom:14px}
 .mode h3{font-family:var(--display); font-size:26px; margin-bottom:6px}
@@ -265,12 +266,13 @@ footer{border-top:1px solid var(--line); padding:40px 0 56px}
 <!-- MODES -->
 <section id="how" class="wrap">
   <h2>Ask in your own words. It picks the right mode.</h2>
-  <p class="sec-sub">Four things it does, whichever way you describe the task.</p>
+  <p class="sec-sub">Five ways to use it, whichever way you describe the task.</p>
   <div class="modes">
     <div class="mode"><span class="tag">Create</span><h3>From intent to eval</h3><p>Turn a PRD, capability, user job or product idea into a practical eval plan and an importable test set.</p></div>
     <div class="mode"><span class="tag">Critique</span><h3>Stress-test what you have</h3><p>Review an existing eval for weak criteria, thin coverage, unreliable graders, or misleading release thresholds.</p></div>
     <div class="mode"><span class="tag">Expand</span><h3>Failures into regressions</h3><p>Turn production failures, traces, support cases or user feedback into regression cases that lock the fix in.</p></div>
     <div class="mode"><span class="tag">Calibrate</span><h3>Trust your graders</h3><p>Improve agreement between human judgement and an automated grader before it decides what ships.</p></div>
+    <div class="mode wide"><span class="tag">Run</span><h3>Run your first eval</h3><p>Go beyond planning: get guided through a first real eval on your actual outputs, with human scoring, rubric reconciliation, an optional judge trial, and an engineering handoff.</p></div>
   </div>
 </section>
 
@@ -366,7 +368,7 @@ footer{border-top:1px solid var(--line); padding:40px 0 56px}
     <div class="stat"><div class="big">6<span class="base">/6</span></div><p>Tasks won, out of six</p></div>
     <div class="stat"><div class="big">0<span class="base">/2</span></div><p>Critical failures vs baseline</p></div>
   </div>
-  <p class="caveat">The same run exposed a weakness (early skill outputs ran long) that we’ve since tightened, adding PM usability to the rubric. Because the rubric was developed alongside the skill, with one run per task and no independent replication yet, treat this as promising early evidence rather than a universal claim. <a href="https://github.com/justshipai/evals-coach/blob/public-alpha/evals/results/2026-08-24-gpt-5.6-sol-medium/report.md" target="_blank" rel="noopener">Read the full method, scores and limitations →</a></p>
+  <p class="caveat">The same run exposed a weakness (early skill outputs ran long) that we’ve since tightened, adding PM usability to the rubric. Because the rubric was developed alongside the skill, with one run per task and no independent replication yet, treat this as promising early evidence rather than a universal claim. <a href="https://github.com/justshipai/evals-coach/blob/main/evals/results/2026-08-24-gpt-5.6-sol-medium/report.md" target="_blank" rel="noopener">Read the full method, scores and limitations →</a></p>
 </section>
 
 <div class="divider"></div>
