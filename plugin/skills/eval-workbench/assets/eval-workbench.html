@@ -1,42 +1,46 @@
+<meta charset="utf-8">
 <title>PM Eval Workbench</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
 :root{
-  --paper:#F5F7F3; --surface:#FFFFFF; --surface-2:#EBEFE8; --surface-3:#E1E7DE;
-  --line:#D7DCD2; --line-strong:#BCC4B7;
-  --ink:#18201B; --ink-2:#4B554E; --ink-3:#7A857D;
-  --accent:#1F6F5C; --accent-ink:#14503F; --accent-soft:#E0EFE8;
-  --warn:#9C5A0B; --warn-soft:#FAEFDD;
-  --crit:#A32E17; --crit-soft:#F8E7E2;
+  --paper:#FAF5EC; --surface:#FFFDF8; --surface-2:#F4EFE1; --surface-3:#ECE6D6;
+  --line:#E9E3D4; --line-strong:#D6CFBC;
+  --ink:#1A1A1A; --ink-2:#57574F; --ink-3:#8A897F;
+  --accent:#5B2E86; --accent-ink:#452066; --accent-soft:#F1E7FB;
+  --coral:#FF6C4C;
+  --warn:#B4610E; --warn-soft:#FBEEDD;
+  --crit:#B23A1E; --crit-soft:#F9E7E0;
   --ok:#2C7A4F;
-  --shadow:0 1px 2px rgba(24,32,27,.06), 0 8px 24px -12px rgba(24,32,27,.16);
-  --radius:10px;
-  --display:"Instrument Serif", Georgia, "Times New Roman", serif;
-  --body:"Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --shadow:0 1px 2px rgba(26,26,26,.05), 0 10px 26px -14px rgba(26,26,26,.18);
+  --radius:12px;
+  --display:"EB Garamond", Georgia, "Times New Roman", serif;
+  --body:"Figtree", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   --mono:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --paper:#111512; --surface:#191F1B; --surface-2:#212823; --surface-3:#2A322C;
-    --line:#303931; --line-strong:#434E45;
-    --ink:#E7EDE7; --ink-2:#A7B2A9; --ink-3:#7B857D;
-    --accent:#63C5A7; --accent-ink:#8FDCC2; --accent-soft:#1C332B;
-    --warn:#DDA35C; --warn-soft:#33281A;
+    --paper:#171512; --surface:#201D18; --surface-2:#2A261F; --surface-3:#332E26;
+    --line:#37312A; --line-strong:#4A4339;
+    --ink:#F2EDE4; --ink-2:#B4AE9F; --ink-3:#847E70;
+    --accent:#C9A9F0; --accent-ink:#E0CCF7; --accent-soft:#2E2440;
+    --coral:#FF8768;
+    --warn:#E0A45C; --warn-soft:#33281A;
     --crit:#E68C73; --crit-soft:#35201B;
     --ok:#6BC08C;
-    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 26px -14px rgba(0,0,0,.6);
   }
 }
 :root[data-theme="dark"]{
-  --paper:#111512; --surface:#191F1B; --surface-2:#212823; --surface-3:#2A322C;
-  --line:#303931; --line-strong:#434E45;
-  --ink:#E7EDE7; --ink-2:#A7B2A9; --ink-3:#7B857D;
-  --accent:#63C5A7; --accent-ink:#8FDCC2; --accent-soft:#1C332B;
-  --warn:#DDA35C; --warn-soft:#33281A;
+  --paper:#171512; --surface:#201D18; --surface-2:#2A261F; --surface-3:#332E26;
+  --line:#37312A; --line-strong:#4A4339;
+  --ink:#F2EDE4; --ink-2:#B4AE9F; --ink-3:#847E70;
+  --accent:#C9A9F0; --accent-ink:#E0CCF7; --accent-soft:#2E2440;
+  --coral:#FF8768;
+  --warn:#E0A45C; --warn-soft:#33281A;
   --crit:#E68C73; --crit-soft:#35201B;
   --ok:#6BC08C;
-  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 26px -14px rgba(0,0,0,.6);
 }
 
 *{box-sizing:border-box}
@@ -244,7 +248,19 @@ td select{padding:5px 7px; font-size:12px; background:var(--surface); min-width:
 @keyframes pulse{0%,100%{opacity:.25; transform:scale(.8)} 50%{opacity:1; transform:scale(1.15)}}
 @media (prefers-reduced-motion: reduce){ .pulse{animation:none; opacity:.8} }
 .err{padding:11px 14px; border-radius:10px; background:var(--crit-soft); color:var(--crit); font-size:13px; border:1px solid transparent}
-.notice{padding:11px 14px; border-radius:10px; background:var(--surface-2); color:var(--ink-2); font-size:13px}
+.notice{padding:11px 14px; border-radius:10px; background:var(--surface-2); color:var(--ink-2); font-size:13px; line-height:1.5}
+.notice-row{display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:space-between}
+.notice-row > span{flex:1 1 auto}
+.outbar{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow)}
+.outbar-head{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:16px}
+.outbar-head strong{font-family:var(--display); font-weight:400; font-size:23px; letter-spacing:-.01em}
+.outbar-head .hint{flex:1 1 200px}
+.outfiles{display:grid; grid-template-columns:repeat(3,1fr); gap:12px}
+.outfile{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; border:1px solid var(--line); border-radius:10px; background:var(--surface-2)}
+.outfile-meta{display:flex; flex-direction:column; gap:2px; min-width:0}
+.outfile-meta strong{font-size:14px; font-weight:600}
+.outfile .fn{font-family:var(--mono); font-size:11.5px; color:var(--ink-3)}
+@media(max-width:640px){ .outfiles{grid-template-columns:1fr} }
 [hidden]{display:none !important}
 .sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
 </style>
@@ -254,7 +270,7 @@ td select{padding:5px 7px; font-size:12px; background:var(--surface); min-width:
     <div class="brand">
       <span class="eyebrow">Evals coach</span>
       <h1>PM Eval Workbench</h1>
-      <p class="tag">Describe the AI feature you're shipping. This walks you to a runnable eval — criteria, test cases, graders and a release gate — and asks for your judgement only where it can't be inferred.</p>
+      <p class="tag">Describe the AI feature you're shipping. This walks you to a runnable eval, criteria, test cases, graders and a release gate, and asks for your judgement only where it can't be inferred.</p>
     </div>
     <div class="masthead-side">
       <button class="btn sm ghost" id="btn-how">How this works</button>
@@ -327,7 +343,7 @@ const BLANK = {
 
 /* Starter criteria used when Claude can't draft. Keyed by what the PM said they're
    judging, so the suggestions still fit the shape of their eval. Each is a pattern
-   with a blank to fill in — never a finished criterion. */
+   with a blank to fill in, never a finished criterion. */
 const STARTERS = {
   response:{
     must:[["Every factual claim in the output traces to something in the supplied [source]","Stops the most common failure: a confident answer with nothing behind it."],
@@ -421,7 +437,7 @@ const ERR = {
   capability_disabled:"Drafting isn't available in this view.",
   capability_removed:"Drafting isn't available in this view.",
   rate_limited:"Too many requests just now. Wait a minute and try again.",
-  session_expired:"Your session expired — sign in to Claude again, then retry.",
+  session_expired:"Your session expired, sign in to Claude again, then retry.",
   refused:"Claude wouldn't answer that. Try rewording your feature description.",
   empty_completion:"Nothing came back. Shorten the description and try again.",
   invalid_json:"The draft came back malformed. Try again.",
@@ -449,7 +465,7 @@ function setStrip(msg, warn){
   if(!sampleChecked){ t.textContent = "Checking whether Claude can draft for you here…"; return; }
   if(sample){
     strip.classList.remove("warn");
-    t.textContent = "Claude drafts each step from what you've told it. Everything it writes is editable — you own the product judgement.";
+    t.textContent = "Claude drafts each step from what you've told it. Everything it writes is editable, you own the product judgement.";
   } else if(PUBLIC_BUILD){
     strip.classList.remove("warn");
     t.textContent = "You fill each step in yourself, with a shape to follow and starter suggestions along the way. Nothing you type leaves your browser.";
@@ -473,7 +489,7 @@ function ctxBlock(){
   const p = S.product;
   const L = [];
   L.push("FEATURE UNDER EVALUATION:\n" + (p.desc||"(not described)"));
-  L.push("MATURITY: " + (p.stage==="prelaunch" ? "Pre-launch — no production traffic yet" : "Post-launch — real usage and traces exist"));
+  L.push("MATURITY: " + (p.stage==="prelaunch" ? "Pre-launch, no production traffic yet" : "Post-launch, real usage and traces exist"));
   L.push("DECISION THE EVAL MUST SUPPORT: " + ({ship:"Whether to ship this to users",compare:"Which of two versions/models/prompts to use",regress:"Whether a change broke anything that worked",expand:"Whether it is safe to widen the rollout"})[p.decision]);
   L.push("UNIT OF EVALUATION: " + ({response:"a single response",trajectory:"the agent's whole trajectory across steps",task:"whether the end-to-end task was completed",state:"the resulting state after the system acted"})[p.unit]);
   if(p.worst) L.push("THE FAILURE THE PM SAYS IS MOST COSTLY:\n" + p.worst);
@@ -519,9 +535,9 @@ function withBusy(host, label, fn){
 /* ============================ intro ============================ */
 const STAGE_COPY = [
   ["Your feature","Tell it what you're shipping, in a paragraph, plus three quick choices. This is the only real writing you do.","yours","You write it","You write it"],
-  ["Evaluation question","The single question your eval exists to answer. Written for you from your paragraph — you confirm or rewrite it.","mine","Drafted for you","A shape to fill in"],
+  ["Evaluation question","The single question your eval exists to answer. Written for you from your paragraph, you confirm or rewrite it.","mine","Drafted for you","A shape to fill in"],
   ["Good and bad","What must happen, what should happen, and what must never happen. You tick, edit and untick; nothing counts until you keep it.","mine","Drafted, you decide","Starters, you decide"],
-  ["Test cases","A small set of deliberately different situations to run the feature against — including the one you said would hurt most.","mine","Drafted, you edit","A starter set, you edit"],
+  ["Test cases","A small set of deliberately different situations to run the feature against, including the one you said would hurt most.","mine","Drafted, you edit","A starter set, you edit"],
   ["Graders","How each thing gets marked: a code check, a look at what the system did, an AI judge, or a person. Cheapest one that's actually reliable.","mine","Proposed, you approve","You choose"],
   ["Release gate","The line that turns a set of results into ship, don't ship, or needs review. The numbers are yours.","yours","Your call","Your call"],
   ["Handoff","Everything packaged for whoever builds it, with the questions they mustn't guess at called out.","mine","Take it away","Take it away"]
@@ -532,7 +548,7 @@ function renderIntro(){
 
   box.appendChild(el("p",{class:"intro-lede", text:"An eval is just this: what should happen, a handful of cases to check it on, and a line you won't ship below."}));
   box.appendChild(el("p",{class:"intro-sub", text: sample
-    ? "You don't need to have run one before, and you don't need your codebase. Seven steps, about fifteen minutes. You'll be asked for product judgement — what matters, what's unacceptable, where the line sits — and everything around that gets drafted for you."
+    ? "You don't need to have run one before, and you don't need your codebase. Seven steps, about fifteen minutes. You'll be asked for product judgement, what matters, what's unacceptable, where the line sits, and everything around that gets drafted for you."
     : "You don't need to have run one before, and you don't need your codebase. Seven steps, about twenty minutes. Each one gives you a shape to follow and starter suggestions to take or leave, so you're editing rather than staring at a blank box."}));
 
   const grid = el("div",{class:"stages"});
@@ -548,7 +564,7 @@ function renderIntro(){
 
   box.appendChild(el("span",{class:"eyebrow", text:"What you leave with"}));
   box.appendChild(el("div",{class:"leave"},[
-    el("div",{},[el("strong",{text:"An eval plan"}), el("span",{text:"The question, the criteria, the gate — the thing you'd put in front of your team."})]),
+    el("div",{},[el("strong",{text:"An eval plan"}), el("span",{text:"The question, the criteria, the gate, the thing you'd put in front of your team."})]),
     el("div",{},[el("strong",{text:"test-cases.csv"}), el("span",{text:"The cases as a table, ready for a spreadsheet or your eval tool."})]),
     el("div",{},[el("strong",{text:"Judge prompts"}), el("span",{text:"Ready to wire up, with the calibration you owe them before they gate anything."})])
   ]));
@@ -563,7 +579,7 @@ function renderIntro(){
   actions.appendChild(el("span",{class:"hint", text: sample
     ? "Nothing leaves your browser except what you send to Claude when you press a draft button."
     : PUBLIC_BUILD ? "Everything stays in your browser. Your progress is saved here, so you can come back to this link."
-    : "Drafting is unavailable in this view — you can still work through every step by hand."}));
+    : "Drafting is unavailable in this view, you can still work through every step by hand."}));
   box.appendChild(actions);
 }
 
@@ -623,8 +639,8 @@ function stepProduct(body){
   const p = S.product;
   const stack = el("div",{class:"stack"});
 
-  const banner = el("div",{class:"notice"},[
-    "Loaded with an example so you can see the shape of it. ",
+  const banner = el("div",{class:"notice notice-row"},[
+    el("span",{text:"Loaded with an example so you can see the shape of it."}),
     el("button",{class:"btn sm", onclick:()=>{ S.product = Object.assign({}, BLANK.product); S.product.isExample=false; save(); render(); }},["Clear and use my own"])
   ]);
   if(p.isExample) stack.appendChild(banner);
@@ -655,7 +671,7 @@ function stepProduct(body){
   ], p.unit, v=>{ p.unit=v; markStale(); }));
 
   stack.appendChild(field("What's the most costly thing it could get wrong?",
-    "Not every failure — the one you'd have to explain to someone. This becomes a hard blocker rather than an averaged score.",
+    "Not every failure, the one you'd have to explain to someone. This becomes a hard blocker rather than an averaged score.",
     area(p.worst, v=>{ p.worst=v; markStale(); }, 3, "e.g. It states a refund policy that isn't ours and the agent sends it."),
     p.worst.trim() ? null : "you"));
 
@@ -703,7 +719,7 @@ function stepQuestion(body){
     start.appendChild(el("span",{class:"eyebrow", text:"One sentence, in this shape"}));
     start.appendChild(shapeLine());
     start.appendChild(el("p",{class:"hint", text: sample
-      ? "Claude fills in the four slots from what you wrote on the last step. Nothing is locked in — you edit it straight after."
+      ? "Claude fills in the four slots from what you wrote on the last step. Nothing is locked in, you edit it straight after."
       : "Fill in the four slots with your feature's own words. Concrete beats tidy."}));
     const row = el("div",{class:"btnrow"});
     if(sample) row.appendChild(el("button",{class:"btn primary", onclick:()=>draftQuestion(host)},["Fill it in for me"]));
@@ -722,7 +738,7 @@ function stepQuestion(body){
       hasQ ? (S.questionDrafted?"drafted":null) : "you"));
     const row = el("div",{class:"btnrow"});
     if(sample) row.appendChild(el("button",{class:"btn sm ghost", onclick:()=>draftQuestion(host)},[hasQ?"Redraft":"Fill it in for me"]));
-    row.appendChild(el("span",{class:"hint", text:"Name real users, real situations and the real decision — not \"users\" and \"quality\"."}));
+    row.appendChild(el("span",{class:"hint", text:"Name real users, real situations and the real decision, not \"users\" and \"quality\"."}));
     wrap.appendChild(row);
   }
 
@@ -737,7 +753,7 @@ function draftQuestion(host){
 
 Write ONE evaluation question in this shape:
 "Does [system or candidate] achieve [user outcome] for [target situations] without [critical regressions], well enough to support [decision]?"
-Make every bracket concrete to this feature — no placeholders, no generic quality words.
+Make every bracket concrete to this feature, no placeholders, no generic quality words.
 Reply with only JSON: {"question": "..."}`, "quick");
     S.question = String(r.question||"").trim();
     S.questionDrafted = true;
@@ -821,7 +837,7 @@ function tray(k, label, host){
   t.appendChild(localHost);
 
   if(!items.length){
-    t.appendChild(el("p",{class:"tray-empty", text: sample ? "Nothing on the table — ask for some, or write your own above." : "You've taken all of these."}));
+    t.appendChild(el("p",{class:"tray-empty", text: sample ? "Nothing on the table, ask for some, or write your own above." : "You've taken all of these."}));
     return t;
   }
   items.forEach(s=>{
@@ -854,9 +870,9 @@ function suggestMore(k, label, host){
 The PM already has these "${kindWord}" criteria on the table:
 ` + (onTable.length ? onTable.map(t=>"- "+t).join("\n") : "(none yet)") + `
 
-Suggest 3 more "${kindWord}" criteria for THIS feature that are genuinely different from those — different failure mode, different user situation, or a part of the job nobody has looked at yet. Not rewordings.
+Suggest 3 more "${kindWord}" criteria for THIS feature that are genuinely different from those, different failure mode, different user situation, or a part of the job nobody has looked at yet. Not rewordings.
 Each must be observable in a single run and named in this product's own language. No generic quality words.
-For each, add one short line (under 15 words) on why the PM might want it — the failure it catches.
+For each, add one short line (under 15 words) on why the PM might want it, the failure it catches.
 Reply with only JSON: {"items":[{"text":"...","why":"..."}]}`);
     const add = (r.items||[]).map(x=>({text:String(x.text||""), why:String(x.why||"")})).filter(x=>x.text);
     S.suggestions[k] = (S.suggestions[k]||[]).concat(add);
@@ -872,10 +888,10 @@ function draftCriteria(host){
 Write the criteria for this eval.
 - "must": 2-4 non-negotiable success conditions.
 - "should": 2-3 graded qualities where better or worse genuinely matters to this user.
-- "mustNot": 2-4 critical failures, policy violations or regressions — include the PM's most costly failure if they named one.
+- "mustNot": 2-4 critical failures, policy violations or regressions, include the PM's most costly failure if they named one.
 Every line must be observable from what a reviewer can actually see in a run of THIS feature. Name the feature's own objects, policies and users. No generic words like helpful, accurate, relevant, high quality, appropriate.
 
-Then, separately, suggest 2 more of EACH kind that you did not put in the lists above — the next most defensible candidates, each covering a different failure mode or user situation from the ones you chose. These are offered to the PM to take or leave, so give each one a short line (under 15 words) on the failure it catches.
+Then, separately, suggest 2 more of EACH kind that you did not put in the lists above, the next most defensible candidates, each covering a different failure mode or user situation from the ones you chose. These are offered to the PM to take or leave, so give each one a short line (under 15 words) on the failure it catches.
 
 Reply with only JSON:
 {"must":["..."],"should":["..."],"mustNot":["..."],
@@ -899,10 +915,10 @@ function stepCases(body){
   if(!S.cases.length){
     const start = el("div",{class:"start"});
     start.appendChild(el("span",{class:"eyebrow", text:"A set that could change the decision"}));
-    start.appendChild(el("p",{class:"shape", style:"font-size:19px", text:"Six to ten cases that differ from each other on purpose — not ten versions of the easy one."}));
+    start.appendChild(el("p",{class:"shape", style:"font-size:19px", text:"Six to ten cases that differ from each other on purpose, not ten versions of the easy one."}));
     start.appendChild(el("p",{class:"hint", text: sample
       ? "Claude writes a first set from your criteria, spread across the kinds of situation that break things: the ordinary case, the edge, the ambiguous request, the unsafe one, recovery when something fails."
-      : "The starter set gives you one row per kind of situation that tends to break things — ordinary, edge, ambiguous, unsafe, recovery — each with the fields to fill in. Delete any that don't apply to you."}));
+      : "The starter set gives you one row per kind of situation that tends to break things, ordinary, edge, ambiguous, unsafe, recovery, each with the fields to fill in. Delete any that don't apply to you."}));
     const row = el("div",{class:"btnrow"});
     if(sample) row.appendChild(el("button",{class:"btn primary", onclick:()=>draftCases(host)},["Draft 8 test cases"]));
     row.appendChild(el("button",{class: sample?"btn":"btn primary", onclick:()=>{ S.cases = starterCases(); save(); render(); }},["Start from a template set"]));
@@ -989,11 +1005,11 @@ function draftCases(host){
 ` + ctxBlock() + `
 
 Design the smallest test set that could change this decision: 8 cases, deliberately varied, no near-duplicates.
-Cover a spread of: capability, edge, ambiguity, safety, regression, recovery, efficiency — only the ones that matter to this product. At least one case must probe the PM's most costly failure.
+Cover a spread of: capability, edge, ambiguity, safety, regression, recovery, efficiency, only the ones that matter to this product. At least one case must probe the PM's most costly failure.
 For each case give:
   id: "T01".."T08"
   name: short name, under 8 words
-  input: the concrete input or situation, written specifically for this feature — real-sounding content, not "a typical query"
+  input: the concrete input or situation, written specifically for this feature, real-sounding content, not "a typical query"
   setup: starting state, data, permissions or prior context needed to reproduce it; "—" if none
   expected: what a pass looks like, observable
   category: one of capability|edge|ambiguity|safety|regression|recovery|efficiency
@@ -1015,7 +1031,7 @@ Reply with only JSON: {"cases":[{"id":"T01","name":"...","input":"...","setup":"
 
 /* ---- step 5: graders ---- */
 const GTYPES = [
-  ["code","Code check","Deterministic — cheapest, use it where you can"],
+  ["code","Code check","Deterministic, cheapest, use it where you can"],
   ["trace","Trace check","Did a required action happen, or a prohibited one"],
   ["llm","LLM judge","Needs calibration before it gates anything"],
   ["human","Human review","Ambiguous or high-consequence"]
@@ -1037,13 +1053,13 @@ function stepGraders(body){
         S.calibration = S.calibration || CALIBRATION_TEMPLATE;
         S.gradersDrafted = true; save(); render();
       }},[S.judges.length?"Rebuild the judge prompts":"Build judge prompts for the " + llm.length + " judged criteria"]),
-      el("span",{class:"hint", text:"Templates with your criteria dropped in — fill the bracketed parts before using them."})
+      el("span",{class:"hint", text:"Templates with your criteria dropped in, fill the bracketed parts before using them."})
     ]));
   }
   wrap.appendChild(host);
 
   const g = el("div",{class:"crit-group"});
-  g.appendChild(el("div",{class:"crit-head"},[el("h3",{text:"Grader per criterion"}), el("span",{class:"hint",text:"Change any of these — you know what your team can actually run."})]));
+  g.appendChild(el("div",{class:"crit-head"},[el("h3",{text:"Grader per criterion"}), el("span",{class:"hint",text:"Change any of these, you know what your team can actually run."})]));
   crits.forEach(c=>{
     const cur = S.graders[c.id] || {type:"llm", evidence:""};
     S.graders[c.id] = cur;
@@ -1082,7 +1098,7 @@ function stepGraders(body){
   if(!S.gradersDrafted && !sample){ S.gradersDrafted = true; }
   $("#p-note").textContent = crits.length + " criteria · " + S.judges.length + " judge prompt" + (S.judges.length===1?"":"s");
 }
-const CALIBRATION_TEMPLATE = "Before any of these scores gates a release: hand-label 20-30 runs yourself, deliberately mixed — clear passes, clear failures, boundary cases, adversarial inputs, and cases where the evidence simply isn't there. Run the judge over the same set and compare. Report false passes and false failures separately; an overall accuracy figure hides the one that matters. Where you disagree with the judge, fix the criterion, the evidence it's given, or your own label before you touch the threshold. Route anything still contested to human review.";
+const CALIBRATION_TEMPLATE = "Before any of these scores gates a release: hand-label 20-30 runs yourself, deliberately mixed, clear passes, clear failures, boundary cases, adversarial inputs, and cases where the evidence simply isn't there. Run the judge over the same set and compare. Report false passes and false failures separately; an overall accuracy figure hides the one that matters. Where you disagree with the judge, fix the criterion, the evidence it's given, or your own label before you touch the threshold. Route anything still contested to human review.";
 
 function localJudge(c){
   return [
@@ -1141,16 +1157,16 @@ Reply with only JSON:
 /* ---- step 6: gate ---- */
 function stepGate(body){
   $("#p-lede").textContent = sample
-    ? "The contract that turns a run into a decision. Set your risk tolerance and Claude proposes the rest — but the thresholds are yours."
+    ? "The contract that turns a run into a decision. Set your risk tolerance and Claude proposes the rest, but the thresholds are yours."
     : "The contract that turns a run into a decision. Nobody can set these for you: they're a statement of what you're willing to ship.";
   const host = busyHost();
   const wrap = el("div",{class:"stack"});
   const G = S.gate;
 
   wrap.appendChild(pick("How much risk can this feature carry?", "Drives how strict the proposed thresholds are.", [
-    ["low","Low — it's reversible","Internal, easily undone"],
+    ["low","Low, it's reversible","Internal, easily undone"],
     ["medium","Medium","User-visible, correctable"],
-    ["high","High — mistakes stick","Money, policy, or trust on the line"]
+    ["high","High, mistakes stick","Money, policy, or trust on the line"]
   ], G.risk, v=>{ G.risk=v; save(); }));
 
   if(sample) wrap.appendChild(el("div",{class:"btnrow"},[
@@ -1161,7 +1177,7 @@ function stepGate(body){
   const rows = [
     ["overall","Minimum overall performance","Only where averaging is legitimate. Say what's measured over what."],
     ["floors","Floors for individual slices","An average can hide a slice that's badly broken."],
-    ["blockers","Hard blockers — zero tolerance","Any single occurrence blocks the release, whatever the score."],
+    ["blockers","Hard blockers, zero tolerance","Any single occurrence blocks the release, whatever the score."],
     ["regression","Permitted regression","What may get worse against the baseline, if anything."],
     ["reps","Repetitions","Non-deterministic behaviour needs more than one run per case."],
     ["owner","Who owns the decision","One named role. Not \"the team\"."]
@@ -1177,7 +1193,7 @@ function stepGate(body){
 }
 function draftGate(host){
   withBusy(host, "Proposing a release contract…", async ()=>{
-    const risk = {low:"low — the feature is reversible and internal", medium:"medium — user-visible but correctable", high:"high — mistakes are costly and stick"}[S.gate.risk];
+    const risk = {low:"low, the feature is reversible and internal", medium:"medium, user-visible but correctable", high:"high, mistakes are costly and stick"}[S.gate.risk];
     const r = await ask(HOUSE + `
 
 ` + ctxBlock() + `
@@ -1187,7 +1203,7 @@ Propose a release contract. Be concrete and numeric where a number is legitimate
 Fields:
   overall: minimum overall performance, naming what is measured over which cases
   floors: floors for the specific user or task slices in this eval
-  blockers: the zero-tolerance failures — one per line, drawn from the must-not criteria
+  blockers: the zero-tolerance failures, one per line, drawn from the must-not criteria
   regression: what regression against the baseline is permitted, if any
   reps: how many repetitions per case and why
   owner: which single role owns the ship / don't ship / needs review call
@@ -1203,7 +1219,32 @@ function stepOut(body){
   $("#p-lede").textContent = "Three things to hand over: the plan your engineer estimates from, the cases they import, and the judge prompts they wire up.";
   $("#btn-next").hidden = true;
   const wrap = el("div",{});
-  const tabs = el("div",{class:"tabs"});
+
+  // Deliverables, surfaced up front so no file hides behind a tab
+  const dl = [["Eval plan","eval-plan.md",planMd],["Test cases","test-cases.csv",csv]];
+  if(S.judges.length) dl.push(["Judge prompts","judge-prompts.md",judgesMd]);
+  const bar = el("div",{class:"outbar"});
+  bar.appendChild(el("div",{class:"outbar-head"},[
+    el("strong",{text:"Your eval is ready."}),
+    el("span",{class:"hint", text: downloads ? "Save your files, or preview each below." : "Copy each file below and paste it into a file with that name."})
+  ]));
+  const files = el("div",{class:"outfiles"});
+  dl.forEach(([label,filename,gen])=>{
+    const card = el("div",{class:"outfile"});
+    card.appendChild(el("div",{class:"outfile-meta"},[el("strong",{text:label}), el("code",{class:"fn",text:filename})]));
+    card.appendChild(el("button",{class:"btn sm"+(downloads?" primary":""), onclick: async(e)=>{
+      if(downloads){ try{ await downloads.save({filename, data:gen()}); flash(e.target,"Saved"); } catch(err){ flash(e.target, err&&err.code==="declined"?"Cancelled":"Couldn't save"); } }
+      else copy(gen(), e.target);
+    }},[downloads?"Save":"Copy"]));
+    files.appendChild(card);
+  });
+  bar.appendChild(files);
+  if(downloads && dl.length>1){
+    bar.appendChild(el("button",{class:"btn", style:"margin-top:14px", onclick: async(e)=>{ for(const [,filename,gen] of dl){ try{ await downloads.save({filename, data:gen()}); }catch(err){} } flash(e.target,"Saved all"); }},["Save all files"]));
+  }
+  wrap.appendChild(bar);
+
+  const tabs = el("div",{class:"tabs", style:"margin-top:30px"});
   [["plan","Eval plan"],["cases","Test cases"],["judges","Judge prompts"],["handoff","Engineering handoff"]].forEach(([k,l])=>{
     tabs.appendChild(el("button",{class:"tab","aria-selected": outTab===k?"true":"false", onclick:()=>{ outTab=k; render(); }},[l]));
   });
@@ -1213,7 +1254,7 @@ function stepOut(body){
 
   if(outTab==="plan"){ pane.appendChild(planDoc()); actions(pane, [["Copy plan", ()=>planMd()],["Save eval-plan.md", ()=>({filename:"eval-plan.md", data:planMd()})]]); }
   if(outTab==="cases"){
-    pane.appendChild(el("p",{class:"hint", style:"margin-bottom:12px", text:"Thirteen columns, one row per case — import straight into a sheet or your eval tool."}));
+    pane.appendChild(el("p",{class:"hint", style:"margin-bottom:12px", text:"Thirteen columns, one row per case, import straight into a sheet or your eval tool."}));
     const tw = el("div",{class:"tablewrap"}); const t = el("table");
     const cols = ["id","name","category","slice","input","setup","expected","why"];
     t.appendChild(el("thead",{},[el("tr",{},cols.map(c=>el("th",{text:c})))]));
@@ -1223,7 +1264,7 @@ function stepOut(body){
     actions(pane, [["Copy CSV", ()=>csv()],["Save test-cases.csv", ()=>({filename:"test-cases.csv", data:csv()})]]);
   }
   if(outTab==="judges"){
-    if(!S.judges.length) pane.appendChild(el("div",{class:"notice",text:"No LLM judges in this eval — every criterion is graded by code, trace or human review. That's a good place to be."}));
+    if(!S.judges.length) pane.appendChild(el("div",{class:"notice",text:"No LLM judges in this eval, every criterion is graded by code, trace or human review. That's a good place to be."}));
     S.judges.forEach(j=>{
       const p = el("div",{class:"prompt"});
       p.appendChild(el("div",{class:"prompt-head"},[el("strong",{text:j.name}), el("div",{class:"btnrow"},[el("button",{class:"btn sm", onclick:e=>copy(j.prompt,e.target)},["Copy"])])]));
@@ -1255,7 +1296,7 @@ function actions(pane, list){
       } else copy(fn(), e.target);
     }},[label]));
   });
-  if(!downloads) row.appendChild(el("span",{class:"hint",text:"File saving isn't available in this view — copy instead."}));
+  if(!downloads) row.appendChild(el("span",{class:"hint",text:"File saving isn't available in this view, copy instead."}));
   pane.appendChild(row);
 }
 function copy(text, btn){
@@ -1272,7 +1313,7 @@ function planDoc(){
   d.appendChild(el("h3",{text:"What's being evaluated"}));
   d.appendChild(el("p",{text:p.desc}));
   d.appendChild(el("ul",{},[
-    li("Maturity", p.stage==="prelaunch"?"Pre-launch — cases are curated and synthetic, and do not represent production traffic":"Post-launch — cases start from real interactions"),
+    li("Maturity", p.stage==="prelaunch"?"Pre-launch, cases are curated and synthetic, and do not represent production traffic":"Post-launch, cases start from real interactions"),
     li("Decision", {ship:"Ship or don't ship",compare:"Choose between versions",regress:"Catch regressions",expand:"Widen the rollout"}[p.decision]),
     li("Unit of evaluation", {response:"A single response",trajectory:"The whole trajectory",task:"Task completion",state:"Resulting state"}[p.unit]),
     p.worst ? li("Most costly failure", p.worst) : null
@@ -1326,7 +1367,7 @@ function handoffDoc(){
     el("li",{text:"Import " + S.cases.length + " cases from test-cases.csv, including the starting state in the setup column."}),
     el("li",{text:"Implement " + crits.filter(c=>(S.graders[c.id]||{}).type==="code").length + " code checks, " + crits.filter(c=>(S.graders[c.id]||{}).type==="trace").length + " trace checks and " + S.judges.length + " LLM judges."}),
     el("li",{text:"Route " + crits.filter(c=>(S.graders[c.id]||{}).type==="human").length + " criteria to human review."}),
-    el("li",{text:"Encode the hard blockers as gates that fail the run outright — never averaged into a score."}),
+    el("li",{text:"Encode the hard blockers as gates that fail the run outright, never averaged into a score."}),
     S.gate.reps ? el("li",{text:"Repetitions: " + S.gate.reps}) : null,
     el("li",{text:"Separate infrastructure failures from product failures in the report; an errored run is inconclusive, not a pass."})
   ].filter(Boolean)));
@@ -1336,7 +1377,7 @@ function handoffDoc(){
   }
   d.appendChild(el("h4",{class:"eyebrow",text:"Do not guess these"}));
   d.appendChild(el("ul",{},[
-    el("li",{text:"Any threshold left blank in the release gate — ask the PM."}),
+    el("li",{text:"Any threshold left blank in the release gate, ask the PM."}),
     S.product.stage==="prelaunch" ? el("li",{text:"These cases are curated, not sampled from production. Replace them with real traffic as soon as there is any."}) : null,
     S.judges.length ? el("li",{text:"No judge score gates a release until it has been calibrated against hand labels."}) : null
   ].filter(Boolean)));
@@ -1355,7 +1396,7 @@ function planMd(){
   L.push("# Eval plan\n");
   L.push("**Evaluation question**\n\n> " + (S.question||"—") + "\n");
   L.push("## What's being evaluated\n\n" + p.desc + "\n");
-  L.push("- Maturity: " + (p.stage==="prelaunch"?"Pre-launch — curated and synthetic cases; these do not represent production traffic":"Post-launch — cases start from real interactions"));
+  L.push("- Maturity: " + (p.stage==="prelaunch"?"Pre-launch, curated and synthetic cases; these do not represent production traffic":"Post-launch, cases start from real interactions"));
   L.push("- Decision: " + {ship:"Ship or don't ship",compare:"Choose between versions",regress:"Catch regressions",expand:"Widen the rollout"}[p.decision]);
   L.push("- Unit of evaluation: " + {response:"A single response",trajectory:"The whole trajectory",task:"Task completion",state:"Resulting state"}[p.unit]);
   if(p.worst) L.push("- Most costly failure: " + p.worst);
@@ -1365,10 +1406,10 @@ function planMd(){
     if(!it.length) return;
     L.push("### " + l + "\n"); it.forEach(c=>L.push("- " + c.text)); L.push("");
   });
-  L.push("## Test set\n\n" + S.cases.length + " cases — see test-cases.csv.");
+  L.push("## Test set\n\n" + S.cases.length + " cases, see test-cases.csv.");
   if(S.notCovered) L.push("\n**Not covered:** " + S.notCovered);
   L.push("\n## Graders\n");
-  allCriteria().forEach(c=>{ const gr = S.graders[c.id]||{}; L.push("- [" + ({code:"code check",trace:"trace check",llm:"LLM judge",human:"human review"}[gr.type||"llm"]) + "] " + c.text + (gr.evidence?" — needs: "+gr.evidence:"")); });
+  allCriteria().forEach(c=>{ const gr = S.graders[c.id]||{}; L.push("- [" + ({code:"code check",trace:"trace check",llm:"LLM judge",human:"human review"}[gr.type||"llm"]) + "] " + c.text + (gr.evidence?", needs: "+gr.evidence:"")); });
   if(S.calibration) L.push("\n**Calibration:** " + S.calibration);
   L.push("\n## Release gate\n");
   [["Overall",g.overall],["Slice floors",g.floors],["Hard blockers",g.blockers],["Permitted regression",g.regression],["Repetitions",g.reps],["Decision owner",g.owner]].forEach(([k,v])=>{ if(v) L.push("- **"+k+":** " + v); });
@@ -1409,7 +1450,7 @@ function field(label, hint, control, badge){
   const f = el("div",{class:"field"});
   const head = el("div",{class:"field-head"},[el("label",{class:"lbl",text:label})]);
   if(badge==="you") head.appendChild(el("span",{class:"badge you",text:"needs you"}));
-  if(badge==="drafted") head.appendChild(el("span",{class:"badge drafted",text:"drafted — review"}));
+  if(badge==="drafted") head.appendChild(el("span",{class:"badge drafted",text:"drafted, review"}));
   if(badge==="example") head.appendChild(el("span",{class:"badge example",text:"example"}));
   f.appendChild(head);
   if(hint) f.appendChild(el("p",{class:"hint",text:hint}));

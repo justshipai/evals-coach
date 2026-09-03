@@ -26,7 +26,22 @@ It does **not** replace an eval platform or execute your product suite. It helps
 
 ## Install
 
-Clone the repository into a skills directory:
+Two ways in. Most PMs want the first.
+
+### Easiest: the Eval Workbench (Claude plugin)
+
+A guided seven-step wizard. In the Claude app: **Settings → Customize → Plugins → Add → Add marketplace**, enter `justshipai/evals-coach`, then install **Eval Workbench**. In Claude Code:
+
+```text
+/plugin marketplace add justshipai/evals-coach
+/plugin install evals-coach@justshipai
+```
+
+Then ask for **the eval workbench**. It publishes a private web page that walks you from a feature description to a runnable eval and hands back an eval plan, `test-cases.csv` and judge prompts. It runs on Claude: drafting spends the account of whoever opens the page, and the page is shared with named people rather than a public link. See [website](https://evalscoach.com).
+
+### For Codex, Claude Code, or any assistant: the skill
+
+The conversational `evals-coach` skill (create, critique, expand, calibrate, run) installs by cloning into a skills directory:
 
 ```bash
 # Codex / ChatGPT
@@ -36,26 +51,7 @@ git clone https://github.com/justshipai/evals-coach.git ~/.agents/skills/evals-c
 git clone https://github.com/justshipai/evals-coach.git ~/.claude/skills/evals-coach
 ```
 
-### Claude Code and Cowork (plugin)
-
-One command instead of a clone, and it brings the guided workbench with it:
-
-```text
-/plugin marketplace add justshipai/evals-coach
-/plugin install evals-coach@justshipai
-```
-
-The **workbench** is a seven-step wizard, published to your own account as an Artifact,
-for PMs who would rather fill in a form than write a prompt. Ask for "the eval workbench"
-once the plugin is installed. It is Claude-specific — it asks Claude from inside the page,
-using the account of whoever opens it — while the skill itself stays vendor-neutral and
-runs anywhere.
-
-Then ask your assistant to use Evals Coach. In Codex, for example:
-
-```text
-$evals-coach Create an eval for this feature idea: ...
-```
+Then, for example: `$evals-coach Create an eval for this feature idea: ...`
 
 You do not need repository access or eval expertise. Start with a PRD, feature idea, workflow, examples, traces, feedback, or an existing eval.
 
