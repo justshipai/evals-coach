@@ -295,6 +295,20 @@ td select{padding:5px 7px; font-size:12px; background:var(--surface); min-width:
 .evidence-in{width:100%; padding:7px 10px; border:1px solid var(--line-strong); border-radius:7px; background:var(--surface); font-size:13px; color:var(--ink)}
 .evidence-in:focus{outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent)}
 .evidence .hint{font-size:12px; line-height:1.5}
+.saturation{display:flex; flex-direction:column; gap:6px; margin-top:10px}
+.sat-bar{height:4px; background:var(--surface-3); border-radius:3px; overflow:hidden}
+.sat-bar span{display:block; height:100%; background:var(--accent); border-radius:3px; transition:width .3s ease}
+.prevalence{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:18px; display:flex; flex-direction:column; gap:14px}
+.prev-head h3{font-size:15px; margin-bottom:3px}
+.prev-head .hint{font-size:12.5px}
+.prev-row{display:flex; align-items:flex-start; gap:12px}
+.prev-bar{flex:none; width:64px; height:8px; margin-top:5px; background:var(--surface-3); border-radius:4px; overflow:hidden}
+.prev-bar span{display:block; height:100%; background:var(--crit); border-radius:4px}
+.prev-meta{flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:2px}
+.prev-text{font-size:13.5px; color:var(--ink); line-height:1.45}
+.prev-nums{display:flex; gap:10px; flex-wrap:wrap; align-items:baseline}
+.prev-nums strong{font-size:12.5px; color:var(--ink)}
+.prev-nums span{font-family:var(--mono); font-size:11px; color:var(--ink-3)}
 .weight-row{display:flex; align-items:center; gap:6px; margin-top:6px; flex-wrap:wrap}
 .weight-lbl{font-family:var(--mono); font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); margin-right:2px}
 .weight-chip{font:inherit; font-size:11.5px; font-weight:500; padding:3px 8px; border-radius:6px; border:1px solid var(--line-strong); background:transparent; color:var(--ink-3); cursor:pointer}
@@ -377,8 +391,8 @@ const EXAMPLE = {
 };
 
 const BLANK = {
-  v:5, step:0, seenIntro:false,
-  product:{desc:"", stage:"prelaunch", decision:"ship", unit:"response", worst:"", examples:[], isExample:true},
+  v:6, step:0, seenIntro:false,
+  product:{desc:"", stage:"prelaunch", decision:"ship", unit:"response", worst:"", escalation:"", examples:[], isExample:true},
   question:"", questionDrafted:false,
   criteria:{must:[], should:[], mustNot:[]}, criteriaDrafted:false, criteriaSource:null,
   suggestions:{must:[], should:[], mustNot:[]}, suggestRound:0,
@@ -446,7 +460,7 @@ let ctl = null, busy = false;
 function load(){
   try{
     const raw = localStorage.getItem(KEY);
-    if(raw){ const p = JSON.parse(raw); if(p && p.v===5) return normalize(p); }
+    if(raw){ const p = JSON.parse(raw); if(p && p.v===6) return normalize(p); }
   }catch(e){}
   const s = JSON.parse(JSON.stringify(BLANK));
   s.product = Object.assign(s.product, EXAMPLE, {isExample:true});
@@ -459,8 +473,20 @@ function normalize(s){
   if(!Array.isArray(s.product.examples)) s.product.examples = [];
   s.product.examples.forEach(e=>{ if(typeof e.reviewNotes !== "string") e.reviewNotes = ""; });
   if(typeof s.criteriaSource === "undefined") s.criteriaSource = null;
+  if(typeof s.product.escalation !== "string") s.product.escalation = "";
   return s;
 }
+/* Wilson score interval. Honest uncertainty on a small sample, which is the
+   whole point: 4/12 is not "33%", it is "somewhere between 14% and 61%". */
+function wilson(k, n){
+  if(!n) return [0,1];
+  const z = 1.96, p = k/n;
+  const d = 1 + z*z/n;
+  const c = p + z*z/(2*n);
+  const s = z * Math.sqrt(p*(1-p)/n + z*z/(4*n*n));
+  return [Math.max(0,(c-s)/d), Math.min(1,(c+s)/d)];
+}
+const pct = x => Math.round(x*100) + "%";
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
 
 /* ============================ helpers ============================ */
@@ -561,6 +587,7 @@ function ctxBlock(){
   L.push("DECISION THE EVAL MUST SUPPORT: " + ({ship:"Whether to ship this to users",compare:"Which of two versions/models/prompts to use",regress:"Whether a change broke anything that worked",expand:"Whether it is safe to widen the rollout"})[p.decision]);
   L.push("UNIT OF EVALUATION: " + ({response:"a single response",trajectory:"the agent's whole trajectory across steps",task:"whether the end-to-end task was completed",state:"the resulting state after the system acted"})[p.unit]);
   if(p.worst) L.push("THE FAILURE THE PM SAYS IS MOST COSTLY:\n" + p.worst);
+  if((p.escalation||"").trim()) L.push("ACTIONS THAT REQUIRE HUMAN APPROVAL (these are authorisation boundaries, not scored criteria; an eval must confirm the approval step happened, and must never assume a compromised or confused model will respect them on its own):\n" + p.escalation.trim());
   if(S.question) L.push("AGREED EVALUATION QUESTION:\n" + S.question);
   const cs = allCriteria();
   if(cs.length) L.push("AGREED CRITERIA:\n" + cs.map(c=>{
@@ -777,6 +804,13 @@ function stepProduct(body){
     stack.appendChild(pl);
   }
 
+  if(p.unit==="trajectory" || p.unit==="task" || p.unit==="state"){
+    stack.appendChild(field("What must it never do without a human saying yes?",
+      "You said you're judging something that acts, not just something that answers. Name the actions that are hard to undo: spending money, emailing a customer, changing an order, deleting anything. These become approval gates rather than criteria you score. Leave blank if it can't take actions.",
+      area(p.escalation, v=>{ p.escalation=v; markStale(); }, 3, "e.g. Never issue a refund over £50 or email the customer directly without an agent approving it first."),
+      null));
+  }
+
   stack.appendChild(field("What's the most costly thing it could get wrong?",
     "Not every failure, the one you'd have to explain to someone. This becomes a hard blocker rather than an averaged score.",
     area(p.worst, v=>{ p.worst=v; markStale(); }, 3, "e.g. It states a refund policy that isn't ours and the agent sends it."),
@@ -870,9 +904,19 @@ Reply with only JSON: {"question": "..."}`, "quick");
 /* ---- step 3: criteria ---- */
 function renderReviewPane(wrap, host){
   const examples = (S.product.examples||[]).filter(e => (e.output||"").trim());
-  wrap.appendChild(el("div",{class:"review-intro"},[
-    el("p",{text:"Read each output. Drop a line or two on what caught your eye. Two or more is enough to distill; more gives sharper criteria."})
-  ]));
+  const intro = el("div",{class:"review-intro"});
+  intro.appendChild(el("p",{text:"Read each output and note where it FIRST goes wrong, in your own words. Just the first thing, not everything wrong with it: once an answer goes off the rails, everything after is a consequence, and writing those down separately inflates your list with symptoms instead of causes."}));
+  const done = reviewedCount(), total = examples.length;
+  const sat = el("div",{class:"saturation"});
+  sat.appendChild(el("div",{class:"sat-bar"},[el("span",{style:"width:" + Math.min(100, Math.round(done/20*100)) + "%"})]));
+  let satText;
+  if(done === 0) satText = "Nothing reviewed yet. Two is enough to distill something, but treat that as a first sketch.";
+  else if(done < 5) satText = done + " reviewed. Enough to distill a rough first set. Expect it to change as you read more.";
+  else if(done < 15) satText = done + " reviewed. Getting useful. Keep going while each new output is still showing you something you had not already written down.";
+  else satText = done + " reviewed. You are in the range where teams usually stop finding genuinely new failure modes. If the last few outputs told you nothing new, you have probably seen enough.";
+  sat.appendChild(el("p",{class:"hint",text:satText + " The signal to stop is saturation: new outputs stop producing new kinds of problem. A serious taxonomy usually takes somewhere between 20 and 60."}));
+  intro.appendChild(sat);
+  wrap.appendChild(intro);
   examples.forEach((ex,i)=>{
     const card = el("div",{class:"review-card"});
     card.appendChild(el("div",{class:"review-head"},[el("span",{class:"eyebrow",text:"Output " + (i+1)})]));
@@ -889,7 +933,6 @@ function renderReviewPane(wrap, host){
       null));
     wrap.appendChild(card);
   });
-  const done = reviewedCount();
   const enough = done >= 2;
   const btnrow = el("div",{class:"btnrow"});
   btnrow.appendChild(el("button",{class:"btn primary", onclick:()=>distillCriteria(host), disabled:!enough},[
@@ -897,6 +940,38 @@ function renderReviewPane(wrap, host){
   ]));
   if(sample) btnrow.appendChild(el("button",{class:"btn sm ghost", onclick:()=>{ S.criteriaSource = "draft"; save(); render(); }},["Or draft from my description instead"]));
   wrap.appendChild(btnrow);
+}
+
+function reviewedTotal(){
+  return (S.product.examples||[]).filter(e=>(e.output||"").trim()).length;
+}
+function renderPrevalence(wrap){
+  const n = reviewedTotal();
+  const rows = allCriteria().filter(c=>Array.isArray(c.failedIn) && c.failedIn.length);
+  if(!n || !rows.length) return;
+  const box = el("div",{class:"prevalence"});
+  box.appendChild(el("div",{class:"prev-head"},[
+    el("h3",{text:"How often did each of these actually go wrong?"}),
+    el("span",{class:"hint",text:"Counted across the " + n + " outputs you reviewed. This is the number that tells you what to fix first."})
+  ]));
+  rows.sort((a,b)=>b.failedIn.length - a.failedIn.length).forEach(c=>{
+    const k = c.failedIn.length, p = k/n, ci = wilson(k,n);
+    const r = el("div",{class:"prev-row"});
+    r.appendChild(el("div",{class:"prev-bar"},[el("span",{style:"width:" + Math.round(p*100) + "%"})]));
+    r.appendChild(el("div",{class:"prev-meta"},[
+      el("div",{class:"prev-text",text:c.text}),
+      el("div",{class:"prev-nums"},[
+        el("strong",{text:k + " of " + n + " (" + pct(p) + ")"}),
+        el("span",{text:"true rate likely between " + pct(ci[0]) + " and " + pct(ci[1])})
+      ])
+    ]));
+    box.appendChild(r);
+  });
+  const wide = n < 20;
+  box.appendChild(el("p",{class:"hint", text: wide
+    ? "Those ranges are wide because " + n + " outputs is a small sample. Treat the ordering as a rough steer on what to look at first, not the percentages as facts. Reviewing more narrows them quickly."
+    : "With " + n + " outputs these ranges are tight enough to prioritise on, though they still describe the outputs you happened to review rather than all your traffic."}));
+  wrap.appendChild(box);
 }
 
 function stepCriteria(body){
@@ -966,6 +1041,8 @@ function stepCriteria(body){
     g.appendChild(tray(k, label, host));
     wrap.appendChild(g);
   });
+
+  renderPrevalence(wrap);
 
   if(allCriteria().length && sample){
     const isDistilled = S.criteriaSource === "distill";
@@ -1119,24 +1196,31 @@ ${perEx}
 
 Distill the PM's reviews into a small, sharp set of criteria for this eval. Do not invent failure modes the PM did not touch on. Do not restate generic best practices unless a review points at them.
 
+Where a review describes several things wrong with one output, treat the FIRST thing that went wrong as the real failure and the rest as its consequences. Do not create a separate criterion for a downstream symptom of a failure you have already captured.
+
 - "must": 2-4 non-negotiable success conditions grounded in the reviews.
 - "should": 2-3 graded qualities the reviews point at where better or worse genuinely matters.
 - "mustNot": 2-4 critical failures the reviews name; include the PM's most costly failure if it is one of them.
 
-For each item, list the 1-based output numbers whose review triggered it in "fromExamples". If a criterion is genuinely general (not tied to any single output but named across reviews), leave fromExamples empty for it.
+For each item give two separate lists of 1-based output numbers:
+  "fromExamples": the outputs whose review triggered this criterion. Empty if it is general rather than tied to specific outputs.
+  "failedIn": every output above that would actually FAIL this criterion if you graded it now. Judge this from the output text itself, not only from whether the PM mentioned it; the PM was noting what caught their eye, not doing a full audit. If you genuinely cannot tell for an output, leave it out rather than guessing.
 
 Every line must be observable from what a reviewer can actually see in a run of THIS feature. Name the feature's own objects, policies and users. No generic words like helpful, accurate, relevant, high quality, appropriate.
 
 Then, separately, suggest 2 more of EACH kind not in the lists above, the next most defensible candidates from the reviews or their gaps. Give each a short "why" line (under 15 words).
 
 Reply with only JSON:
-{"must":[{"text":"...","fromExamples":[1,3]}],"should":[{"text":"...","fromExamples":[2]}],"mustNot":[{"text":"...","fromExamples":[]}],
+{"must":[{"text":"...","fromExamples":[1,3],"failedIn":[1,3,7]}],"should":[{"text":"...","fromExamples":[2],"failedIn":[2]}],"mustNot":[{"text":"...","fromExamples":[],"failedIn":[4]}],
  "suggest":{"must":[{"text":"...","why":"..."}],"should":[{"text":"...","why":"..."}],"mustNot":[{"text":"...","why":"..."}]}}`);
+    const idxList = v => Array.isArray(v) ? v.filter(n=>Number.isInteger(n)&&n>=1&&n<=examples.length) : [];
     const mkD = (a, kind) => (Array.isArray(a)?a:[]).map(t=>{
       const text = String((t&&t.text)||t||"");
-      const from = Array.isArray(t&&t.fromExamples) ? t.fromExamples.filter(n=>Number.isInteger(n)&&n>=1&&n<=examples.length) : [];
+      const from = idxList(t&&t.fromExamples);
+      const failed = idxList(t&&t.failedIn);
       const item = {id:uid("c"), text, on:true};
       if(from.length) item.fromExamples = from;
+      if(failed.length) item.failedIn = failed;
       if(kind==="should") item.weight = "medium";
       return item;
     }).filter(x=>x.text);
@@ -1497,7 +1581,7 @@ function stepGate(body){
       "Measured against whatever you are running today. \"Nothing\" is a perfectly good answer.",
       "e.g. No case that passes today may start failing. Up to 500ms slower is acceptable."],
     ["reps","How many times you run each case",
-      "The same input can give a different answer on a second run. Say how many runs, and whether a case has to pass all of them.",
+      "The same input can give a different answer on a second run. Decide which question you are asking: can it do this at all (one pass out of several runs is enough), or can it do this reliably (every run must pass)? For anything a user depends on, you want the second.",
       "e.g. 3 runs per case. A case counts as a pass only if all 3 pass."],
     ["owner","Who owns the decision",
       "One named role, so there is someone to ask when the result is borderline.",
@@ -1727,6 +1811,15 @@ function handoffDoc(){
     ]));
   }
   const anyProvenance = allCriteria().some(c=>Array.isArray(c.fromExamples) && c.fromExamples.length);
+  if((S.product.escalation||"").trim()){
+    d.appendChild(el("h4",{class:"eyebrow",text:"Actions that need human approval"}));
+    d.appendChild(el("p",{text:S.product.escalation}));
+    d.appendChild(el("ul",{},[
+      el("li",{text:"Enforce these in code, at the point the action is taken, not in the prompt. A prompt instruction is a request; an authorisation check is a guarantee."}),
+      el("li",{text:"Assume the model can be talked into trying. There is no reliable detector for a determined prompt injection, so the approval step has to hold even when the model has been convinced it should not."}),
+      el("li",{text:"Add a case that tries to get the action taken without approval, and treat a pass as a hard blocker rather than a score."})
+    ]));
+  }
   d.appendChild(el("h4",{class:"eyebrow",text:"Do not guess these"}));
   d.appendChild(el("ul",{},[
     el("li",{text:"Any threshold left blank in the release gate, ask the PM."}),
@@ -1740,6 +1833,18 @@ function handoffDoc(){
     el("li",{text:"Label a mixed calibration set and check the judges against it before wiring the gate."}),
     el("li",{text:"Put the run behind whatever triggers your release, and make each new production failure a new case."})
   ]));
+  d.appendChild(el("h4",{class:"eyebrow",text:"When a new model ships"}));
+  d.appendChild(el("ul",{},[
+    el("li",{text:"Keep each configuration you care about (model, prompt, tools) stored as a config you can re-run, not as a thing someone changed by hand."}),
+    el("li",{text:"When a new model lands, re-run this whole suite against it rather than trusting the benchmark scores in the announcement. Your eval is the only one measuring your product."}),
+    el("li",{text:"Then decide deliberately what to deploy, what to keep as a fallback, and what to retire. A model that is better on average can still be worse on the slice you care about."})
+  ]));
+  if(S.product.stage==="prelaunch"){
+    d.appendChild(el("h4",{class:"eyebrow",text:"Before this takes real traffic"}));
+    d.appendChild(el("ul",{},[
+      el("li",{text:"Make sure the evidence each grader needs is actually recorded from day one. If you cannot see what the system was given, which tools it called and what came back, you cannot evaluate it later, and retrofitting that is far more expensive than building it in now."})
+    ]));
+  }
   return d;
 }
 
@@ -1753,6 +1858,7 @@ function planMd(){
   L.push("- Decision: " + {ship:"Ship or don't ship",compare:"Choose between versions",regress:"Catch regressions",expand:"Widen the rollout"}[p.decision]);
   L.push("- Unit of evaluation: " + {response:"A single response",trajectory:"The whole trajectory",task:"Task completion",state:"Resulting state"}[p.unit]);
   if(p.worst) L.push("- Most costly failure: " + p.worst);
+  if((p.escalation||"").trim()) L.push("- Requires human approval: " + p.escalation.trim());
   L.push("\n## Criteria\n");
   [["must","Must"],["should","Should"],["mustNot","Must not"]].forEach(([k,l])=>{
     const it = S.criteria[k].filter(c=>c.on!==false && c.text.trim());
@@ -1760,7 +1866,10 @@ function planMd(){
     L.push("### " + l + "\n"); it.forEach(c=>{
       const w = (k==="should" && c.weight && c.weight!=="medium") ? ` _(${c.weight} priority)_` : "";
       const fx = (Array.isArray(c.fromExamples) && c.fromExamples.length) ? ` _(from output ${c.fromExamples.join(", ")})_` : "";
-      L.push("- " + c.text + w + fx);
+      const nRev = reviewedTotal();
+      const pv = (Array.isArray(c.failedIn) && c.failedIn.length && nRev)
+        ? ` _(failed ${c.failedIn.length} of ${nRev} reviewed, likely ${pct(wilson(c.failedIn.length,nRev)[0])} to ${pct(wilson(c.failedIn.length,nRev)[1])} of traffic)_` : "";
+      L.push("- " + c.text + w + fx + pv);
     }); L.push("");
   });
   L.push("## Test set\n\n" + S.cases.length + " cases, see test-cases.csv.");
@@ -1816,8 +1925,9 @@ function calibrateMd(){
   L.push("2. Is the judge missing evidence it needs? Give it the trace field, the source doc, the prior turn.");
   L.push("3. Is the prompt vague? Show the judge two labelled examples (one pass, one fail) and the reasoning.");
   L.push("4. Only then adjust the threshold. Never present an uncalibrated judge score as ground truth.\n");
-  L.push("## 6. Keep held-out examples\n");
-  L.push("The examples you used to tune the judge shouldn't be the ones you measure it on. Set aside 5–10 as a held-out check you don't touch during calibration.\n");
+  L.push("## 6. Keep held-out examples, and only read them once\n");
+  L.push("The examples you used to tune the judge shouldn't be the ones you measure it on. Split your labelled set: work on one half, and set the other aside as a held-out check.\n");
+  L.push("The discipline that makes this worth anything: you read the held-out set **once**, when you think you are finished. The moment you look at it and then go back and tweak the judge, it has stopped being held-out and has quietly become part of your tuning set. If you need another look, label fresh examples for it.\n");
   L.push("## 7. Route uncertainty to humans\n");
   L.push("Whatever the judge can't decide confidently should go to a human, not a default pass. Log those cases; they're your next round of criteria.\n");
   if(S.calibration){ L.push("## Notes from this eval\n\n" + S.calibration); }
