@@ -36,6 +36,21 @@ git clone https://github.com/justshipai/evals-coach.git ~/.agents/skills/evals-c
 git clone https://github.com/justshipai/evals-coach.git ~/.claude/skills/evals-coach
 ```
 
+### Claude Code and Cowork (plugin)
+
+One command instead of a clone, and it brings the guided workbench with it:
+
+```text
+/plugin marketplace add justshipai/evals-coach
+/plugin install evals-coach@justshipai
+```
+
+The **workbench** is a seven-step wizard, published to your own account as an Artifact,
+for PMs who would rather fill in a form than write a prompt. Ask for "the eval workbench"
+once the plugin is installed. It is Claude-specific — it asks Claude from inside the page,
+using the account of whoever opens it — while the skill itself stays vendor-neutral and
+runs anywhere.
+
 Then ask your assistant to use Evals Coach. In Codex, for example:
 
 ```text
@@ -101,6 +116,8 @@ Read the [full method, task scores and limitations](evals/results/2026-08-24-gpt
 - `scripts/validate_test_cases.py` — validates the generated CSV schema
 - `examples/` — worked PM-to-engineering examples
 - `evals/` — cases and rubric for evaluating Evals Coach itself
+- `plugin/` — the Claude Code / Cowork plugin, including the eval workbench
+- `.claude-plugin/marketplace.json` — lets this repository be added as a plugin marketplace
 
 ## Help shape it
 
