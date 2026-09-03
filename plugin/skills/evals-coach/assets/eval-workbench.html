@@ -260,6 +260,14 @@ td select{padding:5px 7px; font-size:12px; background:var(--surface); min-width:
 .example-card{background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:16px; display:flex; flex-direction:column; gap:12px}
 .example-head{display:flex; align-items:center; justify-content:space-between; gap:12px}
 .example-head .eyebrow{color:var(--accent-ink); font-weight:600}
+.review-intro{margin-bottom:4px}
+.review-intro p{font-size:14px; color:var(--ink-2); line-height:1.5}
+.review-card{background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:16px; display:flex; flex-direction:column; gap:12px}
+.review-head .eyebrow{color:var(--accent-ink); font-weight:600}
+.review-output{font-family:var(--mono); font-size:12.5px; line-height:1.6; background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:10px 12px; max-height:220px; overflow-y:auto; white-space:pre-wrap; word-break:break-word; margin:0}
+.review-context{font-size:12.5px; color:var(--ink-2); background:var(--surface); border:1px dashed var(--line); border-radius:8px; padding:8px 10px}
+.review-context .eyebrow{font-family:var(--mono); font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); margin-right:4px}
+.provenance{display:inline-block; margin-top:6px; font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; color:var(--accent-ink); background:var(--accent-soft); border:1px solid var(--line); border-radius:5px; padding:2px 7px}
 .weight-row{display:flex; align-items:center; gap:6px; margin-top:6px; flex-wrap:wrap}
 .weight-lbl{font-family:var(--mono); font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); margin-right:2px}
 .weight-chip{font:inherit; font-size:11.5px; font-weight:500; padding:3px 8px; border-radius:6px; border:1px solid var(--line-strong); background:transparent; color:var(--ink-3); cursor:pointer}
@@ -342,10 +350,10 @@ const EXAMPLE = {
 };
 
 const BLANK = {
-  v:4, step:0, seenIntro:false,
+  v:5, step:0, seenIntro:false,
   product:{desc:"", stage:"prelaunch", decision:"ship", unit:"response", worst:"", examples:[], isExample:true},
   question:"", questionDrafted:false,
-  criteria:{must:[], should:[], mustNot:[]}, criteriaDrafted:false,
+  criteria:{must:[], should:[], mustNot:[]}, criteriaDrafted:false, criteriaSource:null,
   suggestions:{must:[], should:[], mustNot:[]}, suggestRound:0,
   cases:[], casesDrafted:false, notCovered:"",
   graders:{}, judges:[], gradersDrafted:false, calibration:"",
@@ -411,7 +419,7 @@ let ctl = null, busy = false;
 function load(){
   try{
     const raw = localStorage.getItem(KEY);
-    if(raw){ const p = JSON.parse(raw); if(p && p.v===4) return normalize(p); }
+    if(raw){ const p = JSON.parse(raw); if(p && p.v===5) return normalize(p); }
   }catch(e){}
   const s = JSON.parse(JSON.stringify(BLANK));
   s.product = Object.assign(s.product, EXAMPLE, {isExample:true});
@@ -422,6 +430,8 @@ function normalize(s){
   ["must","should","mustNot"].forEach(k=>{ if(!Array.isArray(s.suggestions[k])) s.suggestions[k] = []; });
   if(typeof s.suggestRound !== "number") s.suggestRound = 0;
   if(!Array.isArray(s.product.examples)) s.product.examples = [];
+  s.product.examples.forEach(e=>{ if(typeof e.reviewNotes !== "string") e.reviewNotes = ""; });
+  if(typeof s.criteriaSource === "undefined") s.criteriaSource = null;
   return s;
 }
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
@@ -528,7 +538,8 @@ function ctxBlock(){
   const cs = allCriteria();
   if(cs.length) L.push("AGREED CRITERIA:\n" + cs.map(c=>{
     const w = (c.kind==="should" && c.weight && c.weight!=="medium") ? ` (weight: ${c.weight})` : "";
-    return `- [${c.kind.toUpperCase()}${w}] ${c.text}`;
+    const fx = (Array.isArray(c.fromExamples) && c.fromExamples.length) ? ` (from output ${c.fromExamples.join(", ")})` : "";
+    return `- [${c.kind.toUpperCase()}${w}] ${c.text}${fx}`;
   }).join("\n"));
   if(S.cases.length) L.push("AGREED TEST CASES:\n" + S.cases.map(c=>`- ${c.id} (${c.category}, slice: ${c.slice||"—"}): ${c.name}. Input: ${c.input}. Expected: ${c.expected}`).join("\n"));
   return L.join("\n\n");
@@ -706,7 +717,7 @@ function stepProduct(body){
 
   if(p.stage==="postlaunch"){
     if(!Array.isArray(p.examples)) p.examples = [];
-    if(!p.examples.length) p.examples.push({output:"", notes:"", gold:""});
+    if(!p.examples.length) p.examples.push({output:"", notes:"", gold:"", reviewNotes:""});
     const pl = el("div",{class:"postlaunch-card"});
     pl.appendChild(el("div",{class:"postlaunch-head"},[
       el("strong",{text:"You have real outputs. Add a few and the whole eval gets grounded in them."}),
@@ -718,7 +729,7 @@ function stepProduct(body){
         el("span",{class:"eyebrow",text:"Example " + (i+1)})
       ]);
       if(p.examples.length>1){
-        head.appendChild(el("button",{class:"btn sm ghost", type:"button", onclick:()=>{ p.examples.splice(i,1); if(!p.examples.length) p.examples.push({output:"",notes:"",gold:""}); save(); render(); }},["Remove"]));
+        head.appendChild(el("button",{class:"btn sm ghost", type:"button", onclick:()=>{ p.examples.splice(i,1); if(!p.examples.length) p.examples.push({output:"",notes:"",gold:"",reviewNotes:""}); save(); render(); }},["Remove"]));
       }
       card.appendChild(head);
       card.appendChild(field("Real output",
@@ -735,7 +746,7 @@ function stepProduct(body){
         null));
       pl.appendChild(card);
     });
-    pl.appendChild(el("button",{class:"btn sm", type:"button", onclick:()=>{ p.examples.push({output:"",notes:"",gold:""}); save(); render(); }},["+ Add another example"]));
+    pl.appendChild(el("button",{class:"btn sm", type:"button", onclick:()=>{ p.examples.push({output:"",notes:"",gold:"",reviewNotes:""}); save(); render(); }},["+ Add another example"]));
     stack.appendChild(pl);
   }
 
@@ -830,13 +841,55 @@ Reply with only JSON: {"question": "..."}`, "quick");
 }
 
 /* ---- step 3: criteria ---- */
+function renderReviewPane(wrap, host){
+  const examples = (S.product.examples||[]).filter(e => (e.output||"").trim());
+  wrap.appendChild(el("div",{class:"review-intro"},[
+    el("p",{text:"Read each output. Drop a line or two on what caught your eye. Two or more is enough to distill; more gives sharper criteria."})
+  ]));
+  examples.forEach((ex,i)=>{
+    const card = el("div",{class:"review-card"});
+    card.appendChild(el("div",{class:"review-head"},[el("span",{class:"eyebrow",text:"Output " + (i+1)})]));
+    card.appendChild(el("pre",{class:"review-output",text:ex.output}));
+    if((ex.notes||"").trim()){
+      card.appendChild(el("div",{class:"review-context"},[
+        el("span",{class:"eyebrow",text:"From your step 1 note: "}),
+        el("span",{text:ex.notes})
+      ]));
+    }
+    card.appendChild(field("What jumped out here?",
+      "Anything a reviewer would flag on this specific output. A few words per line is fine.",
+      area(ex.reviewNotes||"", v=>{ ex.reviewNotes=v; markStale(); }, 3, "e.g. Wrong tone; invented a policy; missed the user's actual question."),
+      null));
+    wrap.appendChild(card);
+  });
+  const done = reviewedCount();
+  const enough = done >= 2;
+  const btnrow = el("div",{class:"btnrow"});
+  btnrow.appendChild(el("button",{class:"btn primary", onclick:()=>distillCriteria(host), disabled:!enough},[
+    enough ? "Distill " + done + " reviews into criteria" : "Add notes to at least 2 outputs to distill"
+  ]));
+  if(sample) btnrow.appendChild(el("button",{class:"btn sm ghost", onclick:()=>{ S.criteriaSource = "draft"; save(); render(); }},["Or draft from my description instead"]));
+  wrap.appendChild(btnrow);
+}
+
 function stepCriteria(body){
-  $("#p-lede").textContent = "Must, should, must-not. Tick what's right, edit the wording, untick what isn't yours. Each group carries a few more candidates you can pull in. Anything left unticked won't be evaluated.";
+  const reviewable = hasReviewableExamples();
+  const inReviewMode = reviewable && sample && S.criteriaSource !== "draft";
+  if(inReviewMode){
+    $("#p-lede").textContent = "Read each output you pasted. Note what jumped out. When you've done a few, we'll distill your notes into criteria, with a reference back to which output each one came from.";
+  } else {
+    $("#p-lede").textContent = "Must, should, must-not. Tick what's right, edit the wording, untick what isn't yours. Each group carries a few more candidates you can pull in. Anything left unticked won't be evaluated.";
+  }
   const host = busyHost();
   const wrap = el("div",{class:"stack"});
 
-  if(!allCriteria().length && sample){
-    wrap.appendChild(el("div",{class:"btnrow"},[el("button",{class:"btn primary", onclick:()=>draftCriteria(host)},["Draft criteria"])]));
+  if(inReviewMode){
+    renderReviewPane(wrap, host);
+  } else if(!allCriteria().length && sample){
+    wrap.appendChild(el("div",{class:"btnrow"},[
+      el("button",{class:"btn primary", onclick:()=>draftCriteria(host)},["Draft criteria from my description"]),
+      reviewable ? el("button",{class:"btn sm ghost", onclick:()=>{ S.criteriaSource = null; save(); render(); }},["Or review my outputs instead"]) : null
+    ].filter(Boolean)));
   }
   wrap.appendChild(host);
 
@@ -845,7 +898,8 @@ function stepCriteria(body){
     ["should","Should","Graded. Better or worse is meaningful here."],
     ["mustNot","Must not","Critical failures. These become hard blockers, never averaged away."]
   ];
-  groups.forEach(([k,label,hint])=>{
+  const showGroups = !inReviewMode || allCriteria().length > 0;
+  if(showGroups) groups.forEach(([k,label,hint])=>{
     const list = S.criteria[k];
     const g = el("div",{class:"crit-group"});
     g.appendChild(el("div",{class:"crit-head"},[
@@ -860,6 +914,10 @@ function stepCriteria(body){
       const ta = area(c.text, v=>{ c.text=v; markStale(); }, 2, "Observable behaviour…");
       row.appendChild(tick);
       const cell = el("div",{},[ta]);
+      if(Array.isArray(c.fromExamples) && c.fromExamples.length){
+        const chip = el("span",{class:"provenance", text:"from Output " + c.fromExamples.join(", ")});
+        cell.appendChild(chip);
+      }
       if(k==="should"){
         if(!c.weight) c.weight = "medium";
         const wrapW = el("div",{class:"weight-row"});
@@ -882,10 +940,23 @@ function stepCriteria(body){
     wrap.appendChild(g);
   });
 
-  if(allCriteria().length && sample) wrap.appendChild(el("div",{class:"btnrow"},[
-    el("button",{class:"btn sm ghost", onclick:()=>draftCriteria(host)},["Redraft from scratch"]),
-    el("span",{class:"hint",text:"Your edits are overwritten if you redraft."})
-  ]));
+  if(allCriteria().length && sample){
+    const isDistilled = S.criteriaSource === "distill";
+    const canRedistill = isDistilled && reviewedCount() >= 2;
+    wrap.appendChild(el("div",{class:"btnrow"},[
+      el("button",{class:"btn sm ghost", onclick:()=>{
+        if(isDistilled) distillCriteria(host); else draftCriteria(host);
+      }},[isDistilled ? "Redistill from my notes" : "Redraft from scratch"]),
+      el("span",{class:"hint",text: isDistilled ? "Uses your latest review notes. Your edits to these criteria are overwritten." : "Your edits are overwritten if you redraft."}),
+      reviewable && sample ? el("button",{class:"btn sm ghost", onclick:()=>{
+        S.criteriaSource = isDistilled ? "draft" : "distill";
+        S.criteria = {must:[], should:[], mustNot:[]};
+        S.suggestions = {must:[], should:[], mustNot:[]};
+        S.criteriaDrafted = false;
+        save(); render();
+      }},[isDistilled ? "Switch to drafting from description" : "Switch to reviewing my outputs"]) : null
+    ].filter(Boolean)));
+  }
 
   body.appendChild(wrap);
   $("#btn-next").disabled = !allCriteria().length;
@@ -987,6 +1058,67 @@ Reply with only JSON:
     const ms = a => (Array.isArray(a)?a:[]).map(x=>({text:String((x&&x.text)||x||""), why:String((x&&x.why)||"")})).filter(x=>x.text);
     S.suggestions = {must:ms(sg.must), should:ms(sg.should), mustNot:ms(sg.mustNot)};
     S.criteriaDrafted = true;
+    S.criteriaSource = "draft";
+  });
+}
+
+function hasReviewableExamples(){
+  const p = S.product;
+  if(p.stage !== "postlaunch") return false;
+  return (p.examples||[]).filter(e => (e.output||"").trim()).length >= 3;
+}
+
+function reviewedCount(){
+  return (S.product.examples||[]).filter(e => (e.output||"").trim() && (e.reviewNotes||"").trim()).length;
+}
+
+function distillCriteria(host){
+  withBusy(host, "Distilling your reviews into criteria…", async ()=>{
+    const examples = (S.product.examples||[]).filter(e => (e.output||"").trim());
+    const perEx = examples.map((e,i)=>{
+      const parts = [`--- Output ${i+1} ---`, e.output.trim()];
+      if((e.reviewNotes||"").trim()) parts.push(`PM's review of output ${i+1}:\n${e.reviewNotes.trim()}`);
+      else if((e.notes||"").trim()) parts.push(`PM's earlier note on output ${i+1}:\n${e.notes.trim()}`);
+      if((e.gold||"").trim()) parts.push(`Gold version of output ${i+1} (what should have shipped):\n${e.gold.trim()}`);
+      return parts.join("\n");
+    }).join("\n\n");
+    const r = await ask(HOUSE + `
+
+` + ctxBlock() + `
+
+REVIEWED OUTPUTS (numbered; the PM's per-output reviews are their observed failure modes; treat these as evidence, not suggestions):
+
+${perEx}
+
+Distill the PM's reviews into a small, sharp set of criteria for this eval. Do not invent failure modes the PM did not touch on. Do not restate generic best practices unless a review points at them.
+
+- "must": 2-4 non-negotiable success conditions grounded in the reviews.
+- "should": 2-3 graded qualities the reviews point at where better or worse genuinely matters.
+- "mustNot": 2-4 critical failures the reviews name; include the PM's most costly failure if it is one of them.
+
+For each item, list the 1-based output numbers whose review triggered it in "fromExamples". If a criterion is genuinely general (not tied to any single output but named across reviews), leave fromExamples empty for it.
+
+Every line must be observable from what a reviewer can actually see in a run of THIS feature. Name the feature's own objects, policies and users. No generic words like helpful, accurate, relevant, high quality, appropriate.
+
+Then, separately, suggest 2 more of EACH kind not in the lists above, the next most defensible candidates from the reviews or their gaps. Give each a short "why" line (under 15 words).
+
+Reply with only JSON:
+{"must":[{"text":"...","fromExamples":[1,3]}],"should":[{"text":"...","fromExamples":[2]}],"mustNot":[{"text":"...","fromExamples":[]}],
+ "suggest":{"must":[{"text":"...","why":"..."}],"should":[{"text":"...","why":"..."}],"mustNot":[{"text":"...","why":"..."}]}}`);
+    const mkD = (a, kind) => (Array.isArray(a)?a:[]).map(t=>{
+      const text = String((t&&t.text)||t||"");
+      const from = Array.isArray(t&&t.fromExamples) ? t.fromExamples.filter(n=>Number.isInteger(n)&&n>=1&&n<=examples.length) : [];
+      const item = {id:uid("c"), text, on:true};
+      if(from.length) item.fromExamples = from;
+      if(kind==="should") item.weight = "medium";
+      return item;
+    }).filter(x=>x.text);
+    S.criteria = {must:mkD(r.must,"must"), should:mkD(r.should,"should"), mustNot:mkD(r.mustNot,"mustNot")};
+    const sg = r.suggest || {};
+    const ms = a => (Array.isArray(a)?a:[]).map(x=>({text:String((x&&x.text)||x||""), why:String((x&&x.why)||"")})).filter(x=>x.text);
+    S.suggestions = {must:ms(sg.must), should:ms(sg.should), mustNot:ms(sg.mustNot)};
+    S.criteriaDrafted = true;
+    S.criteriaSource = "distill";
   });
 }
 
@@ -1429,7 +1561,8 @@ function planDoc(){
     d.appendChild(el("h4",{class:"eyebrow",text:l}));
     d.appendChild(el("ul",{}, items.map(c=>{
       const w = (k==="should" && c.weight && c.weight!=="medium") ? ` (${c.weight} priority)` : "";
-      return el("li",{text:c.text + w});
+      const fx = (Array.isArray(c.fromExamples) && c.fromExamples.length) ? ` (from output ${c.fromExamples.join(", ")})` : "";
+      return el("li",{text:c.text + w + fx});
     })));
   });
 
@@ -1490,10 +1623,12 @@ function handoffDoc(){
       el("li",{text:"Auto-eval tools recover obvious errors well but miss product-judgement failures and typically run 80–90% precise. Sample the judge's passes and failures by hand before trusting the aggregate."})
     ]));
   }
+  const anyProvenance = allCriteria().some(c=>Array.isArray(c.fromExamples) && c.fromExamples.length);
   d.appendChild(el("h4",{class:"eyebrow",text:"Do not guess these"}));
   d.appendChild(el("ul",{},[
     el("li",{text:"Any threshold left blank in the release gate, ask the PM."}),
     S.product.stage==="prelaunch" ? el("li",{text:"These cases are curated, not sampled from production. Replace them with real traffic as soon as there is any."}) : null,
+    anyProvenance ? el("li",{text:"Criteria tagged \"from output N\" came from the PM reviewing specific real outputs. Preserve the reference when you cite them in a report; it's the shortest path back to the failure they're catching."}) : null,
     S.judges.length ? el("li",{text:"No judge score gates a release until it has been calibrated against hand labels."}) : null
   ].filter(Boolean)));
   d.appendChild(el("h4",{class:"eyebrow",text:"Next three actions"}));
@@ -1521,7 +1656,8 @@ function planMd(){
     if(!it.length) return;
     L.push("### " + l + "\n"); it.forEach(c=>{
       const w = (k==="should" && c.weight && c.weight!=="medium") ? ` _(${c.weight} priority)_` : "";
-      L.push("- " + c.text + w);
+      const fx = (Array.isArray(c.fromExamples) && c.fromExamples.length) ? ` _(from output ${c.fromExamples.join(", ")})_` : "";
+      L.push("- " + c.text + w + fx);
     }); L.push("");
   });
   L.push("## Test set\n\n" + S.cases.length + " cases, see test-cases.csv.");
