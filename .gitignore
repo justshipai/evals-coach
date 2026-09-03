@@ -2,3 +2,5 @@
 .eval-runs/
 __pycache__/
 *.pyc
+*.plugin
+*.zip
