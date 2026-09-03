@@ -268,6 +268,22 @@ td select{padding:5px 7px; font-size:12px; background:var(--surface); min-width:
 .review-context{font-size:12.5px; color:var(--ink-2); background:var(--surface); border:1px dashed var(--line); border-radius:8px; padding:8px 10px}
 .review-context .eyebrow{font-family:var(--mono); font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); margin-right:4px}
 .provenance{display:inline-block; margin-top:6px; font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; color:var(--accent-ink); background:var(--accent-soft); border:1px solid var(--line); border-radius:5px; padding:2px 7px}
+.explainer{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden}
+.explainer summary{cursor:pointer; padding:13px 16px; font-size:14px; font-weight:600; color:var(--ink); list-style:none; display:flex; align-items:center; gap:8px}
+.explainer summary::-webkit-details-marker{display:none}
+.explainer summary::before{content:"?"; display:inline-grid; place-items:center; width:18px; height:18px; border-radius:50%; background:var(--accent-soft); border:1px solid var(--accent); color:var(--accent-ink); font-size:11px; font-weight:700; flex:none}
+.explainer summary:hover{background:var(--surface-2)}
+.explainer[open] summary{border-bottom:1px solid var(--line)}
+.explainer-body{padding:14px 16px 16px; display:flex; flex-direction:column; gap:11px}
+.explainer-body p{font-size:13.5px; line-height:1.6; color:var(--ink-2)}
+.explainer-item{display:flex; flex-direction:column; gap:2px; padding-left:12px; border-left:2px solid var(--line)}
+.explainer-item strong{font-size:13.5px; color:var(--ink)}
+.explainer-item span{font-size:13px; line-height:1.55; color:var(--ink-2)}
+.evidence{display:flex; flex-direction:column; gap:5px; margin-top:9px}
+.evidence-lbl{font-family:var(--mono); font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3)}
+.evidence-in{width:100%; padding:7px 10px; border:1px solid var(--line-strong); border-radius:7px; background:var(--surface); font-size:13px; color:var(--ink)}
+.evidence-in:focus{outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent)}
+.evidence .hint{font-size:12px; line-height:1.5}
 .weight-row{display:flex; align-items:center; gap:6px; margin-top:6px; flex-wrap:wrap}
 .weight-lbl{font-family:var(--mono); font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); margin-right:2px}
 .weight-chip{font:inherit; font-size:11.5px; font-weight:500; padding:3px 8px; border-radius:6px; border:1px solid var(--line-strong); background:transparent; color:var(--ink-3); cursor:pointer}
@@ -1249,16 +1265,36 @@ Reply with only JSON: {"cases":[{"id":"T01","name":"...","input":"...","setup":"
 
 /* ---- step 5: graders ---- */
 const GTYPES = [
-  ["code","Code check","Deterministic, cheapest, use it where you can"],
-  ["trace","Trace check","Did a required action happen, or a prohibited one"],
-  ["llm","LLM judge","Needs calibration before it gates anything"],
-  ["human","Human review","Ambiguous or high-consequence"]
+  ["code","Code check","A script decides. Objective answers only."],
+  ["trace","Trace check","Looks at what the system did, not just what it said."],
+  ["llm","LLM judge","Another AI reads the output and decides. Needs calibrating."],
+  ["human","Human review","A person reads it. Slowest, most trustworthy."]
+];
+const GTYPE_HELP = [
+  ["Code check","A script decides, pass or fail. Use it when the answer is objective: a number, a date format, a required field, a banned word. Free to run and it never changes its mind. Reach for this first."],
+  ["Trace check","Looks at what the system did on the way to the answer, not just the answer. Use it when a step itself matters: it had to look up the order before promising a refund, or it must never have emailed the customer directly."],
+  ["LLM judge","Another AI reads the output and decides. Use it for things a person could judge by reading, when you have too many runs to read them all yourself. Cheap and fast, but it is a draft until you have checked it against your own hand-labelled examples. Step 7 gives you a guide for that."],
+  ["Human review","A person reads it and decides. Use it for anything genuinely ambiguous or high-consequence. Slowest and most expensive, and the thing you measure the other three against."]
 ];
 function stepGraders(body){
-  $("#p-lede").textContent = "Cheapest reliable grader per criterion. An LLM judge is a draft until you've calibrated it against your own labels.";
+  $("#p-lede").textContent = "Each criterion you wrote needs something that decides, run after run, whether it passed. That thing is called a grader. Pick the cheapest one that you'd actually trust.";
   const host = busyHost();
   const wrap = el("div",{class:"stack"});
   const crits = allCriteria();
+
+  const exp = el("details",{class:"explainer"});
+  exp.appendChild(el("summary",{text:"What's a grader, and how do I pick one?"}));
+  const expBody = el("div",{class:"explainer-body"});
+  expBody.appendChild(el("p",{text:"You've written criteria like \"never states a policy that isn't ours\". Something has to check that, on every run, without you reading all of them by hand. That checker is a grader. There are four kinds, and the rule of thumb is to use the cheapest one that would genuinely catch the failure."}));
+  GTYPE_HELP.forEach(([name,desc])=>{
+    expBody.appendChild(el("div",{class:"explainer-item"},[
+      el("strong",{text:name}),
+      el("span",{text:desc})
+    ]));
+  });
+  expBody.appendChild(el("p",{class:"hint",text:"Claude picks one per criterion below and you can change any of them. You know what your team can actually run; it doesn't."}));
+  exp.appendChild(expBody);
+  wrap.appendChild(exp);
 
   if(!S.gradersDrafted && sample){
     wrap.appendChild(el("div",{class:"btnrow"},[el("button",{class:"btn primary", onclick:()=>draftGraders(host)},["Choose graders and write the judge prompts"])]));
@@ -1277,17 +1313,24 @@ function stepGraders(body){
   wrap.appendChild(host);
 
   const g = el("div",{class:"crit-group"});
-  g.appendChild(el("div",{class:"crit-head"},[el("h3",{text:"Grader per criterion"}), el("span",{class:"hint",text:"Change any of these, you know what your team can actually run."})]));
+  g.appendChild(el("div",{class:"crit-head"},[el("h3",{text:"How each one gets checked"}), el("span",{class:"hint",text:"Change any of these. You know what your team can actually run."})]));
   crits.forEach(c=>{
     const cur = S.graders[c.id] || {type:"llm", evidence:""};
     S.graders[c.id] = cur;
     const row = el("div",{class:"crit-row"});
     row.appendChild(el("span",{class:"badge " + (c.kind==="must not"?"mustnot":c.kind), text:c.kind}));
     const sel = el("select");
-    GTYPES.forEach(([v,l])=> sel.appendChild(el("option",{value:v,text:l, selected: cur.type===v||undefined})));
+    GTYPES.forEach(([v,l,h])=> sel.appendChild(el("option",{value:v,text:l, title:h, selected: cur.type===v||undefined})));
     sel.addEventListener("change", ()=>{ cur.type=sel.value; save(); render(); });
-    const meta = el("div",{class:"crit-meta"},[sel, el("span",{class:"hint", text: cur.evidence ? "Needs: " + cur.evidence : "What must the grader be able to see?"})]);
-    row.appendChild(el("div",{},[el("div",{text:c.text, style:"font-size:13.5px"}), meta]));
+    const typeHint = (GTYPES.find(t=>t[0]===cur.type)||[])[2] || "";
+    const meta = el("div",{class:"crit-meta"},[sel, el("span",{class:"hint", text:typeHint})]);
+    const ev = el("div",{class:"evidence"});
+    ev.appendChild(el("label",{class:"evidence-lbl",text:"What it needs to look at"}));
+    ev.appendChild(el("input",{type:"text", class:"evidence-in", value:cur.evidence||"",
+      placeholder:"e.g. the customer's original message, and the help-centre article it quoted"}));
+    ev.querySelector(".evidence-in").addEventListener("input", e=>{ cur.evidence = e.target.value; markStale(); });
+    ev.appendChild(el("span",{class:"hint",text:"A grader can only judge what it is shown. If it needs the original request, the source document, or a record of which tool ran, say so here and your engineer wires it up."}));
+    row.appendChild(el("div",{},[el("div",{text:c.text, style:"font-size:13.5px"}), meta, ev]));
     row.appendChild(el("span",{}));
     g.appendChild(row);
   });
