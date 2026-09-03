@@ -32,9 +32,14 @@ Then ask for **the eval workbench**.
 
 - `skills/eval-workbench/` — publishes the workbench; the page itself is under `assets/`.
 
-## The conversational skill
+## Already have real outputs? Use the coach directly
 
-The `evals-coach` skill (design, critique, expand, calibrate and run evals by chatting) is
-**not** part of this plugin. It lives at the
+The plugin's wizard is best for **pre-launch** work: you describe a feature and it drafts
+the whole eval structure for you. For **post-launch** products with real traffic, cases
+and criteria should come from what actually happened, not from a description.
+
+The underlying conversational `evals-coach` skill (design, critique, expand, calibrate and
+guide a first real scoring run) lives at the
 [repository root](https://github.com/justshipai/evals-coach) and installs by cloning into
-your assistant's skills directory, including in Codex. See the repository README.
+your assistant's skills directory in either Claude Code or Codex. It's the right tool when
+you want to paste in real outputs and do error discovery on them. See the repository README.

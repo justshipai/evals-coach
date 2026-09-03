@@ -251,6 +251,9 @@ td select{padding:5px 7px; font-size:12px; background:var(--surface); min-width:
 .notice{padding:11px 14px; border-radius:10px; background:var(--surface-2); color:var(--ink-2); font-size:13px; line-height:1.5}
 .notice-row{display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:space-between}
 .notice-row > span{flex:1 1 auto}
+.notice-warn{background:var(--warn-soft); color:var(--ink); border:1px solid var(--warn); border-left-width:3px; display:block}
+.notice-warn strong{display:block; font-weight:600; margin-bottom:4px}
+.notice-warn span{color:var(--ink-2)}
 .outbar{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow)}
 .outbar-head{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:16px}
 .outbar-head strong{font-family:var(--display); font-weight:400; font-size:23px; letter-spacing:-.01em}
@@ -669,6 +672,13 @@ function stepProduct(body){
     ["task","Task completed","End-to-end success"],
     ["state","Resulting state","What changed in the world"]
   ], p.unit, v=>{ p.unit=v; markStale(); }));
+
+  if(p.stage==="postlaunch"){
+    stack.appendChild(el("div",{class:"notice notice-warn"},[
+      el("strong",{text:"You have real outputs. Use them."}),
+      el("span",{text:" This wizard drafts an eval from your description. That's a fine starting point, but if you already have production traffic your cases and criteria should come from what actually happened. Draft here for a first shape, then replace the cases with real failures and re-run this step. There's a note in the handoff to remind whoever runs it."})
+    ]));
+  }
 
   stack.appendChild(field("What's the most costly thing it could get wrong?",
     "Not every failure, the one you'd have to explain to someone. This becomes a hard blocker rather than an averaged score.",
@@ -1216,17 +1226,17 @@ Reply with only JSON: {"overall":"...","floors":"...","blockers":"...","regressi
 /* ---- step 7: output ---- */
 let outTab = "plan";
 function stepOut(body){
-  $("#p-lede").textContent = "Three things to hand over: the plan your engineer estimates from, the cases they import, and the judge prompts they wire up.";
+  $("#p-lede").textContent = "Version 1 of your eval, drafted from your description. Run it on real outputs, look at what's wrong, then come back and refine. That's how evals actually get good.";
   $("#btn-next").hidden = true;
   const wrap = el("div",{});
 
   // Deliverables, surfaced up front so no file hides behind a tab
   const dl = [["Eval plan","eval-plan.md",planMd],["Test cases","test-cases.csv",csv]];
-  if(S.judges.length) dl.push(["Judge prompts","judge-prompts.md",judgesMd]);
+  if(S.judges.length){ dl.push(["Judge prompts","judge-prompts.md",judgesMd]); dl.push(["Calibration guide","calibrate.md",calibrateMd]); }
   const bar = el("div",{class:"outbar"});
   bar.appendChild(el("div",{class:"outbar-head"},[
-    el("strong",{text:"Your eval is ready."}),
-    el("span",{class:"hint", text: downloads ? "Save your files, or preview each below." : "Copy each file below and paste it into a file with that name."})
+    el("strong",{text:"Version 1 of your eval."}),
+    el("span",{class:"hint", text: downloads ? "Save the files, run this on real outputs, then come back and refine." : "Copy each file below into a file with that name. Then run this on real outputs and come back to refine."})
   ]));
   const files = el("div",{class:"outfiles"});
   dl.forEach(([label,filename,gen])=>{
@@ -1245,7 +1255,10 @@ function stepOut(body){
   wrap.appendChild(bar);
 
   const tabs = el("div",{class:"tabs", style:"margin-top:30px"});
-  [["plan","Eval plan"],["cases","Test cases"],["judges","Judge prompts"],["handoff","Engineering handoff"]].forEach(([k,l])=>{
+  const tabDefs = [["plan","Eval plan"],["cases","Test cases"],["judges","Judge prompts"]];
+  if(S.judges.length) tabDefs.push(["calibrate","Calibrate"]);
+  tabDefs.push(["handoff","Engineering handoff"]);
+  tabDefs.forEach(([k,l])=>{
     tabs.appendChild(el("button",{class:"tab","aria-selected": outTab===k?"true":"false", onclick:()=>{ outTab=k; render(); }},[l]));
   });
   wrap.appendChild(tabs);
@@ -1276,6 +1289,20 @@ function stepOut(body){
       pane.appendChild(el("div",{class:"notice",text:S.calibration}));
     }
     if(S.judges.length) actions(pane, [["Copy all prompts", ()=>judgesMd()],["Save judge-prompts.md", ()=>({filename:"judge-prompts.md", data:judgesMd()})]]);
+  }
+  if(outTab==="calibrate"){
+    pane.appendChild(el("p",{class:"hint",style:"margin-bottom:12px",text:"An afternoon of work that keeps an uncalibrated judge from silently gating your release."}));
+    const md = calibrateMd();
+    const doc = el("div",{class:"doc"});
+    md.split("\n").forEach(line=>{
+      if(line.startsWith("### ")) doc.appendChild(el("h4",{text:line.slice(4)}));
+      else if(line.startsWith("## ")) doc.appendChild(el("h3",{text:line.slice(3)}));
+      else if(line.startsWith("# ")) doc.appendChild(el("h3",{text:line.slice(2)}));
+      else if(line.startsWith("- ")) { let ul=doc.lastElementChild; if(!ul||ul.tagName!=="UL"){ ul=el("ul",{}); doc.appendChild(ul);} ul.appendChild(el("li",{text:line.slice(2)}));}
+      else if(line.trim()) doc.appendChild(el("p",{text:line}));
+    });
+    pane.appendChild(doc);
+    actions(pane, [["Copy calibrate.md", ()=>calibrateMd()],["Save calibrate.md", ()=>({filename:"calibrate.md", data:calibrateMd()})]]);
   }
   if(outTab==="handoff"){ pane.appendChild(handoffDoc()); actions(pane, [["Copy handoff", ()=>handoffMd()]]); }
 
@@ -1375,6 +1402,15 @@ function handoffDoc(){
     d.appendChild(el("h4",{class:"eyebrow",text:"Instrumentation the graders need to see"}));
     d.appendChild(el("ul",{}, Object.keys(needs).map(n=>el("li",{text:n}))));
   }
+  if(S.judges.length){
+    d.appendChild(el("h4",{class:"eyebrow",text:"How to run the LLM judges"}));
+    d.appendChild(el("ul",{},[
+      el("li",{text:"Run each criterion as its own judge call, one prompt per criterion. Models get lazy and wash out specifics when several criteria share a prompt."}),
+      el("li",{text:"Aggregate the results into a case-by-criterion sheet (pass/fail plus one-line reason). That's your review artefact, not a headline score."}),
+      el("li",{text:"Treat any must-not (hard blocker) as a gate on its own row, not something an average can absorb."}),
+      el("li",{text:"Auto-eval tools recover obvious errors well but miss product-judgement failures and typically run 80–90% precise. Sample the judge's passes and failures by hand before trusting the aggregate."})
+    ]));
+  }
   d.appendChild(el("h4",{class:"eyebrow",text:"Do not guess these"}));
   d.appendChild(el("ul",{},[
     el("li",{text:"Any threshold left blank in the release gate, ask the PM."}),
@@ -1427,9 +1463,43 @@ function csv(){
   return rows.join("\n");
 }
 function judgesMd(){
-  const L = ["# Judge prompts\n","These are drafts. Calibrate each against hand labels before any of them gates a release.\n"];
+  const L = ["# Judge prompts\n","These are drafts. Calibrate each against hand labels before any of them gates a release. See calibrate.md.\n"];
   S.judges.forEach(j=>{ L.push("## " + j.name + "\n"); L.push("```\n" + j.prompt + "\n```\n"); });
-  if(S.calibration) L.push("## Calibration\n\n" + S.calibration);
+  if(S.calibration) L.push("## Calibration notes\n\n" + S.calibration);
+  return L.join("\n");
+}
+function calibrateMd(){
+  const L = [];
+  L.push("# Calibrate the judges before they gate anything\n");
+  L.push("An uncalibrated LLM judge is a coin flip in a lab coat. Before you let any judge score decide ship or hold, check it agrees with a human on real examples. This takes an afternoon.\n");
+  L.push("## 1. Build a mixed calibration set (about 20 examples)\n");
+  L.push("Pick outputs that cover the full picture, not just the middle:");
+  L.push("- Clear passes, the feature working as intended");
+  L.push("- Clear failures, the kind of thing you'd screenshot to your team");
+  L.push("- Boundary cases, where you can see the argument for either verdict");
+  L.push("- Adversarial or unusual inputs, the ones your test set is stretching to cover");
+  L.push("- Insufficient-evidence cases, where a reasonable judge would say \"can't tell\"\n");
+  L.push("Prefer real outputs over synthetic ones. If you have none yet, note that these labels are on drafts and must be redone with production traffic.\n");
+  L.push("## 2. Label each output by hand, without seeing the judge's answer\n");
+  L.push("For each criterion, mark pass or fail and write a one-line reason. Two reviewers on the same subset is better than one; disagreements tell you the criterion is ambiguous.\n");
+  L.push("## 3. Run each judge on the same set\n");
+  S.judges.forEach(j=>{ L.push("- " + j.name); });
+  if(!S.judges.length) L.push("- (No LLM judges in this eval yet.)");
+  L.push("\n## 4. Compare, and look at the disagreements\n");
+  L.push("Don't just report a headline accuracy. Split it:");
+  L.push("- **False passes**, judge said pass, human said fail. Read every one; these are the ones that ship bad output to users.");
+  L.push("- **False failures**, judge said fail, human said pass. These annoy the team and erode trust in the eval.\n");
+  L.push("## 5. Fix the right thing\n");
+  L.push("When agreement is weak, resist the urge to just move the threshold. In order:");
+  L.push("1. Is the criterion itself ambiguous? Rewrite it so two humans would agree.");
+  L.push("2. Is the judge missing evidence it needs? Give it the trace field, the source doc, the prior turn.");
+  L.push("3. Is the prompt vague? Show the judge two labelled examples (one pass, one fail) and the reasoning.");
+  L.push("4. Only then adjust the threshold. Never present an uncalibrated judge score as ground truth.\n");
+  L.push("## 6. Keep held-out examples\n");
+  L.push("The examples you used to tune the judge shouldn't be the ones you measure it on. Set aside 5–10 as a held-out check you don't touch during calibration.\n");
+  L.push("## 7. Route uncertainty to humans\n");
+  L.push("Whatever the judge can't decide confidently should go to a human, not a default pass. Log those cases; they're your next round of criteria.\n");
+  if(S.calibration){ L.push("## Notes from this eval\n\n" + S.calibration); }
   return L.join("\n");
 }
 function handoffMd(){
