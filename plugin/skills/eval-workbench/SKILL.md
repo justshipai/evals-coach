@@ -1,6 +1,6 @@
 ---
 name: eval-workbench
-description: Publish the PM Eval Workbench — a guided, seven-step web wizard that walks a product manager from a feature description to a runnable eval (criteria, test cases, graders, judge prompts, release gate) and hands back an eval plan, test-cases.csv and judge prompts. Use when someone asks for the eval workbench, the eval wizard, a UI or form for building an eval, a guided or step-by-step version of the evals coach, or something to hand to PMs who would rather fill in a form than write a prompt. Only for publishing the workbench; a conversational eval belongs to the evals-coach skill.
+description: Evals Coach for product managers. Publish a guided, seven-step wizard (a private web page) that walks someone from a plain feature description to a runnable eval (criteria, test cases, graders, judge prompts and a release gate) and hands back an eval plan, test-cases.csv and judge prompts. Use whenever someone wants to build, create, design or improve an eval for an AI feature or agent, asks to use Evals Coach, wants a guided or step-by-step way to evaluate what they are shipping, or would rather fill in a form than write a prompt.
 ---
 
 # Eval Workbench

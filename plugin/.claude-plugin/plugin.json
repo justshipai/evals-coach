@@ -1,7 +1,7 @@
 {
   "name": "evals-coach",
   "version": "0.1.0",
-  "description": "The PM Eval Workbench: a guided seven-step wizard that turns a feature description into a runnable eval (criteria, test cases, graders, judge prompts, release gate). No eval experience or repository access required.",
+  "description": "Evals Coach: a guided seven-step wizard that turns a feature description into a runnable eval (criteria, test cases, graders, judge prompts, release gate) and hands back an eval plan, test-cases.csv and judge prompts. For product managers; no eval experience needed.",
   "author": { "name": "Just Ship AI", "url": "https://github.com/justshipai" },
   "homepage": "https://github.com/justshipai/evals-coach",
   "repository": "https://github.com/justshipai/evals-coach",
