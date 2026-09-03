@@ -279,6 +279,17 @@ td select{padding:5px 7px; font-size:12px; background:var(--surface); min-width:
 .explainer-item{display:flex; flex-direction:column; gap:2px; padding-left:12px; border-left:2px solid var(--line)}
 .explainer-item strong{font-size:13.5px; color:var(--ink)}
 .explainer-item span{font-size:13px; line-height:1.55; color:var(--ink-2)}
+.ladder-lead{font-weight:600; color:var(--ink) !important; margin-top:2px}
+.tradeoff{display:flex; flex-direction:column; border:1px solid var(--line); border-radius:8px; overflow:hidden; margin-top:4px}
+.tradeoff-head, .tradeoff-row{display:grid; grid-template-columns:1.3fr 1.4fr 1.1fr .9fr; gap:8px; padding:8px 11px; align-items:center}
+.tradeoff-head{background:var(--surface-2); font-family:var(--mono); font-size:10px; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-3)}
+.tradeoff-row{border-top:1px solid var(--line); font-size:12.5px; color:var(--ink-2)}
+.tradeoff-name{font-weight:600; color:var(--ink)}
+@media(max-width:640px){
+  .tradeoff-head{display:none}
+  .tradeoff-row{grid-template-columns:1fr; gap:2px; padding:10px 11px}
+  .tradeoff-row span:not(.tradeoff-name){font-size:12px; color:var(--ink-3)}
+}
 .evidence{display:flex; flex-direction:column; gap:5px; margin-top:9px}
 .evidence-lbl{font-family:var(--mono); font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3)}
 .evidence-in{width:100%; padding:7px 10px; border:1px solid var(--line-strong); border-radius:7px; background:var(--surface); font-size:13px; color:var(--ink)}
@@ -1271,13 +1282,13 @@ const GTYPES = [
   ["human","Human review","A person reads it. Slowest, most trustworthy."]
 ];
 const GTYPE_HELP = [
-  ["Code check","A script decides, pass or fail. Use it when the answer is objective: a number, a date format, a required field, a banned word. Free to run and it never changes its mind. Reach for this first."],
-  ["Trace check","Looks at what the system did on the way to the answer, not just the answer. Use it when a step itself matters: it had to look up the order before promising a refund, or it must never have emailed the customer directly."],
-  ["LLM judge","Another AI reads the output and decides. Use it for things a person could judge by reading, when you have too many runs to read them all yourself. Cheap and fast, but it is a draft until you have checked it against your own hand-labelled examples. Step 7 gives you a guide for that."],
-  ["Human review","A person reads it and decides. Use it for anything genuinely ambiguous or high-consequence. Slowest and most expensive, and the thing you measure the other three against."]
+  ["1. Can you write the rule down exactly?","If you can state the check without using judgement, a script can do it: under 120 words, contains a policy ID, never contains the word \"guarantee\", valid JSON, the date is in the future. Use a CODE CHECK. It costs nothing, runs instantly, and gives the same answer every single time."],
+  ["2. Is it about what the system did, not what it said?","If the thing you care about is a step rather than the wording: it had to look up the order before promising a refund; it must never have sent an email; it should not have called the pricing tool twice. Use a TRACE CHECK. Same cost and reliability as code, it is just looking at the system's actions instead of its text."],
+  ["3. Could a new joiner judge it from reading, given a clear rule?","If a sensible person could read the output plus its sources and reach the right verdict, and you would trust them after an hour of training, then an LLM JUDGE can do it at scale. Costs pennies per run, takes seconds. It is a draft until you have checked it against your own hand-labelled examples, which is what calibrate.md is for."],
+  ["4. Would two people on your team disagree?","If yes, no automated grader will settle it, and pretending otherwise just moves the argument. Use HUMAN REVIEW. Also worth asking: if two of you genuinely disagree about what a pass looks like, the criterion itself may be too vague. That is a step 3 problem, not a grader problem."]
 ];
 function stepGraders(body){
-  $("#p-lede").textContent = "Each criterion you wrote needs something that decides, run after run, whether it passed. That thing is called a grader. Pick the cheapest one that you'd actually trust.";
+  $("#p-lede").textContent = "Each criterion you wrote needs something that decides, run after run, whether it passed. That thing is called a grader. Open the panel below if you're not sure how to choose between them.";
   const host = busyHost();
   const wrap = el("div",{class:"stack"});
   const crits = allCriteria();
@@ -1285,14 +1296,27 @@ function stepGraders(body){
   const exp = el("details",{class:"explainer"});
   exp.appendChild(el("summary",{text:"What's a grader, and how do I pick one?"}));
   const expBody = el("div",{class:"explainer-body"});
-  expBody.appendChild(el("p",{text:"You've written criteria like \"never states a policy that isn't ours\". Something has to check that, on every run, without you reading all of them by hand. That checker is a grader. There are four kinds, and the rule of thumb is to use the cheapest one that would genuinely catch the failure."}));
+  expBody.appendChild(el("p",{text:"You've written criteria like \"never states a policy that isn't ours\". Something has to check that on every run, without you reading all of them by hand. That checker is a grader."}));
+  expBody.appendChild(el("p",{text:"Here's why the choice matters. You won't run this eval once. You'll run it on every case, every time someone changes a prompt or a model, possibly for years. A check that needs a person costs about two minutes each time; across 40 cases and a weekly release that's most of a day, every week, forever. So the goal is to push each criterion as far up this list as it will honestly go, and no further."}));
+  expBody.appendChild(el("p",{class:"ladder-lead",text:"Work down these four questions. Stop at the first one you can answer yes to."}));
   GTYPE_HELP.forEach(([name,desc])=>{
     expBody.appendChild(el("div",{class:"explainer-item"},[
       el("strong",{text:name}),
       el("span",{text:desc})
     ]));
   });
-  expBody.appendChild(el("p",{class:"hint",text:"Claude picks one per criterion below and you can change any of them. You know what your team can actually run; it doesn't."}));
+  const tbl = el("div",{class:"tradeoff"});
+  tbl.appendChild(el("div",{class:"tradeoff-head"},[
+    el("span",{text:""}), el("span",{text:"Cost to run"}), el("span",{text:"Same answer twice?"}), el("span",{text:"Handles nuance?"})
+  ]));
+  [["Code check","Free","Always","No"],
+   ["Trace check","Free","Always","No"],
+   ["LLM judge","Pennies","Usually","Roughly"],
+   ["Human review","Minutes of someone's time","Not always","Yes"]].forEach(r=>{
+    tbl.appendChild(el("div",{class:"tradeoff-row"}, r.map((cell,i)=>el("span",{class: i===0?"tradeoff-name":"", text:cell}))));
+  });
+  expBody.appendChild(tbl);
+  expBody.appendChild(el("p",{class:"hint",text:"Claude picks one per criterion below and you can change any of them. It doesn't know what your team can realistically run every week. You do."}));
   exp.appendChild(expBody);
   wrap.appendChild(exp);
 
