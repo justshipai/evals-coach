@@ -1,5 +1,5 @@
 ---
-name: eval-workbench
+name: evals-coach
 description: Evals Coach for product managers. Publish a guided, seven-step wizard (a private web page) that walks someone from a plain feature description to a runnable eval (criteria, test cases, graders, judge prompts and a release gate) and hands back an eval plan, test-cases.csv and judge prompts. Use whenever someone wants to build, create, design or improve an eval for an AI feature or agent, asks to use Evals Coach, wants a guided or step-by-step way to evaluate what they are shipping, or would rather fill in a form than write a prompt.
 ---
 
@@ -12,7 +12,7 @@ in the conversation.
 ## Publish it
 
 1. Copy the page to a working file, so the source in the plugin stays pristine:
-   `cp "${CLAUDE_PLUGIN_ROOT}/skills/eval-workbench/assets/eval-workbench.html" ./eval-workbench.html`
+   `cp "${CLAUDE_PLUGIN_ROOT}/skills/evals-coach/assets/eval-workbench.html" ./eval-workbench.html`
 2. Publish it with the Artifact tool:
    - `file_path`: the copy
    - `favicon`: 🎚️ (first publish only — never change it on a republish)
