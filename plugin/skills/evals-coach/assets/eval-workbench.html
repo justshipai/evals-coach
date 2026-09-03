@@ -254,6 +254,14 @@ td select{padding:5px 7px; font-size:12px; background:var(--surface); min-width:
 .notice-warn{background:var(--warn-soft); color:var(--ink); border:1px solid var(--warn); border-left-width:3px; display:block}
 .notice-warn strong{display:block; font-weight:600; margin-bottom:4px}
 .notice-warn span{color:var(--ink-2)}
+.postlaunch-card{background:var(--surface); border:1px solid var(--line-strong); border-left:3px solid var(--accent); border-radius:var(--radius); padding:20px; display:flex; flex-direction:column; gap:14px}
+.postlaunch-head strong{display:block; font-size:15.5px; font-weight:600; margin-bottom:4px}
+.postlaunch-head .hint{font-size:13px; color:var(--ink-2)}
+.weight-row{display:flex; align-items:center; gap:6px; margin-top:6px; flex-wrap:wrap}
+.weight-lbl{font-family:var(--mono); font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); margin-right:2px}
+.weight-chip{font:inherit; font-size:11.5px; font-weight:500; padding:3px 8px; border-radius:6px; border:1px solid var(--line-strong); background:transparent; color:var(--ink-3); cursor:pointer}
+.weight-chip:hover{color:var(--ink)}
+.weight-chip.active{background:var(--accent-soft); border-color:var(--accent); color:var(--accent-ink); font-weight:600}
 .outbar{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow)}
 .outbar-head{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:16px}
 .outbar-head strong{font-family:var(--display); font-weight:400; font-size:23px; letter-spacing:-.01em}
@@ -334,7 +342,7 @@ const EXAMPLE = {
 
 const BLANK = {
   v:3, step:0, seenIntro:false,
-  product:{desc:"", stage:"prelaunch", decision:"ship", unit:"response", worst:"", isExample:true},
+  product:{desc:"", stage:"prelaunch", decision:"ship", unit:"response", worst:"", samples:"", sampleNotes:"", golds:"", isExample:true},
   question:"", questionDrafted:false,
   criteria:{must:[], should:[], mustNot:[]}, criteriaDrafted:false,
   suggestions:{must:[], should:[], mustNot:[]}, suggestRound:0,
@@ -493,12 +501,25 @@ function ctxBlock(){
   const L = [];
   L.push("FEATURE UNDER EVALUATION:\n" + (p.desc||"(not described)"));
   L.push("MATURITY: " + (p.stage==="prelaunch" ? "Pre-launch, no production traffic yet" : "Post-launch, real usage and traces exist"));
+  if(p.stage==="postlaunch" && (p.samples||"").trim()){
+    L.push("REAL OUTPUTS FROM THE LIVE FEATURE (the PM's own samples, treat as ground truth for what happens, not what should happen):\n" + p.samples.trim());
+    if((p.sampleNotes||"").trim()) L.push("PM's NOTES ON WHAT'S OFF ABOUT THESE OUTPUTS:\n" + p.sampleNotes.trim());
+    if((p.golds||"").trim()){
+      L.push("GOLD OUTPUTS (what a human would have shipped instead, same order and separators as the real outputs above):\n" + p.golds.trim());
+      L.push("IMPORTANT: Where GOLD OUTPUTS are provided, derive criteria and cases from the DELTAS between the real outputs and the gold versions. Every criterion should catch something the real output got wrong that the gold got right. Every case should test a delta pattern, not a generic scenario.");
+    } else {
+      L.push("IMPORTANT: Ground your suggestions in the failure modes visible in these real outputs. Do not fall back to generic best-practice criteria if a real failure mode contradicts them.");
+    }
+  }
   L.push("DECISION THE EVAL MUST SUPPORT: " + ({ship:"Whether to ship this to users",compare:"Which of two versions/models/prompts to use",regress:"Whether a change broke anything that worked",expand:"Whether it is safe to widen the rollout"})[p.decision]);
   L.push("UNIT OF EVALUATION: " + ({response:"a single response",trajectory:"the agent's whole trajectory across steps",task:"whether the end-to-end task was completed",state:"the resulting state after the system acted"})[p.unit]);
   if(p.worst) L.push("THE FAILURE THE PM SAYS IS MOST COSTLY:\n" + p.worst);
   if(S.question) L.push("AGREED EVALUATION QUESTION:\n" + S.question);
   const cs = allCriteria();
-  if(cs.length) L.push("AGREED CRITERIA:\n" + cs.map(c=>`- [${c.kind.toUpperCase()}] ${c.text}`).join("\n"));
+  if(cs.length) L.push("AGREED CRITERIA:\n" + cs.map(c=>{
+    const w = (c.kind==="should" && c.weight && c.weight!=="medium") ? ` (weight: ${c.weight})` : "";
+    return `- [${c.kind.toUpperCase()}${w}] ${c.text}`;
+  }).join("\n"));
   if(S.cases.length) L.push("AGREED TEST CASES:\n" + S.cases.map(c=>`- ${c.id} (${c.category}, slice: ${c.slice||"—"}): ${c.name}. Input: ${c.input}. Expected: ${c.expected}`).join("\n"));
   return L.join("\n\n");
 }
@@ -674,10 +695,24 @@ function stepProduct(body){
   ], p.unit, v=>{ p.unit=v; markStale(); }));
 
   if(p.stage==="postlaunch"){
-    stack.appendChild(el("div",{class:"notice notice-warn"},[
-      el("strong",{text:"You have real outputs. Use them."}),
-      el("span",{text:" This wizard drafts an eval from your description. That's a fine starting point, but if you already have production traffic your cases and criteria should come from what actually happened. Draft here for a first shape, then replace the cases with real failures and re-run this step. There's a note in the handoff to remind whoever runs it."})
+    const pl = el("div",{class:"postlaunch-card"});
+    pl.appendChild(el("div",{class:"postlaunch-head"},[
+      el("strong",{text:"You have real outputs. Paste them and the whole eval gets grounded in them."}),
+      el("span",{class:"hint", text:"Cases and criteria then come from what actually went wrong, not from a description of what should happen. Optional but strongly recommended."})
     ]));
+    pl.appendChild(field("Recent real outputs from the live feature",
+      "Paste 5-10 real outputs, separated by a blank line or a line of ---. Trim to the essentials; the drafting doesn't need full transcripts.",
+      area(p.samples, v=>{ p.samples=v; markStale(); }, 8, "The first output…\n\n---\n\nThe second output…"),
+      null));
+    pl.appendChild(field("What's off about them? (optional)",
+      "One line per output, or general notes. Even rough vibes help the drafting spot the failure modes to catch.",
+      area(p.sampleNotes, v=>{ p.sampleNotes=v; markStale(); }, 3, "e.g. #3 invented a policy; #7 was too long; #9 missed the user's real question."),
+      null));
+    pl.appendChild(field("Human-edited or gold versions (optional)",
+      "If you have the versions you'd have shipped, paste them in the same order and separators. The drafting then derives criteria from the deltas between what happened and what should have happened. Peter's \"my final newsletter posts vs the AI drafts\" case.",
+      area(p.golds, v=>{ p.golds=v; markStale(); }, 6, "The gold version of the first output…\n\n---\n\nThe gold version of the second output…"),
+      null));
+    stack.appendChild(pl);
   }
 
   stack.appendChild(field("What's the most costly thing it could get wrong?",
@@ -800,7 +835,18 @@ function stepCriteria(body){
       tick.addEventListener("change", ()=>{ c.on = tick.checked; markStale(); });
       const ta = area(c.text, v=>{ c.text=v; markStale(); }, 2, "Observable behaviour…");
       row.appendChild(tick);
-      row.appendChild(el("div",{},[ta]));
+      const cell = el("div",{},[ta]);
+      if(k==="should"){
+        if(!c.weight) c.weight = "medium";
+        const wrapW = el("div",{class:"weight-row"});
+        wrapW.appendChild(el("span",{class:"weight-lbl", text:"How much does this matter?"}));
+        ["high","medium","low"].forEach(w=>{
+          const b = el("button",{class:"weight-chip"+(c.weight===w?" active":""), type:"button", title:w+" importance", onclick:()=>{ c.weight=w; save(); render(); }},[w[0].toUpperCase()+w.slice(1)]);
+          wrapW.appendChild(b);
+        });
+        cell.appendChild(wrapW);
+      }
+      row.appendChild(cell);
       row.appendChild(el("button",{class:"btn sm danger", title:"Remove", onclick:()=>{ list.splice(idx,1); save(); render(); }},["Remove"]));
       g.appendChild(row);
     });
@@ -900,14 +946,19 @@ Write the criteria for this eval.
 - "should": 2-3 graded qualities where better or worse genuinely matters to this user.
 - "mustNot": 2-4 critical failures, policy violations or regressions, include the PM's most costly failure if they named one.
 Every line must be observable from what a reviewer can actually see in a run of THIS feature. Name the feature's own objects, policies and users. No generic words like helpful, accurate, relevant, high quality, appropriate.
+If REAL OUTPUTS are provided in the context, derive the criteria from failure modes visible in those outputs, not from generic best practices; the PM's own notes on what's off take priority over anything textbook.
 
 Then, separately, suggest 2 more of EACH kind that you did not put in the lists above, the next most defensible candidates, each covering a different failure mode or user situation from the ones you chose. These are offered to the PM to take or leave, so give each one a short line (under 15 words) on the failure it catches.
 
 Reply with only JSON:
 {"must":["..."],"should":["..."],"mustNot":["..."],
  "suggest":{"must":[{"text":"...","why":"..."}],"should":[{"text":"...","why":"..."}],"mustNot":[{"text":"...","why":"..."}]}}`);
-    const mk = a => (Array.isArray(a)?a:[]).map(t=>({id:uid("c"),text:String(t),on:true}));
-    S.criteria = {must:mk(r.must), should:mk(r.should), mustNot:mk(r.mustNot)};
+    const mk = (a, kind) => (Array.isArray(a)?a:[]).map(t=>{
+      const item = {id:uid("c"),text:String(t),on:true};
+      if(kind==="should") item.weight = "medium";
+      return item;
+    });
+    S.criteria = {must:mk(r.must,"must"), should:mk(r.should,"should"), mustNot:mk(r.mustNot,"mustNot")};
     const sg = r.suggest || {};
     const ms = a => (Array.isArray(a)?a:[]).map(x=>({text:String((x&&x.text)||x||""), why:String((x&&x.why)||"")})).filter(x=>x.text);
     S.suggestions = {must:ms(sg.must), should:ms(sg.should), mustNot:ms(sg.mustNot)};
@@ -1016,6 +1067,7 @@ function draftCases(host){
 
 Design the smallest test set that could change this decision: 8 cases, deliberately varied, no near-duplicates.
 Cover a spread of: capability, edge, ambiguity, safety, regression, recovery, efficiency, only the ones that matter to this product. At least one case must probe the PM's most costly failure.
+If REAL OUTPUTS are provided in the context, at least half the cases must be grounded in those outputs: use the same shape of input, capture the failure mode that actually happened, and write the expected behaviour as what should have happened instead. Mark those cases in "why" with "from a real failure: [one line reference]".
 For each case give:
   id: "T01".."T08"
   name: short name, under 8 words
@@ -1351,7 +1403,10 @@ function planDoc(){
     const items = S.criteria[k].filter(c=>c.on!==false && c.text.trim());
     if(!items.length) return;
     d.appendChild(el("h4",{class:"eyebrow",text:l}));
-    d.appendChild(el("ul",{}, items.map(c=>el("li",{text:c.text}))));
+    d.appendChild(el("ul",{}, items.map(c=>{
+      const w = (k==="should" && c.weight && c.weight!=="medium") ? ` (${c.weight} priority)` : "";
+      return el("li",{text:c.text + w});
+    })));
   });
 
   d.appendChild(el("h3",{text:"Test set"}));
@@ -1440,7 +1495,10 @@ function planMd(){
   [["must","Must"],["should","Should"],["mustNot","Must not"]].forEach(([k,l])=>{
     const it = S.criteria[k].filter(c=>c.on!==false && c.text.trim());
     if(!it.length) return;
-    L.push("### " + l + "\n"); it.forEach(c=>L.push("- " + c.text)); L.push("");
+    L.push("### " + l + "\n"); it.forEach(c=>{
+      const w = (k==="should" && c.weight && c.weight!=="medium") ? ` _(${c.weight} priority)_` : "";
+      L.push("- " + c.text + w);
+    }); L.push("");
   });
   L.push("## Test set\n\n" + S.cases.length + " cases, see test-cases.csv.");
   if(S.notCovered) L.push("\n**Not covered:** " + S.notCovered);
