@@ -1,5 +1,5 @@
 <meta charset="utf-8">
-<title>PM Eval Workbench</title>
+<title>Evals Coach</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
@@ -257,6 +257,9 @@ td select{padding:5px 7px; font-size:12px; background:var(--surface); min-width:
 .postlaunch-card{background:var(--surface); border:1px solid var(--line-strong); border-left:3px solid var(--accent); border-radius:var(--radius); padding:20px; display:flex; flex-direction:column; gap:14px}
 .postlaunch-head strong{display:block; font-size:15.5px; font-weight:600; margin-bottom:4px}
 .postlaunch-head .hint{font-size:13px; color:var(--ink-2)}
+.example-card{background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:16px; display:flex; flex-direction:column; gap:12px}
+.example-head{display:flex; align-items:center; justify-content:space-between; gap:12px}
+.example-head .eyebrow{color:var(--accent-ink); font-weight:600}
 .weight-row{display:flex; align-items:center; gap:6px; margin-top:6px; flex-wrap:wrap}
 .weight-lbl{font-family:var(--mono); font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); margin-right:2px}
 .weight-chip{font:inherit; font-size:11.5px; font-weight:500; padding:3px 8px; border-radius:6px; border:1px solid var(--line-strong); background:transparent; color:var(--ink-3); cursor:pointer}
@@ -280,7 +283,7 @@ td select{padding:5px 7px; font-size:12px; background:var(--surface); min-width:
   <header class="masthead">
     <div class="brand">
       <span class="eyebrow">Evals coach</span>
-      <h1>PM Eval Workbench</h1>
+      <h1>Evals Coach</h1>
       <p class="tag">Describe the AI feature you're shipping. This walks you to a runnable eval, criteria, test cases, graders and a release gate, and asks for your judgement only where it can't be inferred.</p>
     </div>
     <div class="masthead-side">
@@ -341,8 +344,8 @@ const EXAMPLE = {
 };
 
 const BLANK = {
-  v:3, step:0, seenIntro:false,
-  product:{desc:"", stage:"prelaunch", decision:"ship", unit:"response", worst:"", samples:"", sampleNotes:"", golds:"", isExample:true},
+  v:4, step:0, seenIntro:false,
+  product:{desc:"", stage:"prelaunch", decision:"ship", unit:"response", worst:"", examples:[], isExample:true},
   question:"", questionDrafted:false,
   criteria:{must:[], should:[], mustNot:[]}, criteriaDrafted:false,
   suggestions:{must:[], should:[], mustNot:[]}, suggestRound:0,
@@ -410,7 +413,7 @@ let ctl = null, busy = false;
 function load(){
   try{
     const raw = localStorage.getItem(KEY);
-    if(raw){ const p = JSON.parse(raw); if(p && p.v===3) return normalize(p); }
+    if(raw){ const p = JSON.parse(raw); if(p && p.v===4) return normalize(p); }
   }catch(e){}
   const s = JSON.parse(JSON.stringify(BLANK));
   s.product = Object.assign(s.product, EXAMPLE, {isExample:true});
@@ -420,6 +423,7 @@ function normalize(s){
   if(!s.suggestions) s.suggestions = {must:[], should:[], mustNot:[]};
   ["must","should","mustNot"].forEach(k=>{ if(!Array.isArray(s.suggestions[k])) s.suggestions[k] = []; });
   if(typeof s.suggestRound !== "number") s.suggestRound = 0;
+  if(!Array.isArray(s.product.examples)) s.product.examples = [];
   return s;
 }
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
@@ -482,7 +486,7 @@ function setStrip(msg, warn){
     t.textContent = "You fill each step in yourself, with a shape to follow and starter suggestions along the way. Nothing you type leaves your browser.";
   } else {
     strip.classList.add("warn");
-    t.textContent = "Drafting is unavailable in this view, so the workbench is running in manual mode. Every field is yours to fill in, and the outputs still assemble at the end.";
+    t.textContent = "Drafting is unavailable in this view, so Evals Coach is running in manual mode. Every field is yours to fill in, and the outputs still assemble at the end.";
   }
 }
 
@@ -501,14 +505,22 @@ function ctxBlock(){
   const L = [];
   L.push("FEATURE UNDER EVALUATION:\n" + (p.desc||"(not described)"));
   L.push("MATURITY: " + (p.stage==="prelaunch" ? "Pre-launch, no production traffic yet" : "Post-launch, real usage and traces exist"));
-  if(p.stage==="postlaunch" && (p.samples||"").trim()){
-    L.push("REAL OUTPUTS FROM THE LIVE FEATURE (the PM's own samples, treat as ground truth for what happens, not what should happen):\n" + p.samples.trim());
-    if((p.sampleNotes||"").trim()) L.push("PM's NOTES ON WHAT'S OFF ABOUT THESE OUTPUTS:\n" + p.sampleNotes.trim());
-    if((p.golds||"").trim()){
-      L.push("GOLD OUTPUTS (what a human would have shipped instead, same order and separators as the real outputs above):\n" + p.golds.trim());
-      L.push("IMPORTANT: Where GOLD OUTPUTS are provided, derive criteria and cases from the DELTAS between the real outputs and the gold versions. Every criterion should catch something the real output got wrong that the gold got right. Every case should test a delta pattern, not a generic scenario.");
-    } else {
-      L.push("IMPORTANT: Ground your suggestions in the failure modes visible in these real outputs. Do not fall back to generic best-practice criteria if a real failure mode contradicts them.");
+  if(p.stage==="postlaunch"){
+    const exs = (p.examples||[]).filter(e=>(e.output||"").trim());
+    if(exs.length){
+      const anyGold = exs.some(e=>(e.gold||"").trim());
+      L.push("REAL EXAMPLES FROM THE LIVE FEATURE (the PM's own outputs; treat as ground truth for what happens, not what should happen):");
+      exs.forEach((e,i)=>{
+        L.push("--- Example " + (i+1) + " ---");
+        L.push("REAL OUTPUT:\n" + e.output.trim());
+        if((e.notes||"").trim()) L.push("WHAT'S OFF (PM's note):\n" + e.notes.trim());
+        if((e.gold||"").trim()) L.push("WHAT SHOULD HAVE HAPPENED (human-edited / gold version):\n" + e.gold.trim());
+      });
+      if(anyGold){
+        L.push("IMPORTANT: Some examples include a gold version. Derive criteria and cases from the DELTAS between the real output and the gold version wherever provided. Every criterion should catch something the real output got wrong that the gold got right. Every case should test a delta pattern, not a generic scenario.");
+      } else {
+        L.push("IMPORTANT: Ground your suggestions in the failure modes visible in these real examples. Do not fall back to generic best-practice criteria if a real failure mode contradicts them.");
+      }
     }
   }
   L.push("DECISION THE EVAL MUST SUPPORT: " + ({ship:"Whether to ship this to users",compare:"Which of two versions/models/prompts to use",regress:"Whether a change broke anything that worked",expand:"Whether it is safe to widen the rollout"})[p.decision]);
@@ -695,23 +707,37 @@ function stepProduct(body){
   ], p.unit, v=>{ p.unit=v; markStale(); }));
 
   if(p.stage==="postlaunch"){
+    if(!Array.isArray(p.examples)) p.examples = [];
+    if(!p.examples.length) p.examples.push({output:"", notes:"", gold:""});
     const pl = el("div",{class:"postlaunch-card"});
     pl.appendChild(el("div",{class:"postlaunch-head"},[
-      el("strong",{text:"You have real outputs. Paste them and the whole eval gets grounded in them."}),
-      el("span",{class:"hint", text:"Cases and criteria then come from what actually went wrong, not from a description of what should happen. Optional but strongly recommended."})
+      el("strong",{text:"You have real outputs. Add a few and the whole eval gets grounded in them."}),
+      el("span",{class:"hint", text:"Add one example per real output. The more you add, the better the drafted criteria and cases will fit what actually happens. Three to five is plenty for a first pass."})
     ]));
-    pl.appendChild(field("Recent real outputs from the live feature",
-      "Paste 5-10 real outputs, separated by a blank line or a line of ---. Trim to the essentials; the drafting doesn't need full transcripts.",
-      area(p.samples, v=>{ p.samples=v; markStale(); }, 8, "The first output…\n\n---\n\nThe second output…"),
-      null));
-    pl.appendChild(field("What's off about them? (optional)",
-      "One line per output, or general notes. Even rough vibes help the drafting spot the failure modes to catch.",
-      area(p.sampleNotes, v=>{ p.sampleNotes=v; markStale(); }, 3, "e.g. #3 invented a policy; #7 was too long; #9 missed the user's real question."),
-      null));
-    pl.appendChild(field("Human-edited or gold versions (optional)",
-      "If you have the versions you'd have shipped, paste them in the same order and separators. The drafting then derives criteria from the deltas between what happened and what should have happened. Peter's \"my final newsletter posts vs the AI drafts\" case.",
-      area(p.golds, v=>{ p.golds=v; markStale(); }, 6, "The gold version of the first output…\n\n---\n\nThe gold version of the second output…"),
-      null));
+    p.examples.forEach((ex,i)=>{
+      const card = el("div",{class:"example-card"});
+      const head = el("div",{class:"example-head"},[
+        el("span",{class:"eyebrow",text:"Example " + (i+1)})
+      ]);
+      if(p.examples.length>1){
+        head.appendChild(el("button",{class:"btn sm ghost", type:"button", onclick:()=>{ p.examples.splice(i,1); if(!p.examples.length) p.examples.push({output:"",notes:"",gold:""}); save(); render(); }},["Remove"]));
+      }
+      card.appendChild(head);
+      card.appendChild(field("Real output",
+        "Paste one output your live feature produced. Trim to what a reviewer would need to judge it.",
+        area(ex.output, v=>{ ex.output=v; markStale(); }, 5, "The output the feature actually produced…"),
+        null));
+      card.appendChild(field("What's off? (optional)",
+        "A line or two on what a reviewer would flag. Even rough vibes help.",
+        area(ex.notes, v=>{ ex.notes=v; markStale(); }, 2, "e.g. Invented a refund policy that isn't ours."),
+        null));
+      card.appendChild(field("What you'd have shipped instead (optional)",
+        "The human-edited or gold version, if you have one. Drafting then learns from the delta between what happened and what should have.",
+        area(ex.gold, v=>{ ex.gold=v; markStale(); }, 4, "The version you'd have sent…"),
+        null));
+      pl.appendChild(card);
+    });
+    pl.appendChild(el("button",{class:"btn sm", type:"button", onclick:()=>{ p.examples.push({output:"",notes:"",gold:""}); save(); render(); }},["+ Add another example"]));
     stack.appendChild(pl);
   }
 
