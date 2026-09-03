@@ -1,6 +1,6 @@
 # Evals Coach
 
-**The vendor-neutral eval coach for AI PMs.** Turn product intent into evals your team can implement, run, and improve.
+**The evals copilot for AI product managers.** Turn product intent, or real outputs from a live feature, into evals your team can implement, run and improve.
 
 Evals Coach helps product managers move from “the AI should be helpful and accurate” to a small, testable definition of good. It can create an eval plan from a PRD or feature idea, guide a team through its first real scoring cycle, critique an existing eval, expand production failures into regression cases, and help calibrate graders.
 
@@ -21,23 +21,23 @@ It does **not** replace an eval platform or execute your product suite. It helps
 
 ## Examples
 
-- [AI Meeting Catch-up](examples/ai-meeting-catch-up/eval-plan.md) — a complete in-repo eval plan and test set
-- [SmartDesk AI Triage & Auto-Resolve](examples/smartdesk-ai-triage/README.md) — a public Claude example showing Evals Coach applied to a higher-risk support agent
+- [AI Meeting Catch-up](examples/ai-meeting-catch-up/eval-plan.md), a complete in-repo eval plan and test set
+- [SmartDesk AI Triage & Auto-Resolve](examples/smartdesk-ai-triage/README.md), a public Claude example showing Evals Coach applied to a higher-risk support agent
 
 ## Install
 
 Two ways in. Most PMs want the first.
 
-### Easiest: the Eval Workbench (Claude plugin)
+### Easiest: the Evals Coach plugin (Claude)
 
-A guided seven-step wizard. In the Claude app: **Settings → Customize → Plugins → Add → Add marketplace**, enter `justshipai/evals-coach`, then install **Eval Workbench**. In Claude Code:
+A guided seven-step wizard. In the Claude app: **Settings → Customize → Plugins → Add → Add marketplace**, enter `justshipai/evals-coach`, then install **Evals Coach**. In Claude Code:
 
 ```text
 /plugin marketplace add justshipai/evals-coach
 /plugin install evals-coach@justshipai
 ```
 
-Then ask for **the eval workbench**. It publishes a private web page that walks you from a feature description to a runnable eval and hands back an eval plan, `test-cases.csv` and judge prompts. It runs on Claude: drafting spends the account of whoever opens the page, and the page is shared with named people rather than a public link. See [website](https://evalscoach.com).
+Then ask **Evals Coach** to build you an eval, in your own words. It publishes a private web page that walks you from a feature description, or real outputs from a live feature, to a runnable eval, and hands back an eval plan, `test-cases.csv`, judge prompts and a calibration guide. It runs on Claude: drafting spends the account of whoever opens the page, and the page is shared with named people rather than a public link. See [website](https://evalscoach.com).
 
 ### For Codex, Claude Code, or any assistant: the skill
 
@@ -107,13 +107,14 @@ Read the [full method, task scores and limitations](evals/results/2026-08-24-gpt
 
 ## Repository map
 
-- `SKILL.md` — the workflow used by the assistant
-- `references/` — scenario, grader, and output guidance
-- `scripts/validate_test_cases.py` — validates the generated CSV schema
-- `examples/` — worked PM-to-engineering examples
-- `evals/` — cases and rubric for evaluating Evals Coach itself
-- `plugin/` — the Claude Code / Cowork plugin, including the eval workbench
-- `.claude-plugin/marketplace.json` — lets this repository be added as a plugin marketplace
+- `SKILL.md`: the workflow used by the assistant
+- `references/`: scenario, grader, and output guidance
+- `scripts/validate_test_cases.py`: validates the generated CSV schema
+- `examples/`: worked PM-to-engineering examples
+- `plugin/`: the Claude plugin (the Evals Coach wizard)
+- `.claude-plugin/marketplace.json`: lets this repository be added as a plugin marketplace
+- `evals/`: cases and rubric for evaluating Evals Coach itself
+- `site/`: source of evalscoach.com
 
 ## Help shape it
 

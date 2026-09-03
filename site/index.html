@@ -91,6 +91,7 @@ h2{font-size:clamp(30px,4.4vw,44px); letter-spacing:-.015em; max-width:20ch}
 
 /* ---- who row ---- */
 .who{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:38px}
+.who.who-4{grid-template-columns:repeat(2,1fr)}
 .who div{padding:22px; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius)}
 .who h3{font-family:var(--body); font-weight:600; font-size:16px; letter-spacing:0; margin-bottom:6px}
 .who p{font-size:15px; color:var(--ink-2)}
@@ -273,13 +274,13 @@ footer{border-top:1px solid var(--line); padding:40px 0 56px}
   <h2>Seven steps to a runnable eval.</h2>
   <p class="sec-sub">Describe your feature; Evals Coach drafts each step, you edit it, and the outputs assemble as you go.</p>
   <div class="steps">
-    <div class="step"><div class="n">1</div><div><h3>Describe your feature</h3><p>A sentence or two: what it does, who uses it, and the worst thing it could get wrong.</p></div></div>
+    <div class="step"><div class="n">1</div><div><h3>Describe your feature (or paste real outputs)</h3><p>A sentence or two on what it does and the worst thing it could get wrong. If it's already live, paste a few real outputs too, and every later step gets grounded in what actually happened.</p></div></div>
     <div class="step"><div class="n">2</div><div><h3>Confirm the evaluation question</h3><p>It drafts the one decision your eval should inform. You adjust the wording until it fits.</p></div></div>
     <div class="step"><div class="n">3</div><div><h3>Set good and bad</h3><p>Turn “helpful” into observable must and must-not behaviours you can actually score.</p></div></div>
-    <div class="step"><div class="n">4</div><div><h3>Edit the test cases</h3><p>It drafts a small representative set: normal, edge, adversarial and critical. You edit them or add your own.</p></div></div>
+    <div class="step"><div class="n">4</div><div><h3>Edit the test cases</h3><p>It drafts a small representative set: normal, edge, adversarial and critical. If you pasted real outputs, half the cases are grounded in them. You edit any of it or add your own.</p></div></div>
     <div class="step"><div class="n">5</div><div><h3>Approve the graders</h3><p>For each criterion it picks deterministic, code, LLM-judge or human, and writes the judge prompt for you.</p></div></div>
     <div class="step"><div class="n">6</div><div><h3>Choose the release gate</h3><p>The one threshold that decides ship or hold, stated plainly instead of left implied.</p></div></div>
-    <div class="step"><div class="n">7</div><div><h3>Take the handoff away</h3><p>Everything assembles into an eval plan, a <code style="font-family:var(--mono);font-size:.85em">test-cases.csv</code> and judge prompts, ready for your team.</p></div></div>
+    <div class="step"><div class="n">7</div><div><h3>Take the handoff away</h3><p>Everything assembles into an eval plan, a <code style="font-family:var(--mono);font-size:.85em">test-cases.csv</code>, judge prompts and a calibration guide, ready for your team.</p></div></div>
   </div>
 </section>
 
@@ -287,12 +288,13 @@ footer{border-top:1px solid var(--line); padding:40px 0 56px}
 
 <!-- OUTPUTS -->
 <section class="wrap">
-  <h2>You walk away with three things.</h2>
-  <p class="sec-sub">Not advice about evals: the actual artifacts your team can run, in formats they already use.</p>
-  <div class="who">
+  <h2>You walk away with the actual files.</h2>
+  <p class="sec-sub">Not advice about evals. Ready-to-import artifacts in formats your team already uses.</p>
+  <div class="who who-4">
     <div><h3>An eval plan</h3><p>The decision, the criteria, the cases and the release gate, written up so anyone on the team can follow it.</p></div>
     <div><h3 style="font-family:var(--mono); font-size:15px">test-cases.csv</h3><p>A validated, importable test set you can drop straight into whatever eval tool your team already uses.</p></div>
     <div><h3>Judge prompts</h3><p>Ready-to-run prompts for each LLM-graded criterion, matched to the good and bad you defined.</p></div>
+    <div><h3 style="font-family:var(--mono); font-size:15px">calibrate.md</h3><p>How to spot-check each judge against 20 hand-labelled cases before it's allowed to gate a release. So you never ship on an uncalibrated score.</p></div>
   </div>
 </section>
 
