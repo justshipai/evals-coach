@@ -94,12 +94,12 @@ h2{font-size:clamp(30px,4.4vw,44px); letter-spacing:-.015em; max-width:20ch}
 
 /* ---- modes ---- */
 .modes{display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-top:38px}
-.mode.wide{grid-column:1 / -1; background:linear-gradient(180deg,#FBF3FF,#FEFCFF); border-color:var(--lilac-line)}
+.mode.wide{grid-column:1 / -1; max-width:calc((100% - 16px) / 2); margin-inline:auto}
 .mode{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:24px; position:relative; overflow:hidden}
 .mode .tag{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--lilac-ink); background:var(--lilac); border:1px solid var(--lilac-line); padding:3px 9px; border-radius:20px; display:inline-block; margin-bottom:14px}
 .mode h3{font-family:var(--display); font-size:26px; margin-bottom:6px}
 .mode p{color:var(--ink-2); font-size:15.5px}
-@media(max-width:720px){ .modes{grid-template-columns:1fr} }
+@media(max-width:720px){ .modes{grid-template-columns:1fr} .mode.wide{max-width:none} }
 
 /* ---- steps ---- */
 .steps{margin-top:40px; display:grid; gap:2px}
