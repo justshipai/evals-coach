@@ -1448,6 +1448,27 @@ function stepGate(body){
   const wrap = el("div",{class:"stack"});
   const G = S.gate;
 
+  const exp = el("details",{class:"explainer"});
+  exp.appendChild(el("summary",{text:"What's a release gate, and what do I write in these boxes?"}));
+  const eb = el("div",{class:"explainer-body"});
+  eb.appendChild(el("p",{text:"A release gate is the rule you agree to in advance for turning a set of results into a decision: ship, don't ship, or needs a human look. Six boxes, and you are writing sentences, not filling in a form. Anyone reading it later should be able to apply it without asking you what you meant."}));
+  eb.appendChild(el("p",{text:"The reason you write it now, before you have seen any numbers, is that it is remarkably easy to talk yourself into shipping when you are two points short and the launch is on Thursday. A gate written in advance is the thing you argue with, rather than the thing you quietly adjust."}));
+  eb.appendChild(el("div",{class:"explainer-item"},[
+    el("strong",{text:"Say it as a sentence, not a score"}),
+    el("span",{text:"\"90%\" on its own is not usable: 90% of what, counted how? \"At least 90% of the 12 cases pass every must criterion\" is a rule someone can actually apply six months from now."})
+  ]));
+  eb.appendChild(el("div",{class:"explainer-item"},[
+    el("strong",{text:"Never let an average absorb a disaster"}),
+    el("span",{text:"If one group of requests fails badly but the overall number still looks fine, the average has hidden it. That is what the second and third boxes are for: groups that must hold up on their own, and failures that stop the release no matter what the score says."})
+  ]));
+  eb.appendChild(el("div",{class:"explainer-item"},[
+    el("strong",{text:"Blank is a legitimate answer"}),
+    el("span",{text:"If nothing needs its own floor, leave that box empty. A short gate you will actually enforce beats a thorough one nobody follows."})
+  ]));
+  eb.appendChild(el("p",{class:"hint",text: sample ? "Every box has an example in it. If you would rather start from a draft, use the button below and then edit it; the numbers are a product judgement and they should be yours." : "Every box has an example in it showing the shape of a good answer. Replace it with your own."}));
+  exp.appendChild(eb);
+  wrap.appendChild(exp);
+
   wrap.appendChild(pick("How much risk can this feature carry?", "Drives how strict the proposed thresholds are.", [
     ["low","Low, it's reversible","Internal, easily undone"],
     ["medium","Medium","User-visible, correctable"],
@@ -1459,16 +1480,31 @@ function stepGate(body){
   ]));
   wrap.appendChild(host);
 
+  const nCases = S.cases.length || 12;
+  const firstBlocker = (S.criteria.mustNot.find(c=>c.on!==false && c.text.trim())||{}).text || "";
   const rows = [
-    ["overall","Minimum overall performance","Only where averaging is legitimate. Say what's measured over what."],
-    ["floors","Floors for individual slices","An average can hide a slice that's badly broken."],
-    ["blockers","Hard blockers, zero tolerance","Any single occurrence blocks the release, whatever the score."],
-    ["regression","Permitted regression","What may get worse against the baseline, if anything."],
-    ["reps","Repetitions","Non-deterministic behaviour needs more than one run per case."],
-    ["owner","Who owns the decision","One named role. Not \"the team\"."]
+    ["overall","The bar for the whole run",
+      "A number, plus what it is counted over. Say it as a sentence so nobody has to guess later.",
+      "e.g. At least 90% of the " + nCases + " cases pass every must criterion."],
+    ["floors","Groups that must hold up on their own",
+      "An average across everything can hide one kind of request being badly broken. Name any group you would not accept hiding inside the overall number. Leave blank if none.",
+      "e.g. Refund questions must pass at least 8 of their 10 cases on their own, not just inside the overall average."],
+    ["blockers","Things that block the release outright",
+      "One per line. A single occurrence stops the release however good the rest of the numbers look. Usually these are your must-not criteria.",
+      firstBlocker ? ("e.g. " + firstBlocker + "\nAny case where the system acts without the evidence it needs.")
+                   : "e.g. Any reply that states a policy we do not have.\nAny reply that promises a specific refund amount."],
+    ["regression","What may get worse",
+      "Measured against whatever you are running today. \"Nothing\" is a perfectly good answer.",
+      "e.g. No case that passes today may start failing. Up to 500ms slower is acceptable."],
+    ["reps","How many times you run each case",
+      "The same input can give a different answer on a second run. Say how many runs, and whether a case has to pass all of them.",
+      "e.g. 3 runs per case. A case counts as a pass only if all 3 pass."],
+    ["owner","Who owns the decision",
+      "One named role, so there is someone to ask when the result is borderline.",
+      "e.g. The PM for the support inbox. Not \"the team\"."]
   ];
-  rows.forEach(([k,label,hint])=>{
-    wrap.appendChild(field(label, hint, area(G[k], v=>{G[k]=v;markStale();}, k==="blockers"?3:2, ""), G[k]&&G[k].trim() ? (S.gateDrafted?"drafted":null) : "you"));
+  rows.forEach(([k,label,hint,ph])=>{
+    wrap.appendChild(field(label, hint, area(G[k], v=>{G[k]=v;markStale();}, k==="blockers"?3:2, ph), G[k]&&G[k].trim() ? (S.gateDrafted?"drafted":null) : "you"));
   });
 
   body.appendChild(wrap);
