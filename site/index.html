@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Evals Coach: eval design for AI product managers</title>
-<meta name="description" content="Evals Coach turns a PRD or feature idea into a small, testable eval your team can run, critique and improve. No eval experience or repository access required. A skill for Claude and Codex, plus a guided workbench.">
-<meta property="og:title" content="Evals Coach: know what good looks like before you ship">
-<meta property="og:description" content="Turn product intent into evals your team can implement, run and improve. A skill for AI product managers that works with any eval stack, plus a guided workbench.">
+<title>Evals Coach: the eval workbench for product managers</title>
+<meta name="description" content="The Eval Workbench turns a feature description into a runnable eval in seven guided steps: criteria, test cases, graders, judge prompts and a release gate. A Claude plugin for product managers. No eval experience needed.">
+<meta property="og:title" content="Evals Coach: the eval workbench for product managers">
+<meta property="og:description" content="Turn a feature description into a runnable eval in seven guided steps. A Claude plugin for PMs who would rather click through a form than write a prompt.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://evalscoach.com">
 <meta name="theme-color" content="#FAF5EC">
@@ -138,6 +138,8 @@ h2{font-size:clamp(30px,4.4vw,44px); letter-spacing:-.015em; max-width:20ch}
 .copy-mini{font-family:var(--body); font-size:10.5px; font-weight:600; color:var(--ink-3); background:var(--card); border:1px solid var(--line); border-radius:5px; padding:1px 6px; cursor:pointer}
 .copy-mini:hover{color:var(--ink)}
 .copy-mini.done{color:#0f1210; background:var(--amber); border-color:var(--amber)}
+.install-foot{margin-top:18px; font-size:14.5px; color:var(--ink-3)}
+.install-foot a{color:var(--lilac-ink); text-decoration-color:var(--lilac-line); text-underline-offset:2px}
 @media(max-width:720px){ .app-steps{grid-template-columns:1fr} }
 .icard .after code{font-family:var(--mono); font-size:12.5px; background:var(--surface-2); padding:2px 6px; border-radius:5px}
 
@@ -213,14 +215,14 @@ footer{border-top:1px solid var(--line); padding:40px 0 56px}
 </nav>
 
 <header class="hero wrap" id="top">
-  <div class="eyebrow">Eval design for AI product managers</div>
+  <div class="eyebrow">The eval workbench for product managers</div>
   <h1 class="headline">Know what <em>good</em><br>looks like before you ship.</h1>
-  <p class="lede">Evals Coach turns a PRD or feature idea into a small, testable eval your team can run, critique and improve. No eval experience or repository access required.</p>
+  <p class="lede">The Eval Workbench walks you from a feature description to a runnable eval in seven guided steps: the question, the criteria, the test cases, the graders, the judge prompts and a release gate. No eval experience needed.</p>
   <div class="hero-cta">
     <a class="btn btn-primary" href="#install"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5528h3.7442L10.5363 3.5409Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z"/></svg> Install the Claude plugin</a>
     <a class="btn btn-ghost" href="https://github.com/justshipai/evals-coach" target="_blank" rel="noopener">View on GitHub ↗</a>
   </div>
-  <p class="hero-note">Best as a Claude plugin. Also a skill in Codex and other assistants. Then just say <code>use Evals Coach</code>.</p>
+  <p class="hero-note">A Claude plugin. Install it once, then ask for <code>the eval workbench</code>.</p>
 </header>
 
 <div class="divider"></div>
@@ -228,7 +230,7 @@ footer{border-top:1px solid var(--line); padding:40px 0 56px}
 <!-- PAIN -->
 <section id="pain" class="wrap">
   <h2>“The AI should be helpful and accurate.” That isn’t an eval.</h2>
-  <p class="sec-sub">Most AI features are shipped on vibes because turning fuzzy product intent into something measurable is genuinely hard. These are the traps Evals Coach is built to catch.</p>
+  <p class="sec-sub">Most AI features are shipped on vibes because turning fuzzy product intent into something measurable is genuinely hard. These are the traps the workbench helps you catch.</p>
   <div class="pain-grid">
     <div class="pain">
       <div class="quote">Vague quality words <span>you can’t test</span></div>
@@ -236,7 +238,7 @@ footer{border-top:1px solid var(--line); padding:40px 0 56px}
     </div>
     <div class="pain">
       <div class="quote">Evals that pass <span>while the product fails</span></div>
-      <p>A green dashboard measuring the wrong thing is worse than none. Evals Coach hunts for what could score well while real users still get hurt.</p>
+      <p>A green dashboard measuring the wrong thing is worse than none. The workbench hunts for what could score well while real users still get hurt.</p>
     </div>
     <div class="pain">
       <div class="quote">Failures with <span>no regression net</span></div>
@@ -255,48 +257,47 @@ footer{border-top:1px solid var(--line); padding:40px 0 56px}
 <section class="wrap">
   <h2>Built for PMs, not eval engineers.</h2>
   <div class="who">
-    <div><h3>No eval experience</h3><p>You bring product judgement. It brings the eval-design method: modes, cases, graders, thresholds.</p></div>
-    <div><h3>No repository access</h3><p>Start from a PRD, feature idea, workflow, traces, feedback, or an existing eval. No codebase required.</p></div>
+    <div><h3>No eval experience</h3><p>You bring product judgement. It brings the eval-design method: criteria, cases, graders and thresholds.</p></div>
+    <div><h3>No repository access</h3><p>Start from a PRD, a feature idea, or a sentence describing what you’re building. No codebase required.</p></div>
     <div><h3>Your stack, not ours</h3><p>The output isn’t tied to any eval platform, so it imports into whatever your team already runs.</p></div>
   </div>
 </section>
 
 <div class="divider"></div>
 
-<!-- MODES -->
+<!-- HOW -->
 <section id="how" class="wrap">
-  <h2>Ask in your own words. It picks the right mode.</h2>
-  <p class="sec-sub">Five ways to use it, whichever way you describe the task.</p>
-  <div class="modes">
-    <div class="mode"><span class="tag">Create</span><h3>From intent to eval</h3><p>Turn a PRD, capability, user job or product idea into a practical eval plan and an importable test set.</p></div>
-    <div class="mode"><span class="tag">Critique</span><h3>Stress-test what you have</h3><p>Review an existing eval for weak criteria, thin coverage, unreliable graders, or misleading release thresholds.</p></div>
-    <div class="mode"><span class="tag">Expand</span><h3>Failures into regressions</h3><p>Turn production failures, traces, support cases or user feedback into regression cases that lock the fix in.</p></div>
-    <div class="mode"><span class="tag">Calibrate</span><h3>Trust your graders</h3><p>Improve agreement between human judgement and an automated grader before it decides what ships.</p></div>
-    <div class="mode wide"><span class="tag">Run</span><h3>Run your first eval</h3><p>Go beyond planning: get guided through a first real eval on your actual outputs, with human scoring, rubric reconciliation, an optional judge trial, and an engineering handoff.</p></div>
+  <h2>Seven steps to a runnable eval.</h2>
+  <p class="sec-sub">Describe your feature; the workbench drafts each step, you edit it, and the outputs assemble as you go.</p>
+  <div class="steps">
+    <div class="step"><div class="n">1</div><div><h3>Describe your feature</h3><p>A sentence or two: what it does, who uses it, and the worst thing it could get wrong.</p></div></div>
+    <div class="step"><div class="n">2</div><div><h3>Confirm the evaluation question</h3><p>It drafts the one decision your eval should inform. You adjust the wording until it fits.</p></div></div>
+    <div class="step"><div class="n">3</div><div><h3>Set good and bad</h3><p>Turn “helpful” into observable must and must-not behaviours you can actually score.</p></div></div>
+    <div class="step"><div class="n">4</div><div><h3>Edit the test cases</h3><p>It drafts a small representative set: normal, edge, adversarial and critical. You edit them or add your own.</p></div></div>
+    <div class="step"><div class="n">5</div><div><h3>Approve the graders</h3><p>For each criterion it picks deterministic, code, LLM-judge or human, and writes the judge prompt for you.</p></div></div>
+    <div class="step"><div class="n">6</div><div><h3>Choose the release gate</h3><p>The one threshold that decides ship or hold, stated plainly instead of left implied.</p></div></div>
+    <div class="step"><div class="n">7</div><div><h3>Take the handoff away</h3><p>Everything assembles into an eval plan, a <code style="font-family:var(--mono);font-size:.85em">test-cases.csv</code> and judge prompts, ready for your team.</p></div></div>
   </div>
 </section>
 
 <div class="divider"></div>
 
-<!-- STEPS -->
+<!-- OUTPUTS -->
 <section class="wrap">
-  <h2>A real eval, not generic advice.</h2>
-  <p class="sec-sub">Every time, it follows the same path: from the decision you need to make to a handoff your team can run.</p>
-  <div class="steps">
-    <div class="step"><div class="n">1</div><div><h3>The product decision the eval must support</h3><p>Ship or hold? For which unit of work? Everything downstream is anchored to a real call you’re about to make.</p></div></div>
-    <div class="step"><div class="n">2</div><div><h3>Observable must / must-not behaviours</h3><p>Vague quality words are replaced with behaviours you can actually see in a transcript and point to.</p></div></div>
-    <div class="step"><div class="n">3</div><div><h3>A minimum viable test set</h3><p>The smallest set that can inform the decision: normal, edge, adversarial and critical cases, with the costliest failure covered first.</p></div></div>
-    <div class="step"><div class="n">4</div><div><h3>The right grader for each criterion</h3><p>Deterministic, trace, LLM-as-judge or human, matched to the behaviour, with judge prompts written for you.</p></div></div>
-    <div class="step"><div class="n">5</div><div><h3>Calibration guidance and explicit release gates</h3><p>What agreement to require, and the threshold that actually decides ship or hold, stated out loud, not implied.</p></div></div>
-    <div class="step"><div class="n">6</div><div><h3>A handoff engineering can run</h3><p>An eval plan, a validated <code style="font-family:var(--mono);font-size:.85em">test-cases.csv</code>, judge prompts, and a path from manual review to CI and production feedback.</p></div></div>
+  <h2>You walk away with three things.</h2>
+  <p class="sec-sub">Not advice about evals: the actual artifacts your team can run, in formats they already use.</p>
+  <div class="who">
+    <div><h3>An eval plan</h3><p>The decision, the criteria, the cases and the release gate, written up so anyone on the team can follow it.</p></div>
+    <div><h3 style="font-family:var(--mono); font-size:15px">test-cases.csv</h3><p>A validated, importable test set you can drop straight into whatever eval tool your team already uses.</p></div>
+    <div><h3>Judge prompts</h3><p>Ready-to-run prompts for each LLM-graded criterion, matched to the good and bad you defined.</p></div>
   </div>
 </section>
 
 <!-- INSTALL -->
 <section id="install">
   <div class="wrap">
-    <h2>Add it to Claude, then ask for an eval.</h2>
-    <p class="sec-sub">Recommended as a Claude plugin, which brings the workbench with it. It also runs as a skill in Codex and other assistants. Set it up once.</p>
+    <h2>Add the workbench to Claude.</h2>
+    <p class="sec-sub">It’s a Claude plugin. Install it once, in the app or in Claude Code, then ask for the eval workbench.</p>
 
     <div class="icard feat">
       <div class="head"><h3>In the Claude app</h3><span class="pill rec">Recommended · adds the workbench</span></div>
@@ -305,35 +306,23 @@ footer{border-top:1px solid var(--line); padding:40px 0 56px}
         <li><span class="sn">1</span><div>Open <b>Settings → Customize → Plugins</b></div></li>
         <li><span class="sn">2</span><div>Click <b>Add</b>, then <b>Add marketplace</b></div></li>
         <li><span class="sn">3</span><div>Enter <span class="idchip" data-copy="justshipai/evals-coach"><code>justshipai/evals-coach</code><button class="copy copy-mini" type="button">copy</button></span> and confirm</div></li>
-        <li><span class="sn">4</span><div>Click <b>Install</b> on <b>Evals Coach</b>, then enable it</div></li>
+        <li><span class="sn">4</span><div>Click <b>Install</b> on <b>Eval Workbench</b>, then enable it</div></li>
       </ol>
-      <p class="after">Then ask for an eval in your own words, or ask for <code>the eval workbench</code>.</p>
+      <p class="after">Then ask for <code>the eval workbench</code>.</p>
     </div>
 
-    <div class="install-grid">
-
-      <div class="icard">
-        <div class="head"><h3>Claude Code (CLI)</h3><span class="pill">Terminal</span></div>
-        <p>Two commands in your terminal.</p>
-        <div class="code" data-copy="/plugin marketplace add justshipai/evals-coach&#10;/plugin install evals-coach@justshipai">
-          <button class="copy">Copy</button>
-          <div class="cmd">/plugin marketplace add <b>justshipai/evals-coach</b>
+    <div class="icard" style="margin-top:16px">
+      <div class="head"><h3>Claude Code (CLI)</h3><span class="pill">Terminal</span></div>
+      <p>Prefer the command line? Two commands in your terminal.</p>
+      <div class="code" data-copy="/plugin marketplace add justshipai/evals-coach&#10;/plugin install evals-coach@justshipai">
+        <button class="copy">Copy</button>
+        <div class="cmd">/plugin marketplace add <b>justshipai/evals-coach</b>
 /plugin install <b>evals-coach@justshipai</b></div>
-        </div>
-        <p class="after">Then ask for an eval, or ask for <code>the eval workbench</code>.</p>
       </div>
-
-      <div class="icard">
-        <div class="head"><h3>Codex &amp; other assistants</h3><span class="pill">Clone as a skill</span></div>
-        <p>Runs anywhere. Clone into your assistant’s skills directory.</p>
-        <div class="code" data-copy="git clone https://github.com/justshipai/evals-coach.git ~/.agents/skills/evals-coach">
-          <button class="copy">Copy</button>
-          <div class="cmd">git clone https://github.com/justshipai/evals-coach.git ~/.agents/skills/evals-coach</div>
-        </div>
-        <p class="after">Then, for example: <code>$evals-coach Turn this PRD into the smallest eval that can inform a ship decision.</code></p>
-      </div>
-
+      <p class="after">Then ask for <code>the eval workbench</code>.</p>
     </div>
+
+    <p class="install-foot">Would rather build an eval by chatting, or work in Codex? The underlying eval-design skill installs by cloning into a skills directory. <a href="https://github.com/justshipai/evals-coach#install" target="_blank" rel="noopener">See the repo →</a></p>
   </div>
 </section>
 
@@ -341,18 +330,13 @@ footer{border-top:1px solid var(--line); padding:40px 0 56px}
 <section class="wrap">
   <div class="wb">
     <div>
-      <h3>The Eval Workbench</h3>
-      <p>A seven-step wizard, published to your own account as a private Artifact. Describe your feature; it drafts the evaluation question, criteria, test cases, graders, judge prompts and release gate, each one editable, and hands back an eval plan, a <code style="font-family:var(--mono);font-size:.85em">test-cases.csv</code> and judge prompts.</p>
-      <p style="font-size:14.5px;color:var(--ink-3)">Claude-only: it asks Claude from inside the page, on the account of whoever opens it. Ask for “the eval workbench” once the Claude plugin is installed. Opened without drafting, it degrades gracefully to a worksheet with the same structure and starters.</p>
+      <h3>Good to know: it runs on Claude</h3>
+      <p>The workbench is a private web page that asks Claude from inside itself. That keeps setup to one click, and it means a few things are worth knowing before you share it.</p>
     </div>
     <div class="mini">
-      <div class="row"><b>1</b> Describe your feature</div>
-      <div class="row"><b>2</b> Confirm the evaluation question</div>
-      <div class="row"><b>3</b> Set good &amp; bad</div>
-      <div class="row"><b>4</b> Edit the test cases</div>
-      <div class="row"><b>5</b> Approve the graders</div>
-      <div class="row"><b>6</b> Choose the release gate</div>
-      <div class="row"><b>7</b> Take the handoff away</div>
+      <div class="row"><b>Account</b> Drafting spends the Claude usage of whoever opens the page; they consent on first use.</div>
+      <div class="row"><b>Sharing</b> A page that uses Claude can’t take a public link, so you share it with named people.</div>
+      <div class="row"><b>Fallback</b> Opened without drafting, it degrades to a worksheet: the same steps, starters and outputs.</div>
     </div>
   </div>
 </section>
@@ -362,13 +346,13 @@ footer{border-top:1px solid var(--line); padding:40px 0 56px}
 <!-- EVIDENCE -->
 <section class="wrap">
   <h2>Does it actually work? We measured.</h2>
-  <p class="sec-sub">A six-task blinded comparison using GPT-5.6 Sol at medium reasoning, Evals Coach versus a no-skill baseline.</p>
+  <p class="sec-sub">A six-task blinded comparison using GPT-5.6 Sol at medium reasoning: the eval-design method behind the workbench versus a no-method baseline.</p>
   <div class="ev">
-    <div class="stat"><div class="big">100<span class="base">/65</span></div><p>Rubric score, Evals Coach vs baseline (%)</p></div>
+    <div class="stat"><div class="big">100<span class="base">/65</span></div><p>Rubric score, method vs baseline (%)</p></div>
     <div class="stat"><div class="big">6<span class="base">/6</span></div><p>Tasks won, out of six</p></div>
     <div class="stat"><div class="big">0<span class="base">/2</span></div><p>Critical failures vs baseline</p></div>
   </div>
-  <p class="caveat">The same run exposed a weakness (early skill outputs ran long) that we’ve since tightened, adding PM usability to the rubric. Because the rubric was developed alongside the skill, with one run per task and no independent replication yet, treat this as promising early evidence rather than a universal claim. <a href="https://github.com/justshipai/evals-coach/blob/main/evals/results/2026-08-24-gpt-5.6-sol-medium/report.md" target="_blank" rel="noopener">Read the full method, scores and limitations →</a></p>
+  <p class="caveat">The workbench encodes this same method. The run also exposed a weakness (early outputs ran long) that we’ve since tightened, adding PM usability to the rubric. Because the rubric was developed alongside the method, with one run per task and no independent replication yet, treat this as promising early evidence rather than a universal claim. <a href="https://github.com/justshipai/evals-coach/blob/main/evals/results/2026-08-24-gpt-5.6-sol-medium/report.md" target="_blank" rel="noopener">Read the full method, scores and limitations →</a></p>
 </section>
 
 <div class="divider"></div>
