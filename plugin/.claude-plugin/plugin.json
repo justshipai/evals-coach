@@ -1,10 +1,10 @@
 {
   "name": "evals-coach",
   "version": "0.1.0",
-  "description": "Design, critique and improve evaluations for AI features — no eval experience or repository access required.",
+  "description": "The PM Eval Workbench: a guided seven-step wizard that turns a feature description into a runnable eval (criteria, test cases, graders, judge prompts, release gate). No eval experience or repository access required.",
   "author": { "name": "Just Ship AI", "url": "https://github.com/justshipai" },
   "homepage": "https://github.com/justshipai/evals-coach",
   "repository": "https://github.com/justshipai/evals-coach",
   "license": "MIT",
-  "keywords": ["evals", "evaluation", "product-management", "llm-judge", "test-cases"]
+  "keywords": ["evals", "evaluation", "product-management", "wizard", "workbench", "llm-judge", "test-cases"]
 }

@@ -39,9 +39,10 @@ Say these three things, briefly, because each one surprises people:
 
 ## Keeping it in step with the coach
 
-The workbench's drafting prompts encode the same commitments as
-[evals-coach](../evals-coach/SKILL.md): start from the product decision, replace vague
-quality words with observable behaviour, prefer a minimum viable eval, never let curated
-cases pose as production traffic, and never let an uncalibrated judge gate a release.
-When the coach's guidance changes materially, change the prompts in the page to match —
-they are plain strings in the `draft*` functions near the end of the file.
+The workbench's drafting prompts encode the same commitments as the
+[evals-coach skill](https://github.com/justshipai/evals-coach/blob/main/SKILL.md) at the
+repository root: start from the product decision, replace vague quality words with
+observable behaviour, prefer a minimum viable eval, never let curated cases pose as
+production traffic, and never let an uncalibrated judge gate a release. When that guidance
+changes materially, change the prompts in the page to match: they are plain strings in the
+`draft*` functions near the end of the file.
