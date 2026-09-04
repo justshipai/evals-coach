@@ -110,6 +110,7 @@ Read the [full method, task scores and limitations](evals/results/2026-08-24-gpt
 - `SKILL.md`: the workflow used by the assistant
 - `references/`: scenario, grader, and output guidance
 - `scripts/validate_test_cases.py`: validates the generated CSV schema
+- `scripts/test_workbench_csv.py`: checks the wizard's export still satisfies that schema
 - `examples/`: worked PM-to-engineering examples
 - `plugin/`: the Claude plugin (the Evals Coach wizard)
 - `.claude-plugin/marketplace.json`: lets this repository be added as a plugin marketplace

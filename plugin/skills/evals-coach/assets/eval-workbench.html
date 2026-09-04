@@ -583,7 +583,7 @@ const HOUSE = `You are an evals coach for a product manager who is not an eval s
 Rules you always follow:
 - Start from the product decision and observable behaviour, never from fashionable metrics.
 - Replace vague words like "helpful", "accurate" or "high quality" with observable, product-specific definitions.
-- Prefer a minimum viable eval: one decision, one critical behaviour, 5-10 deliberately varied cases, one reliable grader, one explicit release gate.
+- Prefer a minimum viable eval: one decision, one critical behaviour, 5 to 8 deliberately varied cases, one reliable grader, one explicit release gate.
 - Never imply synthetic or curated cases represent production traffic.
 - Never present an uncalibrated LLM judge as ground truth.
 - Write in plain product language. British English. No preamble, no flattery.`;
@@ -1418,7 +1418,7 @@ function draftCases(host){
 
 ` + ctxBlock() + `
 
-Design the smallest test set that could change this decision: 8 cases, deliberately varied, no near-duplicates.
+Design the smallest test set that could change this decision: 5 to 8 cases, deliberately varied, no near-duplicates.
 Cover a spread of: capability, edge, ambiguity, safety, regression, recovery, efficiency, only the ones that matter to this product. At least one case must probe the PM's most costly failure.
 If REAL OUTPUTS are provided in the context, at least half the cases must be grounded in those outputs: use the same shape of input, capture the failure mode that actually happened, and write the expected behaviour as what should have happened instead. Mark those cases in "why" with "from a real failure: [one line reference]".
 For each case give:
@@ -1451,6 +1451,18 @@ const GTYPES = [
   ["llm","LLM judge","Another AI reads the output and decides. Needs calibrating."],
   ["human","Human review","A person reads it. Slowest, most trustworthy."]
 ];
+
+/* The export schema is shared with scripts/validate_test_cases.py in the repo, so a
+   finished eval drops straight into the validator. The UI keeps PM-friendly words
+   ("Code check"); only the file uses the schema's vocabulary. */
+const GRADER_SCHEMA = {code:"deterministic", trace:"trace", llm:"llm_judge", human:"human"};
+const PRIORITY_BY_CAT = {safety:"critical", capability:"high", regression:"high",
+  edge:"medium", ambiguity:"medium", recovery:"medium", efficiency:"low"};
+const CSV_COLS = ["id","title","category","priority","source","slices",
+  "input_or_task","context_or_starting_state","expected_outcome",
+  "required_behaviour","must_not_happen","tool_expectations",
+  "grader","repetitions","status","why"];
+
 const GTYPE_HELP = [
   ["1. Can you write the rule down exactly?","If you can state the check without using judgement, a script can do it: under 120 words, contains a policy ID, never contains the word \"guarantee\", valid JSON, the date is in the future. Use a CODE CHECK. It costs nothing, runs instantly, and gives the same answer every single time."],
   ["2. Is it about what the system did, not what it said?","If the thing you care about is a step rather than the wording: it had to look up the order before promising a refund; it must never have sent an email; it should not have called the pricing tool twice. Use a TRACE CHECK. Same cost and reliability as code, it is just looking at the system's actions instead of its text."],
@@ -1748,7 +1760,7 @@ function stepOut(body){
 
   if(outTab==="plan"){ pane.appendChild(planDoc()); actions(pane, [["Copy plan", ()=>planMd()],["Save eval-plan.md", ()=>({filename:"eval-plan.md", data:planMd()})]]); }
   if(outTab==="cases"){
-    pane.appendChild(el("p",{class:"hint", style:"margin-bottom:12px", text:"Thirteen columns, one row per case, import straight into a sheet or your eval tool."}));
+    pane.appendChild(el("p",{class:"hint", style:"margin-bottom:12px", text:"Sixteen columns, one row per case. Matches the Evals Coach test-case schema, so it passes validate_test_cases.py as is."}));
     const tw = el("div",{class:"tablewrap"}); const t = el("table");
     const cols = ["id","name","category","slice","input","setup","expected","why"];
     t.appendChild(el("thead",{},[el("tr",{},cols.map(c=>el("th",{text:c})))]));
@@ -1846,7 +1858,7 @@ function planDoc(){
   d.appendChild(el("h3",{text:"Graders"}));
   const byType = {};
   allCriteria().forEach(c=>{ const t = (S.graders[c.id]||{}).type || "llm"; (byType[t]=byType[t]||[]).push(c.text); });
-  const names = {code:"Code checks",trace:"Trace checks",llm:"LLM judge",human:"Human review"};
+  const names = {code:"Deterministic checks",trace:"Trace checks",llm:"LLM judge",human:"Human review"};
   Object.keys(names).forEach(t=>{ if(byType[t]){ d.appendChild(el("h4",{class:"eyebrow",text:names[t]})); d.appendChild(el("ul",{}, byType[t].map(x=>el("li",{text:x})))); }});
   if(byType.llm && S.calibration) d.appendChild(el("p",{},[el("strong",{text:"Calibration: "}), S.calibration]));
 
@@ -1877,7 +1889,7 @@ function handoffDoc(){
   crits.forEach(c=>{ const gr = S.graders[c.id]||{}; if(gr.evidence) needs[gr.evidence]=1; });
   d.appendChild(el("ul",{},[
     el("li",{text:"Import " + S.cases.length + " cases from test-cases.csv, including the starting state in the setup column."}),
-    el("li",{text:"Implement " + crits.filter(c=>(S.graders[c.id]||{}).type==="code").length + " code checks, " + crits.filter(c=>(S.graders[c.id]||{}).type==="trace").length + " trace checks and " + S.judges.length + " LLM judges."}),
+    el("li",{text:"Implement " + crits.filter(c=>(S.graders[c.id]||{}).type==="code").length + " deterministic checks, " + crits.filter(c=>(S.graders[c.id]||{}).type==="trace").length + " trace checks and " + S.judges.length + " LLM judges."}),
     el("li",{text:"Route " + crits.filter(c=>(S.graders[c.id]||{}).type==="human").length + " criteria to human review."}),
     el("li",{text:"Encode the hard blockers as gates that fail the run outright, never averaged into a score."}),
     S.gate.reps ? el("li",{text:"Repetitions: " + S.gate.reps}) : null,
@@ -1972,20 +1984,44 @@ function planMd(){
   L.push("## Test set\n\n" + S.cases.length + " cases, see test-cases.csv.");
   if(S.notCovered) L.push("\n**Not covered:** " + S.notCovered);
   L.push("\n## Graders\n");
-  allCriteria().forEach(c=>{ const gr = S.graders[c.id]||{}; L.push("- [" + ({code:"code check",trace:"trace check",llm:"LLM judge",human:"human review"}[gr.type||"llm"]) + "] " + c.text + (gr.evidence?", needs: "+gr.evidence:"")); });
+  allCriteria().forEach(c=>{ const gr = S.graders[c.id]||{}; L.push("- [" + (GRADER_SCHEMA[gr.type||"llm"]) + "] " + c.text + (gr.evidence?", needs: "+gr.evidence:"")); });
   if(S.calibration) L.push("\n**Calibration:** " + S.calibration);
   L.push("\n## Release gate\n");
   [["Overall",g.overall],["Slice floors",g.floors],["Hard blockers",g.blockers],["Permitted regression",g.regression],["Repetitions",g.reps],["Decision owner",g.owner]].forEach(([k,v])=>{ if(v) L.push("- **"+k+":** " + v); });
   return L.join("\n");
 }
 function csv(){
-  const cols = ["id","name","category","slice","input","setup","expected","why","graders","must_not_blockers","repetitions","evaluation_question","notes"];
-  const blockers = (S.gate.blockers||"").replace(/\n+/g,"; ");
-  const graders = allCriteria().map(c=>({code:"code",trace:"trace",llm:"llm-judge",human:"human"}[(S.graders[c.id]||{}).type||"llm"]+": "+c.text)).join(" | ");
   const q = v => '"' + String(v==null?"":v).replace(/"/g,'""') + '"';
-  const rows = [cols.join(",")];
+  const join = xs => xs.filter(x=>String(x||"").trim()).join("; ");
+  const byKind = k => allCriteria().filter(c=>c.kind===k).map(c=>c.text);
+
+  const musts = byKind("must"), shoulds = byKind("should"), mustNots = byKind("must not");
+  const blockers = String(S.gate.blockers||"").split("\n").map(x=>x.trim()).filter(Boolean);
+  const graders = [...new Set(allCriteria().map(c=>GRADER_SCHEMA[(S.graders[c.id]||{}).type||"llm"]))];
+  // gate.reps is free text ("3", "3 for critical cases"); the schema wants a positive integer.
+  const repsMatch = String(S.gate.reps||"").match(/\d+/);
+  const reps = repsMatch && +repsMatch[0] > 0 ? +repsMatch[0] : 1;
+  const gradersChosen = !!S.gradersDrafted || allCriteria().some(c=>!!S.graders[c.id]);
+
+  // Every case the wizard produces is deliberately chosen, never sampled traffic, so it
+  // is "curated" even when it was written from a real output. Saying "production" here
+  // would let curated cases pose as production traffic.
+  const rows = [CSV_COLS.join(",")];
   S.cases.forEach(c=>{
-    rows.push([c.id,c.name,c.category,c.slice,c.input,c.setup,c.expected,c.why,graders,blockers,S.gate.reps,S.question,S.notCovered].map(q).join(","));
+    const required = join(musts.length ? musts : shoulds) || String(c.expected||"");
+    const filled = String(c.name||"").trim() && String(c.input||"").trim() && String(c.expected||"").trim();
+    // Every criterion falls back to an LLM judge in the UI, so an untouched step 5 means
+    // the graders were defaulted, not chosen. Say so rather than calling the row ready.
+    const status = !(musts.length || shoulds.length) ? "needs_product_decision"
+                 : !filled ? "needs_evidence"
+                 : !gradersChosen ? "needs_grader"
+                 : "ready";
+    rows.push([
+      c.id, c.name, c.category, PRIORITY_BY_CAT[c.category] || "medium", "curated", c.slice||"",
+      c.input, c.setup, c.expected,
+      required, join(mustNots.concat(blockers)), "",
+      join(graders), reps, status, c.why||""
+    ].map(q).join(","));
   });
   return rows.join("\n");
 }
