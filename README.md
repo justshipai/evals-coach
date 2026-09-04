@@ -115,6 +115,7 @@ Read the [full method, task scores and limitations](evals/results/2026-08-24-gpt
 - `plugin/`: the Claude plugin (the Evals Coach wizard)
 - `.claude-plugin/marketplace.json`: lets this repository be added as a plugin marketplace
 - `evals/`: cases and rubric for evaluating Evals Coach itself
+- `CHANGELOG.md`: what changed in each release
 - `site/`: source of evalscoach.com
 
 ## Help shape it

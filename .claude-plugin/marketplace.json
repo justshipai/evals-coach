@@ -12,7 +12,7 @@
       "source": "./plugin",
       "displayName": "Evals Coach",
       "description": "A guided seven-step wizard that turns a feature description into a runnable eval: criteria, test cases, graders, judge prompts and a release gate, handed back as an eval plan, test-cases.csv and judge prompts. Built for product managers.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": { "name": "Just Ship AI", "url": "https://github.com/justshipai" },
       "homepage": "https://github.com/justshipai/evals-coach",
       "repository": "https://github.com/justshipai/evals-coach",
