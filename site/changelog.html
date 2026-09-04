@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Changelog: Evals Coach</title>
+<meta name="description" content="What changed in each release of Evals Coach, the evals copilot for AI product managers.">
+<meta property="og:title" content="Changelog: Evals Coach">
+<meta property="og:description" content="What changed in each release of Evals Coach.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://evalscoach.com/changelog">
+<meta property="og:image" content="https://evalscoach.com/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#FAF5EC">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --cream:#FAF5EC; --surface:#FFFDF8; --surface-2:#F1ECDF; --card:#FFFFFF;
+  --line:#E9E3D4; --line-strong:#D7D0BE;
+  --ink:#1A1A1A; --ink-2:#57574F; --ink-3:#86857B;
+  --lilac:#F0D7FF; --lilac-line:#E2BEFB; --lilac-ink:#5B2E86; --coral:#FF6C4C;
+  --display:"EB Garamond", Georgia, serif;
+  --body:"Figtree", -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--cream); color:var(--ink); font-family:var(--body);
+  font-size:17px; line-height:1.6; -webkit-font-smoothing:antialiased}
+.wrap{max-width:760px; margin:0 auto; padding:0 24px}
+a{color:inherit}
+nav{border-bottom:1px solid var(--line); background:var(--cream)}
+.nav-in{display:flex; align-items:center; justify-content:space-between; height:66px;
+  max-width:1080px; margin:0 auto; padding:0 24px}
+.logo{display:flex; align-items:center; gap:10px; font-weight:600; font-size:17px; text-decoration:none}
+.mark{display:inline-flex; gap:2.5px; align-items:flex-end; height:20px}
+.mark i{width:3.5px; border-radius:2px; background:var(--lilac-ink); display:block}
+.mark i:nth-child(1){height:8px} .mark i:nth-child(2){height:16px; background:var(--coral)}
+.mark i:nth-child(3){height:11px} .mark i:nth-child(4){height:20px; background:var(--coral)}
+.nav-links{display:flex; align-items:center; gap:8px}
+.nav-links a{font-size:14.5px; font-weight:500; color:var(--ink-2); text-decoration:none;
+  padding:8px 12px; border-radius:9px}
+.nav-links a:hover{color:var(--ink); background:var(--surface-2)}
+.btn{display:inline-flex; align-items:center; gap:8px; font-weight:600; font-size:14px;
+  text-decoration:none; border:1px solid var(--lilac-line); border-radius:12px;
+  padding:9px 15px; background:var(--lilac); color:var(--ink)}
+header{padding:64px 0 0}
+h1{font-family:var(--display); font-weight:400; font-size:clamp(38px,6vw,54px);
+  letter-spacing:-.02em; margin:0}
+.lede{color:var(--ink-2); font-size:18px; margin:16px 0 0; max-width:62ch}
+main{padding:24px 0 72px}
+main h2{font-family:var(--display); font-weight:400; font-size:34px; letter-spacing:-.015em;
+  margin:56px 0 0; padding-top:28px; border-top:1px solid var(--line);
+  display:flex; align-items:baseline; gap:14px; flex-wrap:wrap}
+main h2 .date{font-family:var(--mono); font-size:12.5px; letter-spacing:.06em;
+  color:var(--ink-3); text-transform:uppercase}
+main h3{font-family:var(--mono); font-size:12px; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--coral); margin:32px 0 12px; font-weight:500}
+main p{margin:16px 0; color:var(--ink-2)}
+main ul{margin:12px 0; padding:0; list-style:none}
+main li{position:relative; padding-left:20px; margin:12px 0; color:var(--ink-2)}
+main li::before{content:""; position:absolute; left:2px; top:11px; width:6px; height:6px;
+  border-radius:50%; background:var(--line-strong)}
+main strong{color:var(--ink); font-weight:600}
+code{font-family:var(--mono); font-size:.86em; background:var(--surface-2);
+  padding:2px 6px; border-radius:5px; color:var(--ink-2)}
+pre{background:#1c1c19; color:#f2efe6; border-radius:11px; padding:16px; overflow-x:auto; margin:18px 0}
+pre code{background:none; color:inherit; padding:0; font-size:13px}
+footer{border-top:1px solid var(--line); padding:32px 0 56px; font-size:13px; color:var(--ink-3)}
+footer a{color:var(--ink-2); font-weight:500}
+@media(max-width:640px){
+  header{padding-top:44px}
+  main h2{font-size:28px; margin-top:44px}
+}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-in">
+    <a class="logo" href="/"><span class="mark"><i></i><i></i><i></i><i></i></span> Evals Coach</a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="https://github.com/justshipai/evals-coach" target="_blank" rel="noopener">GitHub</a>
+      <a class="btn" href="/#install">Install</a>
+    </div>
+  </div>
+</nav>
+<header class="wrap">
+  <h1>Changelog</h1>
+</header>
+<main class="wrap">
+<p>Notable changes to Evals Coach. Dates are release dates.</p>
+<p>Updating the plugin does not refresh a wizard page you have already published. An Evals Coach page is a snapshot taken when it was published, so to pick up the changes below, update the plugin and then ask Evals Coach for a new page.</p>
+<pre><code>/plugin update evals-coach@justshipai</code></pre>
+<h2 id="v0.2.0">0.2.0<span class="date">2026-09-04</span></h2>
+<p>The wizard gained a way to build an eval up from real outputs, rather than only down from a description. The handoff files also changed shape.</p>
+<h3>Added</h3>
+<ul>
+<li><strong>Review real outputs and distil them into criteria.</strong> If you paste outputs from a live feature, step 3 now lets you read them one at a time and note what is off. Those notes become named failure modes, and the criteria derived from them carry a reference back to the outputs they came from.</li>
+<li><strong>The failure taxonomy is its own artifact</strong>, so the failure modes you found travel with the eval instead of disappearing into the criteria list.</li>
+<li><strong>Prevalence with an honest confidence range.</strong> A failure seen in 5 of 12 outputs is reported as 42% with the range a sample that size actually supports, rather than as a number that sounds more certain than it is.</li>
+<li><strong>A saturation signal</strong>, showing how many outputs you have reviewed since the last new failure mode appeared.</li>
+<li><strong>A grader decision procedure.</strong> Choosing a grader was previously guided by &quot;pick the cheapest that works&quot;, which told a PM nothing. It is now four questions about what the grader has to see and decide.</li>
+<li><strong>Guidance and worked examples on the release gate</strong>, which was previously a set of empty boxes with no indication of what belonged in them.</li>
+</ul>
+<h3>Changed</h3>
+<ul>
+<li><strong><code>test-cases.csv</code> now matches the schema in <code>scripts/validate_test_cases.py</code>.</strong> The export previously shared only three column names with the repo&#x27;s own validator, so a finished eval could not be checked against it. If you have tooling that reads the old columns, it will need updating. Fields the wizard does not collect are derived rather than invented: <code>priority</code> comes from the case category, <code>source</code> is always <code>curated</code> because these cases are chosen rather than sampled from traffic, and <code>status</code> reports <code>needs_grader</code> when step 5 was never confirmed.</li>
+<li><strong>Graders are named the same way everywhere.</strong> Exports now say <code>deterministic</code>, <code>trace</code>, <code>llm_judge</code> and <code>human</code>, matching the skill and the validator. The wizard&#x27;s own labels stay in plain English.</li>
+<li><strong>Test set size is 5 to 8 cases</strong>, matching <code>SKILL.md</code>. The drafting prompt previously asked for 8 while the guidance said 5 to 10.</li>
+<li>Branded as Evals Coach throughout, and the &quot;workbench&quot; jargon is gone from anything a user reads.</li>
+</ul>
+<h3>Fixed</h3>
+<ul>
+<li>Step 1 no longer claims it is the only writing you do, and step 7 describes what you leave with rather than a handoff.</li>
+</ul>
+<h2 id="v0.1.0">0.1.0<span class="date">2026-09-02</span></h2>
+<p>First public alpha. Seven-step wizard published as a private page, with an eval plan, <code>test-cases.csv</code>, judge prompts and a calibration guide as its output.</p>
+</main>
+<footer>
+  <div class="wrap">Public alpha &middot; By Martin Slaney &middot; MIT licensed &middot;
+    <a href="/">evalscoach.com</a></div>
+</footer>
+</body>
+</html>
