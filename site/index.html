@@ -145,6 +145,47 @@ h2{font-size:clamp(30px,4.4vw,44px); letter-spacing:-.015em; max-width:20ch}
 .copy-mini.done{color:#0f1210; background:var(--amber); border-color:var(--amber)}
 .install-foot{margin-top:18px; font-size:14.5px; color:var(--ink-3)}
 .install-foot a{color:var(--lilac-ink); text-decoration-color:var(--lilac-line); text-underline-offset:2px}
+
+/* ---- product shot (coded, not a raster screenshot: crisp, themed, ~2KB) ---- */
+.shot-wrap{padding-top:8px}
+.shot{display:grid; grid-template-columns:210px 1fr; gap:0; background:var(--surface); border:1px solid var(--line-strong); border-radius:16px; overflow:hidden; box-shadow:0 1px 2px rgba(26,26,26,.04), 0 24px 48px -28px rgba(26,26,26,.28)}
+.shot-rail{display:flex; flex-direction:column; gap:2px; padding:20px 14px; background:var(--surface-2); border-right:1px solid var(--line)}
+.sr-step{font-size:12.5px; color:var(--ink-3); padding:7px 10px; border-radius:8px; display:flex; align-items:center; gap:8px}
+.sr-step::before{content:""; width:15px; height:15px; border-radius:50%; border:1px solid var(--line-strong); flex:none}
+.sr-step.done{color:var(--ink-2)}
+.sr-step.done::before{background:var(--lilac-ink); border-color:var(--lilac-ink)}
+.sr-step.now{background:var(--card); color:var(--ink); font-weight:600; box-shadow:0 1px 2px rgba(26,26,26,.06)}
+.sr-step.now::before{border-color:var(--lilac-ink); border-width:2px}
+.shot-body{padding:22px 24px; display:flex; flex-direction:column; gap:12px; min-width:0}
+.shot-eyebrow{font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3)}
+.shot-h{font-family:var(--display); font-size:27px; line-height:1.1}
+.shot-card{background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:13px 14px}
+.shot-tax{border-left:3px solid var(--lilac-ink)}
+.shot-tax-head{display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:4px}
+.shot-tax-head strong{font-size:14px}
+.shot-tax-head span{font-family:var(--mono); font-size:10.5px; color:var(--ink-3)}
+.shot-tax p{font-size:12.5px; color:var(--ink-2); line-height:1.5}
+.shot-chips{display:flex; gap:8px; flex-wrap:wrap; margin-top:9px; align-items:center}
+.shot-chip{font-family:var(--mono); font-size:10px; letter-spacing:.05em; color:var(--lilac-ink); background:var(--lilac); border:1px solid var(--lilac-line); border-radius:5px; padding:2px 7px; display:inline-block}
+.shot-cov{font-family:var(--mono); font-size:10px; letter-spacing:.05em; color:#2C7A4F}
+.shot-crit{display:flex; gap:11px; align-items:flex-start; background:var(--card)}
+.shot-tick{flex:none; width:16px; height:16px; border-radius:4px; background:var(--lilac-ink); color:#fff; font-size:11px; line-height:16px; text-align:center; margin-top:1px}
+.shot-crit-text{font-size:13px; line-height:1.45; margin-bottom:7px}
+.shot-prev{display:flex; align-items:center; gap:12px; padding-top:2px}
+.shot-bar{flex:none; width:74px; height:8px; background:var(--surface-3, #ECE6D6); border-radius:4px; overflow:hidden}
+.shot-bar span{display:block; width:42%; height:100%; background:var(--coral); border-radius:4px}
+.shot-prev div{display:flex; flex-direction:column; gap:1px}
+.shot-prev strong{font-size:12.5px}
+.shot-prev span{font-family:var(--mono); font-size:10.5px; color:var(--ink-3)}
+.shot-cap{margin-top:16px; font-size:14.5px; color:var(--ink-2); max-width:70ch; line-height:1.55}
+@media(max-width:720px){
+  .shot{grid-template-columns:1fr}
+  .shot-rail{flex-direction:row; overflow-x:auto; gap:6px; padding:12px; border-right:0; border-bottom:1px solid var(--line)}
+  .sr-step{white-space:nowrap; font-size:11.5px; padding:5px 9px}
+  .sr-step:not(.now):not(.done){display:none}
+  .shot-body{padding:18px}
+  .shot-h{font-size:23px}
+}
 @media(max-width:720px){ .app-steps{grid-template-columns:1fr} }
 .icard .after code{font-family:var(--mono); font-size:12.5px; background:var(--surface-2); padding:2px 6px; border-radius:5px}
 
@@ -231,32 +272,6 @@ footer{border-top:1px solid var(--line); padding:40px 0 56px}
 
 <div class="divider"></div>
 
-<!-- PAIN -->
-<section id="pain" class="wrap">
-  <h2>“The AI should be helpful and accurate.” That isn’t an eval.</h2>
-  <p class="sec-sub">Most AI features are shipped on vibes because turning fuzzy product intent into something measurable is genuinely hard. These are the traps Evals Coach helps you catch.</p>
-  <div class="pain-grid">
-    <div class="pain">
-      <div class="quote">Vague quality words <span>you can’t test</span></div>
-      <p>“Helpful”, “accurate”, “on-brand”. Until they become observable must / must-not behaviours, no grader can score them and no one can agree whether a run passed.</p>
-    </div>
-    <div class="pain">
-      <div class="quote">Evals that pass <span>while the product fails</span></div>
-      <p>A green dashboard measuring the wrong thing is worse than none. Evals Coach hunts for what could score well while real users still get hurt.</p>
-    </div>
-    <div class="pain">
-      <div class="quote">Failures with <span>no regression net</span></div>
-      <p>The same production incident keeps recurring because nothing turned it into a test case. Feed in the failures; get back regression cases, without inventing evidence.</p>
-    </div>
-    <div class="pain">
-      <div class="quote">An LLM judge <span>nobody calibrated</span></div>
-      <p>An uncalibrated judge quietly gating your release is a coin flip in a lab coat. Get a path to check it agrees with human labels before it holds the gate.</p>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
 <!-- WHO -->
 <section class="wrap">
   <h2>Built for PMs, not eval engineers.</h2>
@@ -286,6 +301,44 @@ footer{border-top:1px solid var(--line); padding:40px 0 56px}
 
 <div class="divider"></div>
 
+<!-- PRODUCT SHOT -->
+<section class="wrap shot-wrap">
+  <div class="shot" role="img" aria-label="The Evals Coach wizard on step 3, showing a failure mode distilled from twelve reviewed outputs, the criterion that catches it, and how often it occurred.">
+    <div class="shot-rail" aria-hidden="true">
+      <span class="sr-step done">Your feature</span>
+      <span class="sr-step done">Evaluation question</span>
+      <span class="sr-step now">Good and bad</span>
+      <span class="sr-step">Test cases</span>
+      <span class="sr-step">Graders</span>
+      <span class="sr-step">Release gate</span>
+      <span class="sr-step">Handoff</span>
+    </div>
+    <div class="shot-body" aria-hidden="true">
+      <div class="shot-eyebrow">Step 3 of 7</div>
+      <div class="shot-h">Good and bad</div>
+      <div class="shot-card shot-tax">
+        <div class="shot-tax-head"><strong>Invented policy</strong><span>7 of 12</span></div>
+        <p>States a policy, guarantee or figure that cannot be traced to a source it was given.</p>
+        <div class="shot-chips"><span class="shot-chip">seen in output 1, 2, 4, 6, 8, 10, 12</span><span class="shot-cov">caught by 2 criteria</span></div>
+      </div>
+      <div class="shot-card shot-crit">
+        <span class="shot-tick">✓</span>
+        <div>
+          <div class="shot-crit-text">Every policy claim quotes an exact line from the help centre.</div>
+          <span class="shot-chip">from Output 2, 6</span>
+        </div>
+      </div>
+      <div class="shot-prev">
+        <div class="shot-bar"><span></span></div>
+        <div><strong>5 of 12 (42%)</strong><span>true rate likely between 19% and 68%</span></div>
+      </div>
+    </div>
+  </div>
+  <p class="shot-cap">Step 3, after reviewing twelve real outputs. Your notes become named failure modes, each one traceable back to the outputs it came from, and ranked by how often it actually happened.</p>
+</section>
+
+<div class="divider"></div>
+
 <!-- OUTPUTS -->
 <section class="wrap">
   <h2>You walk away with the actual files.</h2>
@@ -295,6 +348,32 @@ footer{border-top:1px solid var(--line); padding:40px 0 56px}
     <div><h3 style="font-family:var(--mono); font-size:15px">test-cases.csv</h3><p>A validated, importable test set you can drop straight into whatever eval tool your team already uses.</p></div>
     <div><h3>Judge prompts</h3><p>Ready-to-run prompts for each LLM-graded criterion, matched to the good and bad you defined.</p></div>
     <div><h3 style="font-family:var(--mono); font-size:15px">calibrate.md</h3><p>How to spot-check each judge against 20 hand-labelled cases before it's allowed to gate a release. So you never ship on an uncalibrated score.</p></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PAIN -->
+<section id="pain" class="wrap">
+  <h2>“The AI should be helpful and accurate.” That isn’t an eval.</h2>
+  <p class="sec-sub">Most AI features are shipped on vibes because turning fuzzy product intent into something measurable is genuinely hard. These are the traps Evals Coach helps you catch.</p>
+  <div class="pain-grid">
+    <div class="pain">
+      <div class="quote">Vague quality words <span>you can’t test</span></div>
+      <p>“Helpful”, “accurate”, “on-brand”. Until they become observable must / must-not behaviours, no grader can score them and no one can agree whether a run passed.</p>
+    </div>
+    <div class="pain">
+      <div class="quote">Evals that pass <span>while the product fails</span></div>
+      <p>A green dashboard measuring the wrong thing is worse than none. Evals Coach hunts for what could score well while real users still get hurt.</p>
+    </div>
+    <div class="pain">
+      <div class="quote">Failures with <span>no regression net</span></div>
+      <p>The same production incident keeps recurring because nothing turned it into a test case. Feed in the failures; get back regression cases, without inventing evidence.</p>
+    </div>
+    <div class="pain">
+      <div class="quote">An LLM judge <span>nobody calibrated</span></div>
+      <p>An uncalibrated judge quietly gating your release is a coin flip in a lab coat. Get a path to check it agrees with human labels before it holds the gate.</p>
+    </div>
   </div>
 </section>
 
