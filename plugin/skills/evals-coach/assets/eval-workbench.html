@@ -217,7 +217,7 @@ td select{padding:5px 7px; font-size:12px; background:var(--surface); min-width:
 .doc .q{font-family:var(--display); font-size:20px; line-height:1.35; color:var(--ink); border-left:3px solid var(--accent); padding-left:16px; margin:0 0 18px}
 
 /* ---------- intro ---------- */
-.intro-lede{font-family:var(--display); font-size:26px; line-height:1.35; max-width:34ch; margin:34px 0 10px}
+.intro-lede{font-family:var(--display); font-size:26px; line-height:1.35; max-width:52ch; margin:34px 0 10px; text-wrap:balance}
 .intro-sub{font-size:15px; color:var(--ink-2); max-width:60ch; margin-bottom:6px}
 .stages{display:grid; grid-template-columns:repeat(auto-fit,minmax(268px,1fr)); gap:1px; background:var(--surface); border-radius:12px; overflow:hidden; margin:26px 0; box-shadow:0 0 0 1px var(--line)}
 .stage{background:var(--surface); padding:18px 20px; display:flex; flex-direction:column; gap:6px; box-shadow:0 0 0 1px var(--line)}
@@ -396,7 +396,7 @@ const STEPS = [
   {key:"cases",    name:"Test cases",         sub:"Drafted, you edit",   msub:"A template, you edit"},
   {key:"graders",  name:"Graders",            sub:"Drafted, you approve",msub:"You choose"},
   {key:"gate",     name:"Release gate",       sub:"Your call",           msub:"Your call"},
-  {key:"out",      name:"Handoff",            sub:"Take it away",        msub:"Take it away"}
+  {key:"out",      name:"Handoff",            sub:"Yours to run",        msub:"Yours to run"}
 ];
 
 const EXAMPLE = {
@@ -660,13 +660,13 @@ function withBusy(host, label, fn){
 
 /* ============================ intro ============================ */
 const STAGE_COPY = [
-  ["Your feature","Tell it what you're shipping, in a paragraph, plus three quick choices. This is the only real writing you do.","yours","You write it","You write it"],
+  ["Your feature","Tell it what you're shipping, in a paragraph, plus a few quick choices. If it's already live, paste in some real outputs and everything after this is grounded in them.","yours","You write it","You write it"],
   ["Evaluation question","The single question your eval exists to answer. Written for you from your paragraph, you confirm or rewrite it.","mine","Drafted for you","A shape to fill in"],
-  ["Good and bad","What must happen, what should happen, and what must never happen. You tick, edit and untick; nothing counts until you keep it.","mine","Drafted, you decide","Starters, you decide"],
+  ["Good and bad","What must happen, what should happen, and what must never happen. Drafted from your description, or distilled from your own notes if you reviewed real outputs.","mine","Drafted, you decide","Starters, you decide"],
   ["Test cases","A small set of deliberately different situations to run the feature against, including the one you said would hurt most.","mine","Drafted, you edit","A starter set, you edit"],
-  ["Graders","How each thing gets marked: a code check, a look at what the system did, an AI judge, or a person. Cheapest one that's actually reliable.","mine","Proposed, you approve","You choose"],
+  ["Graders","How each thing gets marked: a code check, a look at what the system did, an AI judge, or a person. The simplest check you would still trust.","mine","Proposed, you approve","You choose"],
   ["Release gate","The line that turns a set of results into ship, don't ship, or needs review. The numbers are yours.","yours","Your call","Your call"],
-  ["Handoff","Everything packaged for whoever builds it, with the questions they mustn't guess at called out.","mine","Take it away","Take it away"]
+  ["Handoff","The plan, the cases, the judge prompts and a calibration guide, packaged for whoever builds it, with the questions they mustn't guess at called out.","mine","Yours to run","Yours to run"]
 ];
 function renderIntro(){
   const box = $("#intro"); box.innerHTML = ""; box.hidden = false;
