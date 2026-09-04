@@ -140,6 +140,7 @@ h2{font-size:clamp(30px,4.4vw,44px); letter-spacing:-.015em; max-width:20ch}
 .copy:hover{background:rgba(255,255,255,.16)}
 .copy.done{color:#0f1210; background:var(--amber); border-color:var(--amber)}
 .icard .after{font-size:14.5px; color:var(--ink-2); margin-top:4px}
+.install-note{font-size:14px; color:var(--ink-3); margin-top:20px; max-width:70ch}
 .icard.feat{margin-top:34px; background:linear-gradient(180deg,#FBF3FF,#FEFCFF); border-color:var(--lilac-line)}
 .app-steps{list-style:none; padding:0; margin:16px 0 6px; display:grid; grid-template-columns:1fr 1fr; gap:13px 26px}
 .app-steps li{display:flex; gap:12px; align-items:flex-start; font-size:15.5px; color:var(--ink-2); line-height:1.45}
@@ -195,13 +196,6 @@ h2{font-size:clamp(30px,4.4vw,44px); letter-spacing:-.015em; max-width:20ch}
 .icard .after code{font-family:var(--mono); font-size:12.5px; background:var(--surface-2); padding:2px 6px; border-radius:5px}
 
 /* ---- workbench callout ---- */
-.wb{display:grid; grid-template-columns:1.3fr 1fr; gap:32px; align-items:center; background:linear-gradient(180deg,#FBF3FF, #F7EEFF); border:1px solid var(--lilac-line); border-radius:20px; padding:36px}
-.wb h3{font-family:var(--display); font-size:32px; margin-bottom:12px}
-.wb p{color:var(--ink-2); font-size:16px; margin-bottom:10px}
-.wb .mini{display:flex; flex-direction:column; gap:8px}
-.wb .mini .row{display:flex; gap:10px; align-items:center; font-size:14px; color:var(--ink-2); background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 12px}
-.wb .mini .row b{font-family:var(--mono); font-size:11px; color:var(--lilac-ink); background:var(--lilac); border-radius:6px; padding:2px 7px}
-@media(max-width:760px){ .wb{grid-template-columns:1fr; padding:28px} }
 
 /* ---- evidence ---- */
 .ev{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:36px}
@@ -243,8 +237,6 @@ footer{border-top:1px solid var(--line); padding:40px 0 56px}
   .pain-grid,.who,.modes,.steps,.install-grid,.ev{margin-top:26px}
   .pain .quote{font-size:21px}
   .mode h3{font-size:23px}
-  .wb{padding:26px 22px}
-  .wb h3{font-size:26px}
   .stat .big{font-size:44px}
   .stat .big .base{font-size:26px}
   .final{padding-top:60px; padding-bottom:60px}
@@ -409,25 +401,10 @@ footer{border-top:1px solid var(--line); padding:40px 0 56px}
       </div>
       <p class="after">Then ask it to build you an eval, in your own words.</p>
     </div>
+
+    <p class="install-note">Either way, Evals Coach builds you a private page that asks Claude from inside itself. Drafting runs on the Claude account of whoever opens that page, and they consent on first use.</p>
   </div>
 </section>
-
-<!-- WORKBENCH -->
-<section class="wrap">
-  <div class="wb">
-    <div>
-      <h3>Good to know: it runs on Claude</h3>
-      <p>Evals Coach runs as a private web page that asks Claude from inside itself. That keeps setup to one click, and it means a few things are worth knowing before you share it.</p>
-    </div>
-    <div class="mini">
-      <div class="row"><b>Account</b> Drafting spends the Claude usage of whoever opens the page; they consent on first use.</div>
-      <div class="row"><b>Sharing</b> A page that uses Claude can’t take a public link, so you share it with named people.</div>
-      <div class="row"><b>Fallback</b> Opened without drafting, it degrades to a worksheet: the same steps, starters and outputs.</div>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
 
 <!-- EVIDENCE -->
 <section class="wrap">
