@@ -309,6 +309,20 @@ td select{padding:5px 7px; font-size:12px; background:var(--surface); min-width:
 .prev-nums{display:flex; gap:10px; flex-wrap:wrap; align-items:baseline}
 .prev-nums strong{font-size:12.5px; color:var(--ink)}
 .prev-nums span{font-family:var(--mono); font-size:11px; color:var(--ink-3)}
+.taxonomy{background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:var(--radius); padding:18px; display:flex; flex-direction:column; gap:12px}
+.tax-head h3{font-size:15px; margin-bottom:3px}
+.tax-head .hint{font-size:12.5px}
+.tax-row{background:var(--surface-2); border:1px solid var(--line); border-radius:9px; padding:12px; display:flex; flex-direction:column; gap:8px}
+.tax-row-head{display:flex; align-items:center; gap:9px}
+.tax-name{flex:1 1 auto; min-width:0; padding:5px 9px; border:1px solid transparent; border-radius:6px; background:transparent; font:inherit; font-size:14px; font-weight:600; color:var(--ink)}
+.tax-name:hover{border-color:var(--line)}
+.tax-name:focus{outline:2px solid var(--accent); outline-offset:1px; background:var(--surface); border-color:var(--accent)}
+.tax-count{flex:none; font-family:var(--mono); font-size:11px; color:var(--ink-3); white-space:nowrap}
+.tax-def{font-size:13px !important}
+.tax-foot{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.tax-cov{font-family:var(--mono); font-size:10.5px; letter-spacing:.05em; color:var(--ok)}
+.tax-cov.gap{color:var(--warn)}
+.tax-sat{border-top:1px solid var(--line); padding-top:11px; margin-top:2px}
 .weight-row{display:flex; align-items:center; gap:6px; margin-top:6px; flex-wrap:wrap}
 .weight-lbl{font-family:var(--mono); font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); margin-right:2px}
 .weight-chip{font:inherit; font-size:11.5px; font-weight:500; padding:3px 8px; border-radius:6px; border:1px solid var(--line-strong); background:transparent; color:var(--ink-3); cursor:pointer}
@@ -391,9 +405,10 @@ const EXAMPLE = {
 };
 
 const BLANK = {
-  v:6, step:0, seenIntro:false,
+  v:7, step:0, seenIntro:false,
   product:{desc:"", stage:"prelaunch", decision:"ship", unit:"response", worst:"", escalation:"", examples:[], isExample:true},
   question:"", questionDrafted:false,
+  taxonomy:[],
   criteria:{must:[], should:[], mustNot:[]}, criteriaDrafted:false, criteriaSource:null,
   suggestions:{must:[], should:[], mustNot:[]}, suggestRound:0,
   cases:[], casesDrafted:false, notCovered:"",
@@ -460,7 +475,7 @@ let ctl = null, busy = false;
 function load(){
   try{
     const raw = localStorage.getItem(KEY);
-    if(raw){ const p = JSON.parse(raw); if(p && p.v===6) return normalize(p); }
+    if(raw){ const p = JSON.parse(raw); if(p && p.v===7) return normalize(p); }
   }catch(e){}
   const s = JSON.parse(JSON.stringify(BLANK));
   s.product = Object.assign(s.product, EXAMPLE, {isExample:true});
@@ -474,7 +489,19 @@ function normalize(s){
   s.product.examples.forEach(e=>{ if(typeof e.reviewNotes !== "string") e.reviewNotes = ""; });
   if(typeof s.criteriaSource === "undefined") s.criteriaSource = null;
   if(typeof s.product.escalation !== "string") s.product.escalation = "";
+  if(!Array.isArray(s.taxonomy)) s.taxonomy = [];
   return s;
+}
+/* Saturation, computed from the taxonomy rather than guessed. An output
+   "introduced" a mode if it is the earliest one that mode appears in. Once the
+   last several outputs introduce nothing, you have probably seen enough. */
+function saturationInfo(){
+  const modes = (S.taxonomy||[]).filter(m=>Array.isArray(m.outputs) && m.outputs.length);
+  const n = reviewedTotal();
+  if(!modes.length || !n) return null;
+  const firsts = modes.map(m=>Math.min.apply(null, m.outputs));
+  const lastNew = Math.max.apply(null, firsts);
+  return {modes:modes.length, total:n, lastNew, quietRun: n - lastNew};
 }
 /* Wilson score interval. Honest uncertainty on a small sample, which is the
    whole point: 4/12 is not "33%", it is "somewhere between 14% and 61%". */
@@ -945,6 +972,46 @@ function renderReviewPane(wrap, host){
 function reviewedTotal(){
   return (S.product.examples||[]).filter(e=>(e.output||"").trim()).length;
 }
+function renderTaxonomy(wrap){
+  const tax = S.taxonomy || [];
+  if(!tax.length) return;
+  const n = reviewedTotal();
+  const box = el("div",{class:"taxonomy"});
+  box.appendChild(el("div",{class:"tax-head"},[
+    el("h3",{text:"The failure modes behind these criteria"}),
+    el("span",{class:"hint",text:"Your notes, grouped into distinct kinds of problem. This is the description of what goes wrong; the criteria below are the rules that catch it. Check the grouping before you trust the rules."})
+  ]));
+  tax.forEach((m,i)=>{
+    const covering = allCriteria().filter(c=>c.mode && c.mode.toLowerCase()===m.name.toLowerCase());
+    const row = el("div",{class:"tax-row"});
+    const head = el("div",{class:"tax-row-head"});
+    const nameIn = el("input",{type:"text", class:"tax-name", value:m.name});
+    nameIn.addEventListener("input", e=>{ m.name = e.target.value; markStale(); });
+    head.appendChild(nameIn);
+    head.appendChild(el("span",{class:"tax-count", text:(m.outputs||[]).length + " of " + n}));
+    head.appendChild(el("button",{class:"btn sm danger", title:"Remove", onclick:()=>{ tax.splice(i,1); save(); render(); }},["Remove"]));
+    row.appendChild(head);
+    const defIn = area(m.definition, v=>{ m.definition=v; markStale(); }, 2, "One sentence a reviewer could apply to a new output, answerable yes or no.");
+    defIn.className = "tax-def";
+    row.appendChild(defIn);
+    const foot = el("div",{class:"tax-foot"});
+    if((m.outputs||[]).length) foot.appendChild(el("span",{class:"provenance", text:"seen in output " + m.outputs.join(", ")}));
+    foot.appendChild(el("span",{class:"tax-cov" + (covering.length?"":" gap"),
+      text: covering.length ? ("caught by " + covering.length + (covering.length===1 ? " criterion" : " criteria")) : "no criterion catches this yet"}));
+    row.appendChild(foot);
+    box.appendChild(row);
+  });
+  const sat = saturationInfo();
+  if(sat){
+    let msg;
+    if(sat.quietRun >= 5) msg = "The last " + sat.quietRun + " outputs you reviewed introduced no new failure mode. That is the signal you have seen enough for now.";
+    else if(sat.quietRun >= 2) msg = "The last " + sat.quietRun + " outputs introduced nothing new. Promising, but review a few more before you call it saturated.";
+    else msg = "Output " + sat.lastNew + " introduced a new failure mode, so you are still finding things. Keep reviewing.";
+    box.appendChild(el("p",{class:"hint tax-sat", text: sat.modes + " distinct modes across " + sat.total + " outputs. " + msg}));
+  }
+  wrap.appendChild(box);
+}
+
 function renderPrevalence(wrap){
   const n = reviewedTotal();
   const rows = allCriteria().filter(c=>Array.isArray(c.failedIn) && c.failedIn.length);
@@ -1000,6 +1067,8 @@ function stepCriteria(body){
     ["should","Should","Graded. Better or worse is meaningful here."],
     ["mustNot","Must not","Critical failures. These become hard blockers, never averaged away."]
   ];
+  renderTaxonomy(wrap);
+
   const showGroups = !inReviewMode || allCriteria().length > 0;
   if(showGroups) groups.forEach(([k,label,hint])=>{
     const list = S.criteria[k];
@@ -1056,6 +1125,7 @@ function stepCriteria(body){
         S.criteriaSource = isDistilled ? "draft" : "distill";
         S.criteria = {must:[], should:[], mustNot:[]};
         S.suggestions = {must:[], should:[], mustNot:[]};
+        S.taxonomy = [];
         S.criteriaDrafted = false;
         save(); render();
       }},[isDistilled ? "Switch to drafting from description" : "Switch to reviewing my outputs"]) : null
@@ -1161,6 +1231,7 @@ Reply with only JSON:
     const sg = r.suggest || {};
     const ms = a => (Array.isArray(a)?a:[]).map(x=>({text:String((x&&x.text)||x||""), why:String((x&&x.why)||"")})).filter(x=>x.text);
     S.suggestions = {must:ms(sg.must), should:ms(sg.should), mustNot:ms(sg.mustNot)};
+    S.taxonomy = [];
     S.criteriaDrafted = true;
     S.criteriaSource = "draft";
   });
@@ -1194,9 +1265,16 @@ REVIEWED OUTPUTS (numbered; the PM's per-output reviews are their observed failu
 
 ${perEx}
 
-Distill the PM's reviews into a small, sharp set of criteria for this eval. Do not invent failure modes the PM did not touch on. Do not restate generic best practices unless a review points at them.
+Do this in two passes, and return both.
 
-Where a review describes several things wrong with one output, treat the FIRST thing that went wrong as the real failure and the rest as its consequences. Do not create a separate criterion for a downstream symptom of a failure you have already captured.
+PASS ONE, group the failures. Read across all the reviews and group them into a small set of distinct failure modes: 3-7 of them, each one a KIND of problem rather than a restatement of a single output. This is a description of what actually goes wrong, not yet a rule. For each mode give:
+  name: 2-5 words, the label a team would use in conversation
+  definition: one sentence a reviewer could apply to a new output without asking you what you meant. It must be possible to answer yes or no.
+  outputs: every 1-based output number where this mode appears, including ones the PM did not explicitly flag but which clearly show it
+
+Two modes that would always co-occur are one mode. A mode appearing in only one output is fine if it is serious, but say so honestly rather than padding the list. Where a review describes several things wrong with one output, the FIRST thing that went wrong is the real failure and the rest are its consequences; do not mint a separate mode for a downstream symptom.
+
+PASS TWO, write the criteria that would catch those modes. Each criterion should name in "mode" the exact name of the failure mode it addresses, so the PM can see the mapping. Do not invent criteria for failure modes the reviews did not surface. Do not restate generic best practices unless a review points at them.
 
 - "must": 2-4 non-negotiable success conditions grounded in the reviews.
 - "should": 2-3 graded qualities the reviews point at where better or worse genuinely matters.
@@ -1211,14 +1289,24 @@ Every line must be observable from what a reviewer can actually see in a run of 
 Then, separately, suggest 2 more of EACH kind not in the lists above, the next most defensible candidates from the reviews or their gaps. Give each a short "why" line (under 15 words).
 
 Reply with only JSON:
-{"must":[{"text":"...","fromExamples":[1,3],"failedIn":[1,3,7]}],"should":[{"text":"...","fromExamples":[2],"failedIn":[2]}],"mustNot":[{"text":"...","fromExamples":[],"failedIn":[4]}],
+{"taxonomy":[{"name":"Invented policy","definition":"States a policy, guarantee or figure that cannot be traced to a source it was given.","outputs":[2,6,8]}],
+ "must":[{"text":"...","mode":"Invented policy","fromExamples":[1,3],"failedIn":[1,3,7]}],"should":[{"text":"...","mode":"...","fromExamples":[2],"failedIn":[2]}],"mustNot":[{"text":"...","mode":"...","fromExamples":[],"failedIn":[4]}],
  "suggest":{"must":[{"text":"...","why":"..."}],"should":[{"text":"...","why":"..."}],"mustNot":[{"text":"...","why":"..."}]}}`);
     const idxList = v => Array.isArray(v) ? v.filter(n=>Number.isInteger(n)&&n>=1&&n<=examples.length) : [];
+    S.taxonomy = (Array.isArray(r.taxonomy)?r.taxonomy:[]).map(m=>({
+      id: uid("m"),
+      name: String((m&&m.name)||"").trim(),
+      definition: String((m&&m.definition)||"").trim(),
+      outputs: idxList(m&&m.outputs)
+    })).filter(m=>m.name);
+    const knownModes = S.taxonomy.map(m=>m.name.toLowerCase());
     const mkD = (a, kind) => (Array.isArray(a)?a:[]).map(t=>{
       const text = String((t&&t.text)||t||"");
       const from = idxList(t&&t.fromExamples);
       const failed = idxList(t&&t.failedIn);
       const item = {id:uid("c"), text, on:true};
+      const mode = String((t&&t.mode)||"").trim();
+      if(mode && knownModes.includes(mode.toLowerCase())) item.mode = mode;
       if(from.length) item.fromExamples = from;
       if(failed.length) item.failedIn = failed;
       if(kind==="should") item.weight = "medium";
@@ -1859,6 +1947,17 @@ function planMd(){
   L.push("- Unit of evaluation: " + {response:"A single response",trajectory:"The whole trajectory",task:"Task completion",state:"Resulting state"}[p.unit]);
   if(p.worst) L.push("- Most costly failure: " + p.worst);
   if((p.escalation||"").trim()) L.push("- Requires human approval: " + p.escalation.trim());
+  if((S.taxonomy||[]).length){
+    const nRev = reviewedTotal();
+    L.push("\n## Failure modes observed\n");
+    L.push("Grouped from a review of " + nRev + " real outputs. These describe what goes wrong; the criteria below are the rules that catch them.\n");
+    S.taxonomy.forEach(m=>{
+      const seen = (m.outputs||[]).length;
+      L.push("**" + m.name + "**" + (seen ? ` _(seen in ${seen} of ${nRev})_` : ""));
+      if(m.definition) L.push(m.definition);
+      L.push("");
+    });
+  }
   L.push("\n## Criteria\n");
   [["must","Must"],["should","Should"],["mustNot","Must not"]].forEach(([k,l])=>{
     const it = S.criteria[k].filter(c=>c.on!==false && c.text.trim());
