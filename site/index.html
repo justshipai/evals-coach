@@ -16,7 +16,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
 :root{
-  --cream:#FAF5EC; --surface:#FFFDF8; --surface-2:#F1ECDF; --card:#FFFFFF;
+  --cream:#FAF5EC; --surface:#FFFDF8; --surface-2:#F1ECDF; --card:#FFFFFF; --band:#EDE5D4;
   --line:#E9E3D4; --line-strong:#D7D0BE;
   --ink:#1A1A1A; --ink-2:#57574F; --ink-3:#86857B;
   --lilac:#F0D7FF; --lilac-line:#E2BEFB; --lilac-ink:#5B2E86;
@@ -147,7 +147,7 @@ h2{font-size:clamp(30px,4.4vw,44px); letter-spacing:-.015em; max-width:20ch}
 .install-foot a{color:var(--lilac-ink); text-decoration-color:var(--lilac-line); text-underline-offset:2px}
 
 /* ---- product shot (coded, not a raster screenshot: crisp, themed, ~2KB) ---- */
-.shot-wrap{padding-top:8px}
+.shot-band{background:var(--band); padding:76px 0}
 .shot{display:grid; grid-template-columns:210px 1fr; gap:0; background:var(--surface); border:1px solid var(--line-strong); border-radius:16px; overflow:hidden; box-shadow:0 1px 2px rgba(26,26,26,.04), 0 24px 48px -28px rgba(26,26,26,.28)}
 .shot-rail{display:flex; flex-direction:column; gap:2px; padding:20px 14px; background:var(--surface-2); border-right:1px solid var(--line)}
 .sr-step{font-size:12.5px; color:var(--ink-3); padding:7px 10px; border-radius:8px; display:flex; align-items:center; gap:8px}
@@ -232,6 +232,7 @@ footer{border-top:1px solid var(--line); padding:40px 0 56px}
   .hero-cta{margin-top:28px; gap:10px}
   .hero-cta .btn{flex:1 1 auto; justify-content:center}
   section{padding:56px 0}
+  .shot-band{padding:52px 0}
   h2{font-size:clamp(27px,7.2vw,34px)}
   .sec-sub{font-size:16px; margin-top:12px}
   .pain-grid,.who,.modes,.steps,.install-grid,.ev{margin-top:26px}
@@ -299,10 +300,9 @@ footer{border-top:1px solid var(--line); padding:40px 0 56px}
   </div>
 </section>
 
-<div class="divider"></div>
-
 <!-- PRODUCT SHOT -->
-<section class="wrap shot-wrap">
+<section class="shot-band">
+ <div class="wrap">
   <div class="shot" role="img" aria-label="The Evals Coach wizard on step 3, showing a failure mode distilled from twelve reviewed outputs, the criterion that catches it, and how often it occurred.">
     <div class="shot-rail" aria-hidden="true">
       <span class="sr-step done">Your feature</span>
@@ -335,9 +335,8 @@ footer{border-top:1px solid var(--line); padding:40px 0 56px}
     </div>
   </div>
   <p class="shot-cap">Step 3, after reviewing twelve real outputs. Your notes become named failure modes, each one traceable back to the outputs it came from, and ranked by how often it actually happened.</p>
+ </div>
 </section>
-
-<div class="divider"></div>
 
 <!-- OUTPUTS -->
 <section class="wrap">
