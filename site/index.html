@@ -183,7 +183,45 @@ h2{font-size:clamp(30px,4.4vw,44px); letter-spacing:-.015em; max-width:20ch}
 .shot-prev div{display:flex; flex-direction:column; gap:1px}
 .shot-prev strong{font-size:12.5px}
 .shot-prev span{font-family:var(--mono); font-size:10.5px; color:var(--ink-3)}
-.shot-cap{margin-top:16px; font-size:14.5px; color:var(--ink-2); max-width:70ch; line-height:1.55}
+.shot-cap{margin:18px auto 0; font-size:14.5px; color:var(--ink-2); max-width:64ch; line-height:1.55; text-align:center; text-wrap:balance}
+/* Motion: the shot assembles the way the step does. `shot-anim` is set by script,
+   so with no JS (or reduced motion) the finished state is what renders. */
+@media (prefers-reduced-motion: no-preference){
+  .shot-anim .sr-step,
+  .shot-anim .shot-eyebrow,
+  .shot-anim .shot-h,
+  .shot-anim .shot-card,
+  .shot-anim .shot-chip,
+  .shot-anim .shot-cov,
+  .shot-anim .shot-tick,
+  .shot-anim .shot-prev{opacity:0}
+  .shot-anim .shot-bar span{width:0}
+
+  .shot-anim.play .sr-step{animation:shotFade .4s ease-out forwards}
+  .shot-anim.play .sr-step:nth-child(1){animation-delay:.06s}
+  .shot-anim.play .sr-step:nth-child(2){animation-delay:.12s}
+  .shot-anim.play .sr-step:nth-child(3){animation-delay:.18s}
+  .shot-anim.play .sr-step:nth-child(4){animation-delay:.24s}
+  .shot-anim.play .sr-step:nth-child(5){animation-delay:.28s}
+  .shot-anim.play .sr-step:nth-child(6){animation-delay:.32s}
+  .shot-anim.play .sr-step:nth-child(7){animation-delay:.36s}
+
+  .shot-anim.play .shot-eyebrow{animation:shotFade .4s ease-out .20s forwards}
+  .shot-anim.play .shot-h{animation:shotRise .45s ease-out .26s forwards}
+  .shot-anim.play .shot-tax{animation:shotRise .5s ease-out .40s forwards}
+  .shot-anim.play .shot-tax .shot-chip{animation:shotFade .4s ease-out .74s forwards}
+  .shot-anim.play .shot-cov{animation:shotFade .4s ease-out .84s forwards}
+  .shot-anim.play .shot-crit{animation:shotRise .5s ease-out .96s forwards}
+  .shot-anim.play .shot-crit .shot-chip{animation:shotFade .4s ease-out 1.30s forwards}
+  .shot-anim.play .shot-tick{animation:shotPop .45s cubic-bezier(.2,1.5,.4,1) 1.18s forwards}
+  .shot-anim.play .shot-prev{animation:shotFade .4s ease-out 1.44s forwards}
+  .shot-anim.play .shot-bar span{animation:shotBar .85s cubic-bezier(.25,.9,.3,1) 1.56s forwards}
+
+  @keyframes shotFade{from{opacity:0}to{opacity:1}}
+  @keyframes shotRise{from{opacity:0; transform:translateY(9px)}to{opacity:1; transform:none}}
+  @keyframes shotPop{0%{opacity:0; transform:scale(.3)}65%{opacity:1; transform:scale(1.18)}100%{opacity:1; transform:scale(1)}}
+  @keyframes shotBar{from{width:0}to{width:42%}}
+}
 @media(max-width:720px){
   .shot{grid-template-columns:1fr}
   .shot-rail{flex-direction:row; overflow-x:auto; gap:6px; padding:12px; border-right:0; border-bottom:1px solid var(--line)}
@@ -268,35 +306,6 @@ footer{border-top:1px solid var(--line); padding:40px 0 56px}
   </div>
 </header>
 
-<div class="divider"></div>
-
-<!-- WHO -->
-<section class="wrap">
-  <h2>Built for PMs, not eval engineers.</h2>
-  <div class="who">
-    <div><h3>No eval experience</h3><p>You bring product judgement. It brings the eval-design method: criteria, cases, graders and thresholds.</p></div>
-    <div><h3>No repository access</h3><p>Start from a PRD, a feature idea, or a sentence describing what you’re building. No codebase required.</p></div>
-    <div><h3>Your stack, not ours</h3><p>The output isn’t tied to any eval platform, so it imports into whatever your team already runs.</p></div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- HOW -->
-<section id="how" class="wrap">
-  <h2>Seven steps to a runnable eval.</h2>
-  <p class="sec-sub">Describe your feature; Evals Coach drafts each step, you edit it, and the outputs assemble as you go.</p>
-  <div class="steps">
-    <div class="step"><div class="n">1</div><div><h3>Describe your feature (or paste real outputs)</h3><p>A sentence or two on what it does and the worst thing it could get wrong. If it's already live, paste a few real outputs too, and every later step gets grounded in what actually happened.</p></div></div>
-    <div class="step"><div class="n">2</div><div><h3>Confirm the evaluation question</h3><p>It drafts the one decision your eval should inform. You adjust the wording until it fits.</p></div></div>
-    <div class="step"><div class="n">3</div><div><h3>Set good and bad</h3><p>Turn “helpful” into observable must and must-not behaviours you can actually score.</p></div></div>
-    <div class="step"><div class="n">4</div><div><h3>Edit the test cases</h3><p>It drafts a small representative set: normal, edge, adversarial and critical. If you pasted real outputs, half the cases are grounded in them. You edit any of it or add your own.</p></div></div>
-    <div class="step"><div class="n">5</div><div><h3>Approve the graders</h3><p>For each criterion it picks deterministic, code, LLM-judge or human, and writes the judge prompt for you.</p></div></div>
-    <div class="step"><div class="n">6</div><div><h3>Choose the release gate</h3><p>The one threshold that decides ship or hold, stated plainly instead of left implied.</p></div></div>
-    <div class="step"><div class="n">7</div><div><h3>Leave with a runnable eval</h3><p>Everything assembles into an eval plan, a <code style="font-family:var(--mono);font-size:.85em">test-cases.csv</code>, judge prompts and a calibration guide, ready for your team.</p></div></div>
-  </div>
-</section>
-
 <!-- PRODUCT SHOT -->
 <section class="shot-band">
  <div class="wrap">
@@ -334,6 +343,49 @@ footer{border-top:1px solid var(--line); padding:40px 0 56px}
   <p class="shot-cap">Step 3, after reviewing twelve real outputs. Your notes become named failure modes, each one traceable back to the outputs it came from, and ranked by how often it actually happened.</p>
  </div>
 </section>
+<script>
+(function(){
+  var shot = document.querySelector('.shot');
+  if(!shot || !window.matchMedia || !matchMedia('(prefers-reduced-motion: no-preference)').matches) return;
+  shot.classList.add('shot-anim');
+  var play = function(){ shot.classList.add('play'); };
+  if(!('IntersectionObserver' in window)){ play(); return; }
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){ play(); io.disconnect(); } });
+  }, {threshold:.3});
+  io.observe(shot);
+  setTimeout(play, 2500); // never leave it hidden if the observer misfires
+})();
+</script>
+
+<!-- WHO -->
+<section class="wrap">
+  <h2>Built for PMs, not eval engineers.</h2>
+  <div class="who">
+    <div><h3>No eval experience</h3><p>You bring product judgement. It brings the eval-design method: criteria, cases, graders and thresholds.</p></div>
+    <div><h3>No repository access</h3><p>Start from a PRD, a feature idea, or a sentence describing what you’re building. No codebase required.</p></div>
+    <div><h3>Your stack, not ours</h3><p>The output isn’t tied to any eval platform, so it imports into whatever your team already runs.</p></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- HOW -->
+<section id="how" class="wrap">
+  <h2>Seven steps to a runnable eval.</h2>
+  <p class="sec-sub">Describe your feature; Evals Coach drafts each step, you edit it, and the outputs assemble as you go.</p>
+  <div class="steps">
+    <div class="step"><div class="n">1</div><div><h3>Describe your feature (or paste real outputs)</h3><p>A sentence or two on what it does and the worst thing it could get wrong. If it's already live, paste a few real outputs too, and every later step gets grounded in what actually happened.</p></div></div>
+    <div class="step"><div class="n">2</div><div><h3>Confirm the evaluation question</h3><p>It drafts the one decision your eval should inform. You adjust the wording until it fits.</p></div></div>
+    <div class="step"><div class="n">3</div><div><h3>Set good and bad</h3><p>Turn “helpful” into observable must and must-not behaviours you can actually score.</p></div></div>
+    <div class="step"><div class="n">4</div><div><h3>Edit the test cases</h3><p>It drafts a small representative set: normal, edge, adversarial and critical. If you pasted real outputs, half the cases are grounded in them. You edit any of it or add your own.</p></div></div>
+    <div class="step"><div class="n">5</div><div><h3>Approve the graders</h3><p>For each criterion it picks deterministic, code, LLM-judge or human, and writes the judge prompt for you.</p></div></div>
+    <div class="step"><div class="n">6</div><div><h3>Choose the release gate</h3><p>The one threshold that decides ship or hold, stated plainly instead of left implied.</p></div></div>
+    <div class="step"><div class="n">7</div><div><h3>Leave with a runnable eval</h3><p>Everything assembles into an eval plan, a <code style="font-family:var(--mono);font-size:.85em">test-cases.csv</code>, judge prompts and a calibration guide, ready for your team.</p></div></div>
+  </div>
+</section>
+
+<div class="divider"></div>
 
 <!-- OUTPUTS -->
 <section class="wrap">
@@ -442,7 +494,7 @@ footer{border-top:1px solid var(--line); padding:40px 0 56px}
       <a href="#install">Install</a>
     </div>
   </div>
-  <div class="wrap" style="margin-top:22px; font-size:13px; color:var(--ink-3)">Public alpha · By Just Ship AI · MIT licensed</div>
+  <div class="wrap" style="margin-top:22px; font-size:13px; color:var(--ink-3)">Public alpha · By Martin Slaney · MIT licensed</div>
 </footer>
 
 <script>
