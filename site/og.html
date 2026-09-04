@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Evals Coach OG card</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=block">
+<style>
+:root{
+  --cream:#FAF5EC; --ink:#1A1A1A; --ink-2:#57574F; --ink-3:#86857B;
+  --lilac-ink:#5B2E86; --coral:#FF6C4C;
+  --display:"EB Garamond", Georgia, serif;
+  --body:"Figtree", -apple-system, Helvetica, Arial, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+*{margin:0; padding:0; box-sizing:border-box}
+html,body{width:1200px; height:630px}
+body{
+  background:var(--cream); color:var(--ink); font-family:var(--body);
+  -webkit-font-smoothing:antialiased;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:64px; text-align:center;
+}
+.logo{display:flex; align-items:center; gap:14px; font-weight:600; font-size:26px; letter-spacing:-.01em}
+.mark{display:inline-flex; gap:4px; align-items:flex-end; height:30px}
+.mark i{width:5.5px; border-radius:3px; background:var(--lilac-ink); display:block}
+.mark i:nth-child(1){height:12px}
+.mark i:nth-child(2){height:24px; background:var(--coral)}
+.mark i:nth-child(3){height:17px}
+.mark i:nth-child(4){height:30px; background:var(--coral)}
+
+h1{font-family:var(--display); font-weight:400; font-size:108px; line-height:.98;
+   letter-spacing:-.02em; margin-top:52px}
+h1 em{white-space:nowrap}
+h1 .ul{position:relative; white-space:nowrap; font-style:normal}
+h1 .ul::after{content:""; position:absolute; left:-.02em; right:-.02em; bottom:.06em;
+  height:.085em; background:var(--coral); border-radius:3px; opacity:.9}
+
+.lede{font-size:31px; line-height:1.4; color:var(--ink-2); margin-top:42px; white-space:nowrap}
+
+.url{font-family:var(--mono); font-size:19px; letter-spacing:.06em; color:var(--ink-3); margin-top:54px}
+</style>
+</head>
+<body>
+  <div class="logo"><span class="mark"><i></i><i></i><i></i><i></i></span> Evals Coach</div>
+  <h1>Go from <em>zero</em><br>to <span class="ul">eval</span>.</h1>
+  <p class="lede">The evals copilot for AI product managers.</p>
+  <div class="url">evalscoach.com</div>
+</body>
+</html>
