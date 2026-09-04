@@ -672,10 +672,8 @@ function renderIntro(){
   const box = $("#intro"); box.innerHTML = ""; box.hidden = false;
   $("#work").hidden = true;
 
-  box.appendChild(el("p",{class:"intro-lede", text:"An eval is just this: what should happen, a handful of cases to check it on, and a line you won't ship below."}));
-  box.appendChild(el("p",{class:"intro-sub", text: sample
-    ? "You don't need to have run one before, and you don't need your codebase. Seven steps, about fifteen minutes. You'll be asked for product judgement, what matters, what's unacceptable, where the line sits, and everything around that gets drafted for you."
-    : "You don't need to have run one before, and you don't need your codebase. Seven steps, about twenty minutes. Each one gives you a shape to follow and starter suggestions to take or leave, so you're editing rather than staring at a blank box."}));
+  box.appendChild(el("p",{class:"intro-lede", text:"An eval is simpler than it sounds: what should happen, a few realistic cases to test it on, and the bar it has to clear before you ship."}));
+  box.appendChild(el("p",{class:"intro-sub", text:"Evals Coach helps you build one from scratch in about 20 minutes. No eval experience needed. No codebase needed. At every step, you get examples and a sensible starting point, so you're making decisions rather than staring at an empty box."}));
 
   const grid = el("div",{class:"stages"});
   STAGE_COPY.forEach(([name,desc,who,whoLabel,manualLabel],i)=>{
