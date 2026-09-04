@@ -193,6 +193,9 @@ __BODY__
   <div class="wrap">Public alpha &middot; By Martin Slaney &middot; MIT licensed &middot;
     <a href="/">evalscoach.com</a></div>
 </footer>
+<!-- Vercel Web Analytics: cookieless, no consent banner needed. Static-site
+     snippet, not the npm package (this site has no build step). -->
+<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
 """
