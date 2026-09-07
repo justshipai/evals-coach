@@ -26,3 +26,9 @@ Do not include customer data, secrets, private traces, or material you cannot pu
 5. Explain the product failure your change prevents.
 
 For early feedback, opening an issue before doing extensive work is encouraged.
+
+## Licensing of contributions
+
+Evals Coach is released under the [Functional Source License 1.1 (MIT Future License)](LICENSE). By opening a pull request you agree that your contribution is provided under that same licence (inbound matches outbound), and that you have the right to submit it. This keeps the licence consistent across the whole project, including the promise that each release becomes MIT two years on.
+
+If your employer has rights to work you do, make sure you have permission to contribute before you do.
