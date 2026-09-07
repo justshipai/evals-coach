@@ -357,11 +357,12 @@ footer{border-top:1px solid var(--line); padding:40px 0 56px}
   shot.classList.add('shot-anim');
   var play = function(){ shot.classList.add('play'); };
   if(!('IntersectionObserver' in window)){ play(); return; }
+  // Fire only once the shot has risen to roughly the middle of the viewport, so it
+  // assembles as the reader arrives at it rather than while they read the hero above.
   var io = new IntersectionObserver(function(es){
     es.forEach(function(e){ if(e.isIntersecting){ play(); io.disconnect(); } });
-  }, {threshold:.3});
+  }, {threshold:0, rootMargin:'0px 0px -45% 0px'});
   io.observe(shot);
-  setTimeout(play, 2500); // never leave it hidden if the observer misfires
 })();
 </script>
 
