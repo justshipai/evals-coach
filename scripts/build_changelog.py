@@ -190,7 +190,7 @@ footer a{color:var(--ink-2); font-weight:500}
 __BODY__
 </main>
 <footer>
-  <div class="wrap">Public alpha &middot; By Martin Slaney &middot; MIT licensed &middot;
+  <div class="wrap">Public alpha &middot; By Martin Slaney &middot; <a href="https://github.com/justshipai/evals-coach/blob/main/LICENSE" style="color:var(--ink-2)">Source-available (FSL-1.1)</a> &middot;
     <a href="/">evalscoach.com</a></div>
 </footer>
 <!-- Vercel Web Analytics: cookieless, no consent banner needed. Static-site

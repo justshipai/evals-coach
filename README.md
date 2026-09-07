@@ -131,4 +131,6 @@ Please [open an issue](https://github.com/justshipai/evals-coach/issues) or send
 
 ## Licence
 
-MIT
+[Functional Source License 1.1 (MIT Future License)](LICENSE). Use it, self-host it, modify it and build on it freely, including inside your own commercial work. The one thing you may not do is ship a competing product or service from this code. Two years after each release, that version becomes plain MIT.
+
+This does not restrict what you produce with Evals Coach: the eval plans, test cases and judge prompts it helps you write are yours.

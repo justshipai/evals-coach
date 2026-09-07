@@ -16,7 +16,7 @@
       "author": { "name": "Just Ship AI", "url": "https://github.com/justshipai" },
       "homepage": "https://github.com/justshipai/evals-coach",
       "repository": "https://github.com/justshipai/evals-coach",
-      "license": "MIT",
+      "license": "FSL-1.1-MIT",
       "category": "product",
       "keywords": ["evals", "evaluation", "product-management", "llm-judge", "test-cases", "ai-quality"]
     }
