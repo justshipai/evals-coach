@@ -13,25 +13,22 @@
       "displayName": "Evals Coach",
       "description": "A guided seven-step wizard that turns a feature description into a runnable eval: criteria, test cases, graders, judge prompts and a release gate, handed back as an eval plan, test-cases.csv and judge prompts. Built for product managers.",
       "version": "0.2.0",
-      "author": { "name": "Just Ship AI", "url": "https://github.com/justshipai" },
+      "author": {
+        "name": "Just Ship AI",
+        "url": "https://github.com/justshipai"
+      },
       "homepage": "https://github.com/justshipai/evals-coach",
       "repository": "https://github.com/justshipai/evals-coach",
       "license": "FSL-1.1-MIT",
       "category": "product",
-      "keywords": ["evals", "evaluation", "product-management", "llm-judge", "test-cases", "ai-quality"]
-    },
-    {
-      "name": "no-surprises",
-      "source": { "source": "github", "repo": "justshipai/no-surprises" },
-      "displayName": "No Surprises",
-      "description": "Protects your decision rights during substantial Claude Code implementation. Reinforces a Go/Log/Gate policy on every prompt and pauses with a native AskUserQuestion before consequential product, architecture, data, authorisation, privacy, security, cost or external-provider commitments.",
-      "version": "0.2.0",
-      "author": { "name": "Martin Slaney", "url": "https://github.com/justshipai" },
-      "homepage": "https://github.com/justshipai/no-surprises",
-      "repository": "https://github.com/justshipai/no-surprises",
-      "license": "MIT",
-      "category": "product",
-      "keywords": ["decision-making", "guardrails", "product", "claude-code", "agent-safety"]
+      "keywords": [
+        "evals",
+        "evaluation",
+        "product-management",
+        "llm-judge",
+        "test-cases",
+        "ai-quality"
+      ]
     }
   ]
 }
